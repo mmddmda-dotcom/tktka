@@ -607,13 +607,44 @@
             border: 1px solid #fb7185;
         }
 
+        /* 3칸 고정 세로 스택 컨테이너 (position: relative 로 같은 눈 뭉침 직사각형 오버레이 기준 제공) */
         .lane-slots-stack {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            width: 100%;
+            width: var(--die-size);
+            margin: 0 auto;
+        }
+
+        /* 같은 눈 2~3개 뭉침을 하나로 감싸는 단일 직사각형 테두리 오버레이 (기존 3칸 배치 절대 변형 없음) */
+        .combo-group-box {
+            position: absolute;
+            left: -4px;
+            right: -4px;
+            border-radius: 15px;
+            border: 2px solid rgba(253, 224, 71, 0.72);
+            background: rgba(253, 224, 71, 0.08);
+            pointer-events: none;
+            z-index: 4;
+        }
+        body.layout-phone .combo-group-box {
+            left: -3px;
+            right: -3px;
+            border-radius: 11px;
+        }
+
+        .ai-queued-badge {
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(250, 204, 21, 0.18);
+            border: 1px solid rgba(250, 204, 21, 0.55);
+            color: #fde047;
+            white-space: nowrap;
         }
 
         .empty-slot {
@@ -856,32 +887,34 @@
 
         .pip-player { background: #1e293b; }
         .pip-ai { background: #be123c; }
-        .pip-combo3 { background: #ffffff; }
 
-        .die-combo-2 {
-            background: linear-gradient(145deg, #fef9c3 0%, #fde047 75%, #eab308 100%);
-            border: 2px solid #fef08a;
-            box-shadow: 0 3px 0 #a16207, 0 0 14px rgba(250, 204, 21, 0.6);
-        }
-
-        .die-combo-3 {
-            background: linear-gradient(145deg, #fb7185 0%, #e11d48 70%, #9f1239 100%);
-            border: 2px solid #fecdd3;
-            box-shadow: 0 3px 0 #881337, 0 0 18px rgba(244, 63, 94, 0.75);
-        }
-
-        /* 내 고정 주사위: 초록색(#10b981) 테두리 */
+        /* 내 고정 주사위: 단일 초록색 테두리 (4px 두께, 이중 외곽 광원 제거) */
         .die-fixed-player {
-            border: 3px solid #10b981 !important;
-            outline: 2px solid #6ee7b7 !important;
-            box-shadow: 0 0 18px rgba(16, 185, 129, 0.92), inset 0 0 6px rgba(16, 185, 129, 0.35) !important;
+            border: 4px solid #10b981 !important;
+            box-shadow: none !important;
+            outline: none !important;
+            box-sizing: border-box;
         }
 
-        /* 상대 고정 주사위: 빨간색(#ef4444) 테두리 */
+        /* 상대 고정 주사위: 단일 빨간색 테두리 (4px 두께, 이중 외곽 광원 제거) */
         .die-fixed-ai {
-            border: 3px solid #ef4444 !important;
-            outline: 2px solid #fca5a5 !important;
-            box-shadow: 0 0 18px rgba(239, 68, 68, 0.92), inset 0 0 6px rgba(239, 68, 68, 0.35) !important;
+            border: 4px solid #ef4444 !important;
+            box-shadow: none !important;
+            outline: none !important;
+            box-sizing: border-box;
+        }
+
+        /* 트레이 고정 주사위 테두리 */
+        .die-fixed-tray-player {
+            border: 4px solid #10b981 !important;
+            box-shadow: none !important;
+            box-sizing: border-box;
+        }
+
+        .die-fixed-tray-ai {
+            border: 4px solid #ef4444 !important;
+            box-shadow: none !important;
+            box-sizing: border-box;
         }
 
         /* 트레이(미배치 상태) 전용 자물쇠 배지 */
@@ -1081,24 +1114,6 @@
             color: #f8fafc;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-            margin: 14px 0;
-        }
-
-        .stat-box {
-            background: #0f172a;
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            border-radius: 12px;
-            padding: 11px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-        }
-
         @keyframes shake-hit {
             0%, 100% { transform: translate(0, 0); }
             20% { transform: translate(-7px, 5px); }
@@ -1141,12 +1156,12 @@
     <!-- 메인 앱 셸 -->
     <div id="app" class="app-shell">
 
-        <!-- 1. 상단 헤더 바 (연승 배지 + 화면 비율 스위치 + 규칙/전적/음소거/새게임) -->
+        <!-- 1. 상단 헤더 바 -->
         <header class="top-header">
             <div class="brand-group">
                 <div class="brand-icon">🎲</div>
                 <div class="brand-title">티카투카 : 운명의 주사위</div>
-                <span id="streak-badge" class="streak-badge">🔥 0연승 중</span>
+                <span id="streak-badge" class="streak-badge">🔥 일반 0연승 중</span>
             </div>
 
             <div class="header-actions">
@@ -1161,7 +1176,7 @@
             </div>
         </header>
 
-        <!-- 메인 워크스페이스 (패드·컴퓨터에서는 좌측 보드 / 우측 컨트롤 2단 분할, 핸드폰에서는 무스크롤 세로 배치) -->
+        <!-- 메인 워크스페이스 -->
         <div class="workspace-container">
 
             <!-- 2. 상·하 대칭 세로 3열 카드 보드 -->
@@ -1169,12 +1184,13 @@
 
                 <!-- 상대 진영 상단 바 -->
                 <div class="faction-bar faction-ai">
-                    <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                         <span>🎭 상대</span>
-                        <div class="ai-mode-switcher" role="group" aria-label="AI 난이도 전환" title="클릭하여 일반 AI와 타짜 AI를 언제든 전환할 수 있습니다">
+                        <div class="ai-mode-switcher" role="group" aria-label="AI 난이도 전환" title="게임 중 변경 시 다음 게임부터 적용됩니다">
                             <button type="button" id="btn-ai-normal" class="ai-mode-btn active-normal" data-ai-mode="normal">🤖 일반</button>
                             <button type="button" id="btn-ai-tazza" class="ai-mode-btn" data-ai-mode="tazza">🃏 타짜</button>
                         </div>
+                        <span id="ai-queued-badge" class="ai-queued-badge hidden">다음 판: 타짜</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span id="ai-turn-status" style="font-size:10.5px;color:#fecdd3;">대기 중</span>
@@ -1248,34 +1264,57 @@
         </div>
     </div>
 
-    <!-- 전적 모달 -->
+    <!-- 전적 모달 (일반 모드 / 타짜 모드 분리, 알까기 파괴 주사위 항목 제거) -->
     <div id="stats-modal" class="overlay-backdrop hidden">
-        <div class="modal-card" style="text-align:center;">
+        <div class="modal-card" style="text-align:center;max-width:480px;">
             <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid rgba(148,163,184,0.25);">
-                <h3 style="font-size:16px;font-weight:900;color:#fde047;">📊 티카투카 전적 기록</h3>
+                <h3 style="font-size:16px;font-weight:900;color:#fde047;">📊 티카투카 모드별 전적</h3>
                 <button type="button" id="btn-close-stats" style="background:none;border:none;color:#cbd5e1;font-size:18px;font-weight:900;cursor:pointer;padding:2px 6px;">✕</button>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <span style="font-size:11px;color:#94a3b8;font-weight:800;">총 게임 수</span>
-                    <span id="stat-total-games" style="font-size:18px;font-weight:900;color:#ffffff;">0판</span>
+            <div style="display:flex;flex-direction:column;gap:10px;margin:14px 0;">
+                <!-- 일반 모드 전적 카드 -->
+                <div style="background:#0f172a;border:1px solid rgba(56,189,248,0.35);border-radius:12px;padding:12px;text-align:left;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-size:13px;font-weight:900;color:#38bdf8;">🤖 일반 모드</span>
+                        <span id="stat-normal-rate" style="font-size:12.5px;font-weight:900;color:#fde047;">승률 0.0%</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;text-align:center;">
+                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">총 전적</div>
+                            <div id="stat-normal-total" style="font-size:13.5px;font-weight:900;color:#ffffff;margin-top:2px;">0판</div>
+                        </div>
+                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">승 / 패</div>
+                            <div id="stat-normal-wdl" style="font-size:13.5px;font-weight:900;color:#6ee7b7;margin-top:2px;">0승 0패</div>
+                        </div>
+                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">현재 / 최고 연승</div>
+                            <div id="stat-normal-streaks" style="font-size:12.5px;font-weight:900;color:#7dd3fc;margin-top:2px;">0 / 0연승</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-box">
-                    <span style="font-size:11px;color:#94a3b8;font-weight:800;">승률</span>
-                    <span id="stat-win-rate" style="font-size:18px;font-weight:900;color:#fde047;">0.0%</span>
-                </div>
-                <div class="stat-box">
-                    <span style="font-size:11px;color:#94a3b8;font-weight:800;">승 / 패</span>
-                    <span id="stat-wdl" style="font-size:15px;font-weight:900;color:#6ee7b7;">0승 0패</span>
-                </div>
-                <div class="stat-box">
-                    <span style="font-size:11px;color:#94a3b8;font-weight:800;">현재 연승 / 최고 연승</span>
-                    <span id="stat-streaks" style="font-size:15px;font-weight:900;color:#7dd3fc;">0연승 / 0연승</span>
-                </div>
-                <div class="stat-box" style="grid-column:span 2;">
-                    <span style="font-size:11px;color:#94a3b8;font-weight:800;">💥 누적 알까기 파괴 주사위</span>
-                    <span id="stat-total-smashes" style="font-size:18px;font-weight:900;color:#fda4af;">0개</span>
+
+                <!-- 타짜 모드 전적 카드 -->
+                <div style="background:#0f172a;border:1px solid rgba(244,63,94,0.42);border-radius:12px;padding:12px;text-align:left;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-size:13px;font-weight:900;color:#fda4af;">🃏 타짜 모드</span>
+                        <span id="stat-tazza-rate" style="font-size:12.5px;font-weight:900;color:#fde047;">승률 0.0%</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;text-align:center;">
+                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">총 전적</div>
+                            <div id="stat-tazza-total" style="font-size:13.5px;font-weight:900;color:#ffffff;margin-top:2px;">0판</div>
+                        </div>
+                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">승 / 패</div>
+                            <div id="stat-tazza-wdl" style="font-size:13.5px;font-weight:900;color:#6ee7b7;margin-top:2px;">0승 0패</div>
+                        </div>
+                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">현재 / 최고 연승</div>
+                            <div id="stat-tazza-streaks" style="font-size:12.5px;font-weight:900;color:#fda4af;margin-top:2px;">0 / 0연승</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1351,7 +1390,10 @@
                 localStorage.setItem(LAYOUT_KEY, validMode);
             } catch (e) {}
 
-            setTimeout(resizeFxCanvas, 40);
+            setTimeout(() => {
+                resizeFxCanvas();
+                positionComboGroupBoxes();
+            }, 40);
         }
 
         /* ============================================================================
@@ -1585,7 +1627,10 @@
             fxCanvas.width = window.innerWidth;
             fxCanvas.height = window.innerHeight;
         }
-        window.addEventListener('resize', resizeFxCanvas);
+        window.addEventListener('resize', () => {
+            resizeFxCanvas();
+            positionComboGroupBoxes();
+        });
         resizeFxCanvas();
 
         function spawnFxParticles(x, y, colors, count = 26, speed = 8) {
@@ -1655,6 +1700,24 @@
         }
         requestAnimationFrame(renderFxLoop);
 
+        function triggerShake() {
+            const arena = document.getElementById('board-arena');
+            if (!arena) return;
+            arena.classList.remove('shake-hit');
+            void arena.offsetWidth;
+            arena.classList.add('shake-hit');
+        }
+
+        function triggerFlash(rgbaStr) {
+            const flash = document.getElementById('flash-overlay');
+            if (!flash) return;
+            flash.style.backgroundColor = rgbaStr;
+            flash.style.opacity = '1';
+            setTimeout(() => {
+                flash.style.opacity = '0';
+            }, 170);
+        }
+
         /* ============================================================================
            3. 알까기 주사위 직접 발사 & 연결 주사위 일괄 날림 애니메이션
            ============================================================================ */
@@ -1692,7 +1755,7 @@
                 proj.style.pointerEvents = 'none';
                 proj.innerHTML = renderDieHTML(
                     { value: dieValue, fixed: false },
-                    { sizeClass: 'die-sz-full', owner: isPlayerAttacking ? 'player' : 'ai', isSmashable: true, showLockPin: false }
+                    { sizeClass: 'die-sz-full', owner: isPlayerAttacking ? 'player' : 'ai', showLockPin: false }
                 );
                 layer.appendChild(proj);
 
@@ -1783,7 +1846,6 @@
 
         function renderDieHTML(dieObj, options = {}) {
             const {
-                comboCount = 1,
                 sizeClass = 'die-sz-board',
                 owner = 'player',
                 isRolling = false,
@@ -1806,19 +1868,13 @@
             const fixedSide = dieObj.fixedOwner || owner;
 
             let styleClass = 'die-face';
-            if (comboCount === 3) styleClass += ' die-combo-3';
-            else if (comboCount === 2) styleClass += ' die-combo-2';
             if (isFixed) {
                 styleClass += fixedSide === 'ai' ? ' die-fixed-ai' : ' die-fixed-player';
             }
             if (isRolling) styleClass += ' die-rolling-anim';
             if (isPop) styleClass += ' anim-pop';
 
-            const pipClass = comboCount === 3
-                ? 'pip-combo3'
-                : owner === 'ai'
-                ? 'pip-ai'
-                : 'pip-player';
+            const pipClass = owner === 'ai' ? 'pip-ai' : 'pip-player';
 
             const activeCells = PIP_PATTERNS[val] || [4];
             let cellsHtml = '';
@@ -1838,9 +1894,13 @@
         }
 
         /* ============================================================================
-           5. 핵심 게임 상태 및 규칙 로직
+           5. 핵심 게임 상태 및 규칙 유틸리티 함수
            ============================================================================ */
-        const STATS_KEY = 'tika_tuka_classic_stats_v5';
+        const STATS_KEY = 'tika_tuka_mode_stats_v6';
+
+        function createEmptyModeStat() {
+            return { wins: 0, losses: 0, streak: 0, maxStreak: 0 };
+        }
 
         const state = {
             playerBoard: [[], [], []],
@@ -1848,7 +1908,8 @@
             phase: 'coin_toss',
             isAnimating: false,
             isOpeningTurn: false,
-            aiMode: 'normal',
+            activeAiMode: 'normal',
+            queuedAiMode: 'normal',
             aiRerollUsed: false,
             currentDie: null,
             rerollBeforeDie: null,
@@ -1858,25 +1919,182 @@
             aiFixedRoll: false,
             rerollsLeft: 1,
             stats: {
-                wins: 0,
-                losses: 0,
-                streak: 0,
-                maxStreak: 0,
-                smashes: 0
+                normal: createEmptyModeStat(),
+                tazza: createEmptyModeStat()
             }
         };
 
+        function rollDieValue(excludeVal = null) {
+            const pool = [1, 2, 3, 4, 5, 6].filter(v => v !== excludeVal);
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
+        function analyzeColumn(colDice) {
+            const counts = {};
+            let baseSum = 0;
+            colDice.forEach(d => {
+                counts[d.value] = (counts[d.value] || 0) + 1;
+                baseSum += d.value;
+            });
+
+            let maxCount = 0;
+            let bonusSum = 0;
+            Object.entries(counts).forEach(([valStr, cnt]) => {
+                const v = Number(valStr);
+                if (cnt > maxCount) maxCount = cnt;
+                if (cnt === 2) bonusSum += v * 1;
+                else if (cnt === 3) bonusSum += v * 2;
+            });
+
+            return {
+                counts,
+                maxCount,
+                totalScore: baseSum + bonusSum
+            };
+        }
+
+        function isBoardFull(board) {
+            return board.every(col => col.length >= 3);
+        }
+
+        function isBothBoardsFull() {
+            return isBoardFull(state.playerBoard) && isBoardFull(state.aiBoard);
+        }
+
+        function getSmashableTargets(dieVal, isPlayerAttacking) {
+            if (!dieVal) return [];
+            const attackerBoard = isPlayerAttacking ? state.playerBoard : state.aiBoard;
+            const defenderBoard = isPlayerAttacking ? state.aiBoard : state.playerBoard;
+            const targets = [];
+
+            for (let c = 0; c < 3; c++) {
+                const hasAttackerSpace = attackerBoard[c].length < 3;
+                const hasVictim = defenderBoard[c].some(d => d.value === dieVal && !d.fixed);
+                if (hasAttackerSpace && hasVictim) {
+                    targets.push(c);
+                }
+            }
+            return targets;
+        }
+
+        async function animateDieRoll({ durationMs = 520, tickIntervalMs = 50, isFixedStyle = false, excludeVal = null }) {
+            const steps = Math.max(5, Math.floor(durationMs / tickIntervalMs));
+            for (let i = 0; i < steps; i++) {
+                state.currentDie = rollDieValue();
+                audio.playRollTick(i);
+                renderTrayOnly(true, isFixedStyle);
+                await new Promise(r => setTimeout(r, tickIntervalMs));
+            }
+            const finalVal = rollDieValue(excludeVal);
+            state.currentDie = finalVal;
+            audio.playRollStop(isFixedStyle);
+            renderTrayOnly(false, isFixedStyle);
+            return finalVal;
+        }
+
+        async function runPreRoundCoinToss() {
+            const overlay = document.getElementById('cointoss-overlay');
+            const coinEl = document.getElementById('coin-3d-el');
+            const titleEl = document.getElementById('cointoss-title');
+            const subEl = document.getElementById('cointoss-sub');
+
+            state.isAnimating = true;
+            state.phase = 'coin_toss';
+            overlay.classList.remove('hidden');
+            titleEl.textContent = '🪙 운명의 동전을 던집니다...';
+            subEl.textContent = '앞면(👑): 나 선공 · 뒷면(🎭): 상대 선공 (50:50)';
+
+            const isPlayerFirst = Math.random() < 0.5;
+            audio.playCoinFlip();
+
+            const targetDeg = isPlayerFirst ? 1800 : 1980;
+            const spinAnim = coinEl.animate([
+                { transform: 'rotateY(0deg) scale(0.85)' },
+                { transform: `rotateY(${targetDeg * 0.5}deg) scale(1.25)` },
+                { transform: `rotateY(${targetDeg}deg) scale(1)` }
+            ], {
+                duration: 1150,
+                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                fill: 'forwards'
+            });
+
+            await spinAnim.finished;
+            audio.playCoinLand(isPlayerFirst);
+
+            if (isPlayerFirst) {
+                titleEl.textContent = '👑 앞면! 나 선공!';
+                subEl.textContent = '첫 턴에는 내 진영 전용 고정 주사위를 굴립니다.';
+            } else {
+                titleEl.textContent = '🎭 뒷면! 상대 선공!';
+                subEl.textContent = '상대가 먼저 고정 주사위를 굴립니다.';
+            }
+
+            await new Promise(r => setTimeout(r, 950));
+            overlay.classList.add('hidden');
+
+            state.isAnimating = false;
+            state.isOpeningTurn = true;
+
+            if (isPlayerFirst) {
+                state.phase = 'player_wait_roll';
+                renderAll();
+            } else {
+                state.phase = 'ai_turn';
+                renderAll();
+                runAiTurn();
+            }
+        }
+
+        function advanceTurnAfterAction(actor) {
+            state.currentDie = null;
+            state.rerollBeforeDie = null;
+            state.rerollAfterDie = null;
+
+            if (isBothBoardsFull()) {
+                state.phase = 'gameover';
+                renderAll();
+                setTimeout(showGameOverModal, 360);
+                return;
+            }
+
+            if (actor === 'player') {
+                if (!isBoardFull(state.aiBoard)) {
+                    state.phase = 'ai_turn';
+                    renderAll();
+                    runAiTurn();
+                } else {
+                    state.phase = 'player_wait_roll';
+                    renderAll();
+                }
+            } else {
+                if (!isBoardFull(state.playerBoard)) {
+                    state.phase = 'player_wait_roll';
+                    renderAll();
+                } else {
+                    state.phase = 'ai_turn';
+                    renderAll();
+                    runAiTurn();
+                }
+            }
+        }
+
+        /* ============================================================================
+           6. 전적 저장 / 불러오기
+           ============================================================================ */
         function loadStats() {
             try {
                 const raw = localStorage.getItem(STATS_KEY);
                 if (!raw) return;
                 const parsed = JSON.parse(raw);
                 if (parsed && typeof parsed === 'object') {
-                    state.stats.wins = Number(parsed.wins) || 0;
-                    state.stats.losses = Number(parsed.losses) || 0;
-                    state.stats.streak = Number(parsed.streak) || 0;
-                    state.stats.maxStreak = Number(parsed.maxStreak) || 0;
-                    state.stats.smashes = Number(parsed.smashes) || 0;
+                    ['normal', 'tazza'].forEach(m => {
+                        if (parsed[m] && typeof parsed[m] === 'object') {
+                            state.stats[m].wins = Number(parsed[m].wins) || 0;
+                            state.stats[m].losses = Number(parsed[m].losses) || 0;
+                            state.stats[m].streak = Number(parsed[m].streak) || 0;
+                            state.stats[m].maxStreak = Number(parsed[m].maxStreak) || 0;
+                        }
+                    });
                 }
             } catch (e) {}
         }
@@ -1888,236 +2106,31 @@
         }
 
         function resetStats() {
-            state.stats = { wins: 0, losses: 0, streak: 0, maxStreak: 0, smashes: 0 };
+            state.stats = {
+                normal: createEmptyModeStat(),
+                tazza: createEmptyModeStat()
+            };
             saveStats();
             renderAll();
             updateStatsModal();
         }
 
         function updateStatsModal() {
-            const { wins, losses, streak, maxStreak, smashes } = state.stats;
-            const total = wins + losses;
-            const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0';
+            ['normal', 'tazza'].forEach(mode => {
+                const s = state.stats[mode];
+                const total = s.wins + s.losses;
+                const winRate = total > 0 ? ((s.wins / total) * 100).toFixed(1) : '0.0';
 
-            document.getElementById('stat-total-games').textContent = `${total}판`;
-            document.getElementById('stat-win-rate').textContent = `${winRate}%`;
-            document.getElementById('stat-wdl').textContent = `${wins}승 ${losses}패`;
-            document.getElementById('stat-streaks').textContent = `${streak}연승 / ${maxStreak}연승`;
-            document.getElementById('stat-total-smashes').textContent = `${smashes}개`;
-        }
-
-        function rollDieValue(excludeVal = null) {
-            const validEx = Number(excludeVal);
-            if (validEx >= 1 && validEx <= 6) {
-                const candidates = [1, 2, 3, 4, 5, 6].filter(v => v !== validEx);
-                if (window.crypto && window.crypto.getRandomValues) {
-                    const arr = new Uint32Array(1);
-                    window.crypto.getRandomValues(arr);
-                    return candidates[arr[0] % candidates.length];
-                }
-                return candidates[Math.floor(Math.random() * candidates.length)];
-            }
-
-            if (window.crypto && window.crypto.getRandomValues) {
-                const arr = new Uint32Array(1);
-                window.crypto.getRandomValues(arr);
-                return (arr[0] % 6) + 1;
-            }
-            return Math.floor(Math.random() * 6) + 1;
-        }
-
-        function getFairCoinFlip() {
-            if (window.crypto && window.crypto.getRandomValues) {
-                const arr = new Uint32Array(1);
-                window.crypto.getRandomValues(arr);
-                return (arr[0] & 1) === 0;
-            }
-            return Math.random() < 0.5;
-        }
-
-        function analyzeColumn(colDice) {
-            const counts = {};
-            colDice.forEach(d => {
-                counts[d.value] = (counts[d.value] || 0) + 1;
+                document.getElementById(`stat-${mode}-rate`).textContent = `승률 ${winRate}%`;
+                document.getElementById(`stat-${mode}-total`).textContent = `${total}판`;
+                document.getElementById(`stat-${mode}-wdl`).textContent = `${s.wins}승 ${s.losses}패`;
+                document.getElementById(`stat-${mode}-streaks`).textContent = `${s.streak} / ${s.maxStreak}연승`;
             });
-
-            let totalScore = 0;
-            let maxCount = 1;
-            Object.entries(counts).forEach(([valStr, count]) => {
-                const val = Number(valStr);
-                const effectiveCount = count === 3 ? 5 : count === 2 ? 3 : 1;
-                totalScore += val * effectiveCount;
-                if (count > maxCount) maxCount = count;
-            });
-
-            return { totalScore, counts, maxCount };
-        }
-
-        function isBoardFull(board) {
-            return board.every(col => col.length >= 3);
-        }
-
-        function isAllBoardsFull() {
-            return isBoardFull(state.playerBoard) && isBoardFull(state.aiBoard);
-        }
-
-        function getSmashableTargets(dieVal, isPlayerAttacker = true) {
-            if (!dieVal) return [];
-            const myBoard = isPlayerAttacker ? state.playerBoard : state.aiBoard;
-            const oppBoard = isPlayerAttacker ? state.aiBoard : state.playerBoard;
-            const targets = [];
-
-            for (let c = 0; c < 3; c++) {
-                const hasMyEmptySlot = myBoard[c].length < 3;
-                const hasEnemyBreakable = oppBoard[c].some(d => d.value === dieVal && !d.fixed);
-                if (hasMyEmptySlot && hasEnemyBreakable) {
-                    targets.push(c);
-                }
-            }
-            return targets;
-        }
-
-        function triggerShake() {
-            const el = document.getElementById('board-arena');
-            el.classList.remove('shake-hit');
-            void el.offsetWidth;
-            el.classList.add('shake-hit');
-        }
-
-        function triggerFlash(color = 'rgba(255,255,255,0.35)') {
-            const flash = document.getElementById('flash-overlay');
-            flash.style.backgroundColor = color;
-            flash.style.opacity = '1';
-            setTimeout(() => { flash.style.opacity = '0'; }, 90);
         }
 
         /* ============================================================================
-           6. 50:50 코인 토스 & 턴 전환
+           7. 플레이어 액션 핸들러
            ============================================================================ */
-        async function runPreRoundCoinToss() {
-            const overlay = document.getElementById('cointoss-overlay');
-            const coinEl = document.getElementById('coin-3d-el');
-            const titleEl = document.getElementById('cointoss-title');
-            const subEl = document.getElementById('cointoss-sub');
-
-            const isPlayerFirst = getFairCoinFlip();
-            const endDeg = isPlayerFirst ? 1800 : 1980;
-
-            coinEl.getAnimations().forEach(a => a.cancel());
-            coinEl.style.transform = 'translateY(0px) rotateY(0deg) scale(1)';
-
-            titleEl.textContent = '🪙 운명의 동전을 던집니다...';
-            titleEl.style.color = '#fde047';
-            subEl.textContent = '앞면(👑): 나 선공 · 뒷면(🎭): 상대 선공 (50:50)';
-
-            overlay.classList.remove('hidden');
-            audio.playCoinFlip();
-
-            const anim = coinEl.animate([
-                { transform: 'translateY(0px) rotateY(0deg) scale(0.9)' },
-                { transform: `translateY(-90px) rotateY(${endDeg * 0.5}deg) scale(1.25)` },
-                { transform: `translateY(0px) rotateY(${endDeg}deg) scale(1.0)` }
-            ], {
-                duration: 1100,
-                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-                fill: 'forwards'
-            });
-
-            await anim.finished;
-
-            audio.playCoinLand(isPlayerFirst);
-            triggerShake();
-
-            if (isPlayerFirst) {
-                titleEl.textContent = '👑 앞면! 나 선공!';
-                titleEl.style.color = '#6ee7b7';
-                subEl.textContent = '선공 첫 주사위(고정 · 리롤 가능)를 내 진영에 배치하세요!';
-            } else {
-                titleEl.textContent = '🎭 뒷면! 상대 선공!';
-                titleEl.style.color = '#fda4af';
-                subEl.textContent = '상대가 선공 첫 고정 주사위를 굴립니다!';
-            }
-
-            await new Promise(r => setTimeout(r, 820));
-            overlay.classList.add('hidden');
-
-            if (isPlayerFirst) {
-                state.isOpeningTurn = true;
-                state.phase = 'player_wait_roll';
-                renderAll();
-            } else {
-                state.isOpeningTurn = true;
-                state.phase = 'ai_turn';
-                renderAll();
-                runAiTurn();
-            }
-        }
-
-        function advanceTurnAfterAction(justActedSide) {
-            if (isAllBoardsFull()) {
-                state.phase = 'gameover';
-                renderAll();
-                setTimeout(showGameOverModal, 420);
-                return;
-            }
-
-            if (justActedSide === 'player') {
-                if (isBoardFull(state.aiBoard)) {
-                    state.phase = 'player_wait_roll';
-                    state.currentDie = null;
-                    renderAll();
-                    return;
-                }
-                state.phase = 'ai_turn';
-                state.currentDie = null;
-                renderAll();
-                runAiTurn();
-            } else {
-                if (isBoardFull(state.playerBoard)) {
-                    state.phase = 'ai_turn';
-                    renderAll();
-                    runAiTurn();
-                    return;
-                }
-                state.phase = 'player_wait_roll';
-                state.currentDie = null;
-                state.aiDisplayDie = null;
-                state.aiFixedRoll = false;
-                renderAll();
-            }
-        }
-
-        /* ============================================================================
-           7. 플레이어 굴리기 · 리롤(동일 눈 제외 물리 굴림) · 배치 · 알까기
-           ============================================================================ */
-        function animateDieRoll({ durationMs = 550, tickIntervalMs = 50, isFixedStyle = false, excludeVal = null }) {
-            return new Promise((resolve) => {
-                let elapsed = 0;
-                let ticks = 0;
-
-                state.currentDie = rollDieValue();
-                audio.playRollTick(ticks);
-                renderTrayOnly(true, isFixedStyle);
-
-                const timer = setInterval(() => {
-                    elapsed += tickIntervalMs;
-                    ticks++;
-                    state.currentDie = rollDieValue();
-                    audio.playRollTick(ticks);
-                    renderTrayOnly(true, isFixedStyle);
-
-                    if (elapsed >= durationMs) {
-                        clearInterval(timer);
-                        const finalVal = rollDieValue(excludeVal);
-                        state.currentDie = finalVal;
-                        audio.playRollStop(isFixedStyle);
-                        renderTrayOnly(false, isFixedStyle);
-                        resolve(finalVal);
-                    }
-                }, tickIntervalMs);
-            });
-        }
-
         async function handlePlayerRoll(isBonus = false) {
             const expectedPhase = isBonus ? 'player_bonus_wait_roll' : 'player_wait_roll';
             if (state.phase !== expectedPhase || state.isAnimating) return;
@@ -2289,14 +2302,7 @@
                 isPlayerAttacking: true
             });
 
-            const beforeLen = state.aiBoard[colIdx].length;
             state.aiBoard[colIdx] = state.aiBoard[colIdx].filter(d => !(d.value === dieVal && !d.fixed));
-            const destroyedCount = beforeLen - state.aiBoard[colIdx].length;
-
-            if (destroyedCount > 0) {
-                state.stats.smashes += destroyedCount;
-                saveStats();
-            }
 
             state.isAnimating = false;
             state.currentDie = null;
@@ -2308,7 +2314,7 @@
            8. 상대 AI 턴 로직
            ============================================================================ */
         async function runAiTurn() {
-            const difficulty = state.aiMode;
+            const difficulty = state.activeAiMode;
             const isOpening = state.isOpeningTurn;
 
             if (isBoardFull(state.aiBoard)) {
@@ -2514,8 +2520,60 @@
         }
 
         /* ============================================================================
-           9. UI 전체 렌더링
+           9. 같은 눈 뭉침 통합 직사각형 오버레이 위치 계산 & UI 전체 렌더링
            ============================================================================ */
+        function positionComboGroupBoxes() {
+            document.querySelectorAll('.lane-slots-stack').forEach(stack => {
+                stack.querySelectorAll('.combo-group-box').forEach(box => box.remove());
+
+                const slotNodes = Array.from(stack.children).filter(el => !el.classList.contains('combo-group-box'));
+                if (slotNodes.length < 2) return;
+
+                const stackRect = stack.getBoundingClientRect();
+                if (stackRect.height === 0) return;
+
+                // 동일 눈 값을 가진 슬롯 인덱스 수집
+                const byVal = {};
+                slotNodes.forEach((node, idx) => {
+                    const v = node.getAttribute('data-die-val');
+                    if (v) {
+                        if (!byVal[v]) byVal[v] = [];
+                        byVal[v].push(idx);
+                    }
+                });
+
+                Object.values(byVal).forEach(indices => {
+                    if (indices.length < 2) return;
+                    // 연속된 구간(또는 전체 동일 눈 구간)마다 단일 직사각형 테두리 생성
+                    let runStart = indices[0];
+                    let prev = indices[0];
+                    const runs = [];
+
+                    for (let i = 1; i < indices.length; i++) {
+                        if (indices[i] === prev + 1) {
+                            prev = indices[i];
+                        } else {
+                            if (prev > runStart) runs.push([runStart, prev]);
+                            runStart = indices[i];
+                            prev = indices[i];
+                        }
+                    }
+                    if (prev > runStart) runs.push([runStart, prev]);
+
+                    runs.forEach(([sIdx, eIdx]) => {
+                        const firstRect = slotNodes[sIdx].getBoundingClientRect();
+                        const lastRect = slotNodes[eIdx].getBoundingClientRect();
+
+                        const box = document.createElement('div');
+                        box.className = 'combo-group-box';
+                        box.style.top = `${firstRect.top - stackRect.top - 3}px`;
+                        box.style.height = `${lastRect.bottom - firstRect.top + 6}px`;
+                        stack.appendChild(box);
+                    });
+                });
+            });
+        }
+
         function renderTrayOnly(isRollingAnim = false, isFixedStyle = false) {
             const slotEl = document.getElementById('player-die-slot');
             if (!slotEl) return;
@@ -2536,15 +2594,27 @@
         }
 
         function renderAll(popColIdx = -1, popSide = '') {
+            const currentMode = state.activeAiMode;
+            const currentStreak = state.stats[currentMode].streak;
+            const modeLabel = currentMode === 'tazza' ? '타짜' : '일반';
             const streakEl = document.getElementById('streak-badge');
-            streakEl.textContent = `🔥 ${state.stats.streak}연승 중`;
-            streakEl.className = state.stats.streak > 0 ? 'streak-badge streak-badge-hot' : 'streak-badge';
+            streakEl.textContent = `🔥 ${modeLabel} ${currentStreak}연승 중`;
+            streakEl.className = currentStreak > 0 ? 'streak-badge streak-badge-hot' : 'streak-badge';
 
             const btnNormal = document.getElementById('btn-ai-normal');
             const btnTazza = document.getElementById('btn-ai-tazza');
+            const queuedBadge = document.getElementById('ai-queued-badge');
             if (btnNormal && btnTazza) {
-                btnNormal.classList.toggle('active-normal', state.aiMode === 'normal');
-                btnTazza.classList.toggle('active-tazza', state.aiMode === 'tazza');
+                btnNormal.classList.toggle('active-normal', state.queuedAiMode === 'normal');
+                btnTazza.classList.toggle('active-tazza', state.queuedAiMode === 'tazza');
+            }
+            if (queuedBadge) {
+                if (state.queuedAiMode !== state.activeAiMode) {
+                    queuedBadge.textContent = `다음 판: ${state.queuedAiMode === 'tazza' ? '타짜' : '일반'}`;
+                    queuedBadge.classList.remove('hidden');
+                } else {
+                    queuedBadge.classList.add('hidden');
+                }
             }
 
             const isPlayerTurn = state.phase.startsWith('player_');
@@ -2596,7 +2666,7 @@
             document.getElementById('score-player-lines').textContent = playerLineWins;
             document.getElementById('score-ai-lines').textContent = aiLineWins;
 
-            // 1. 상대 3열 렌더링
+            // 1. 상대 3열 렌더링 (기존 3칸 슬롯 구조 그대로 유지)
             const aiGrid = document.getElementById('ai-columns-grid');
             aiGrid.innerHTML = [0, 1, 2].map(colIdx => {
                 const colDice = state.aiBoard[colIdx];
@@ -2624,10 +2694,8 @@
                     const dieIdx = 2 - row;
                     const dieObj = colDice[dieIdx];
                     if (dieObj) {
-                        const comboCnt = evalRes.counts[dieObj.value] || 1;
                         const isPop = popSide === 'ai' && popColIdx === colIdx && dieIdx === colDice.length - 1;
                         slotsHtml += renderDieHTML(dieObj, {
-                            comboCount: comboCnt,
                             sizeClass: 'die-sz-board',
                             owner: 'ai',
                             isPop,
@@ -2676,7 +2744,7 @@
                 `;
             }).join('');
 
-            // 3. 플레이어 3열 렌더링
+            // 3. 플레이어 3열 렌더링 (기존 3칸 슬롯 구조 그대로 유지)
             const playerGrid = document.getElementById('player-columns-grid');
             playerGrid.innerHTML = [0, 1, 2].map(colIdx => {
                 const colDice = state.playerBoard[colIdx];
@@ -2705,10 +2773,8 @@
                 for (let row = 0; row < 3; row++) {
                     const dieObj = colDice[row];
                     if (dieObj) {
-                        const comboCnt = evalRes.counts[dieObj.value] || 1;
                         const isPop = popSide === 'player' && popColIdx === colIdx && row === colDice.length - 1;
                         slotsHtml += renderDieHTML(dieObj, {
-                            comboCount: comboCnt,
                             sizeClass: 'die-sz-board',
                             owner: 'player',
                             isPop,
@@ -2738,6 +2804,9 @@
                     </div>
                 `;
             }).join('');
+
+            // 같은 눈 뭉침 직사각형 테두리 오버레이 배치
+            positionComboGroupBoxes();
 
             document.querySelectorAll('[data-side][data-col]').forEach(el => {
                 el.onclick = () => {
@@ -2903,28 +2972,33 @@
             } else if (aiTotal > playerTotal) {
                 isVictory = false;
             } else {
+                // 무승부 시 무조건 플레이어(나) 승리 판정
                 isVictory = true;
                 isDrawAdvantageWin = true;
             }
 
+            const activeMode = state.activeAiMode;
+            const modeTitle = activeMode === 'tazza' ? '타짜' : '일반';
+            const modeStats = state.stats[activeMode];
+
             if (isVictory) {
-                state.stats.wins++;
-                state.stats.streak++;
-                if (state.stats.streak > state.stats.maxStreak) state.stats.maxStreak = state.stats.streak;
+                modeStats.wins++;
+                modeStats.streak++;
+                if (modeStats.streak > modeStats.maxStreak) modeStats.maxStreak = modeStats.streak;
                 saveStats();
                 audio.playEndGame(true);
                 spawnFxParticles(window.innerWidth / 2, window.innerHeight / 2, ['#fde047', '#10b981', '#38bdf8', '#ffffff'], 65, 11);
                 document.getElementById('result-trophy').textContent = '🏆';
                 document.getElementById('result-title').textContent = isDrawAdvantageWin
                     ? '승리! (동점 우세 판정)'
-                    : `승리! (🔥 ${state.stats.streak}연승 중)`;
+                    : `승리! (🔥 ${modeTitle} ${modeStats.streak}연승 중)`;
                 document.getElementById('result-title').style.color = '#fde047';
                 document.getElementById('result-subtitle').textContent = isDrawAdvantageWin
                     ? `열 점령(${playerWins}:${aiWins})과 총점(${playerTotal}점) 동률로 나 승리!`
                     : `열 점령 ${playerWins} : ${aiWins} (총점 ${playerTotal}점 vs ${aiTotal}점)`;
             } else {
-                state.stats.losses++;
-                state.stats.streak = 0;
+                modeStats.losses++;
+                modeStats.streak = 0;
                 saveStats();
                 audio.playEndGame(false);
                 document.getElementById('result-trophy').textContent = '💀';
@@ -2938,6 +3012,7 @@
         }
 
         function startNewGame() {
+            state.activeAiMode = state.queuedAiMode;
             state.playerBoard = [[], [], []];
             state.aiBoard = [[], [], []];
             state.phase = 'coin_toss';
@@ -2970,7 +3045,12 @@
             document.querySelectorAll('.ai-mode-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const mode = btn.dataset.aiMode === 'tazza' ? 'tazza' : 'normal';
-                    state.aiMode = mode;
+                    state.queuedAiMode = mode;
+
+                    const isBoardEmpty = state.playerBoard.every(c => c.length === 0) && state.aiBoard.every(c => c.length === 0);
+                    if (isBoardEmpty || state.phase === 'gameover') {
+                        state.activeAiMode = mode;
+                    }
                     renderAll();
                 });
             });
