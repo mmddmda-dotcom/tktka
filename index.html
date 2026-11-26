@@ -1,0 +1,2884 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>티카투카 : 운명의 주사위</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-deep: #0b0e14;
+            --bg-velvet: #131823;
+            --panel-card: #1d2536;
+            --gold-light: #fde047;
+            --gold-border: rgba(234, 179, 8, 0.38);
+            --player-accent: #38bdf8;
+            --text-primary: #f8fafc;
+            --die-size: 60px;
+            --pip-size: 11px;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100dvh;
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+            background-color: var(--bg-deep);
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(234, 179, 8, 0.12) 0%, transparent 55%),
+                radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, #0b0e14 0%, #111622 100%);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .hidden { display: none !important; }
+
+        /* =====================================================================
+           레이아웃 모드 (📱 핸드폰 / 📟 패드·컴퓨터 가로 무스크롤)
+           ===================================================================== */
+        .app-shell {
+            width: 100%;
+            max-width: 780px;
+            min-height: 100dvh;
+            margin: 0 auto;
+            padding: 10px 14px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .workspace-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+
+        /* 📱 핸드폰 모드 */
+        body.layout-phone {
+            --die-size: 50px;
+            --pip-size: 9px;
+        }
+        body.layout-phone .app-shell {
+            max-width: 460px;
+            padding: 8px 10px 12px;
+            gap: 8px;
+        }
+        body.layout-phone .top-header {
+            padding: 7px 10px;
+            gap: 6px;
+        }
+        body.layout-phone .brand-title {
+            font-size: 13.5px;
+        }
+        body.layout-phone .lane-card {
+            min-height: 194px;
+            padding: 6px 4px;
+        }
+        body.layout-phone .action-tray {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 10px;
+            gap: 8px;
+        }
+        body.layout-phone .tray-buttons-col {
+            flex-direction: row;
+        }
+        body.layout-phone .btn-roll-main,
+        body.layout-phone .btn-reroll-sub {
+            flex: 1;
+            padding: 9px 10px;
+            font-size: 12px;
+        }
+
+        /* 📟 패드·컴퓨터 모드 (가로 최적화 · 화면 스크롤 없음 100dvh) */
+        body.layout-pad_pc {
+            --die-size: 58px;
+            --pip-size: 10.5px;
+            height: 100dvh;
+            overflow: hidden;
+        }
+        body.layout-pad_pc .app-shell {
+            max-width: 1180px;
+            height: 100dvh;
+            min-height: 0;
+            padding: 8px 14px 10px;
+            gap: 8px;
+            overflow: hidden;
+        }
+        body.layout-pad_pc .top-header {
+            padding: 7px 12px;
+            flex-shrink: 0;
+        }
+        body.layout-pad_pc .workspace-container {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 300px;
+            gap: 14px;
+            height: 100%;
+            min-height: 0;
+            overflow: hidden;
+        }
+        body.layout-pad_pc .board-arena {
+            height: 100%;
+            min-height: 0;
+            padding: 9px 12px;
+            gap: 6px;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+        body.layout-pad_pc .columns-grid-3 {
+            flex: 1;
+            min-height: 0;
+            gap: 10px;
+        }
+        body.layout-pad_pc .lane-card {
+            height: 100%;
+            min-height: 0;
+            padding: 5px 6px;
+            gap: 3px;
+            justify-content: space-evenly;
+        }
+        body.layout-pad_pc .lane-slots-stack {
+            gap: 4px;
+        }
+        body.layout-pad_pc .vs-divider-grid {
+            padding: 1px 0;
+            flex-shrink: 0;
+        }
+        body.layout-pad_pc .vs-lane-pill {
+            padding: 4px 12px;
+        }
+        body.layout-pad_pc .faction-bar {
+            padding: 4px 10px;
+            flex-shrink: 0;
+        }
+        body.layout-pad_pc .action-tray {
+            height: 100%;
+            min-height: 0;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: stretch;
+            padding: 14px;
+            gap: 12px;
+            overflow: hidden;
+        }
+        body.layout-pad_pc .tray-left-die {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            gap: 12px;
+            flex: 1;
+        }
+        body.layout-pad_pc .tray-status-title {
+            font-size: 14.5px;
+            margin-bottom: 5px;
+        }
+        body.layout-pad_pc .tray-status-sub {
+            font-size: 12px;
+            line-height: 1.45;
+        }
+        body.layout-pad_pc .tray-buttons-col {
+            flex-direction: column;
+            width: 100%;
+            gap: 8px;
+        }
+        body.layout-pad_pc .btn-roll-main {
+            padding: 12px 14px;
+            font-size: 13.5px;
+        }
+        body.layout-pad_pc .btn-reroll-sub {
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+
+        /* =====================================================================
+           1. 상단 헤더 & 화면 비율 스위치
+           ===================================================================== */
+        .top-header {
+            width: 100%;
+            background: rgba(24, 31, 46, 0.95);
+            border: 1px solid var(--gold-border);
+            border-radius: 14px;
+            padding: 9px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #fde047 0%, #ca8a04 100%);
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        .brand-title {
+            font-size: 15px;
+            font-weight: 900;
+            color: #fef3c7;
+            white-space: nowrap;
+        }
+
+        .streak-badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 900;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            color: #cbd5e1;
+            white-space: nowrap;
+        }
+
+        .streak-badge-hot {
+            background: linear-gradient(90deg, rgba(234, 88, 12, 0.35), rgba(225, 29, 72, 0.35));
+            border-color: #fde047;
+            color: #fef08a;
+            box-shadow: 0 0 12px rgba(250, 204, 21, 0.35);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .layout-switcher {
+            display: inline-flex;
+            align-items: center;
+            background: #0f172a;
+            border: 1px solid rgba(148, 163, 184, 0.32);
+            border-radius: 9px;
+            padding: 2px;
+            gap: 2px;
+        }
+
+        .layout-opt-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.14s ease;
+            white-space: nowrap;
+            -webkit-appearance: none;
+        }
+        .layout-opt-btn:hover {
+            color: #f8fafc;
+        }
+        .layout-opt-btn.active {
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            color: #fde047;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .ui-btn {
+            background: #1e293b;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            color: #f1f5f9;
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.14s ease;
+            white-space: nowrap;
+            -webkit-appearance: none;
+        }
+        .ui-btn:hover { border-color: var(--gold-light); background: #273549; }
+        .ui-btn:active { transform: scale(0.95); }
+
+        .ui-btn-gold {
+            background: linear-gradient(180deg, #facc15 0%, #ca8a04 100%);
+            border-color: #fef08a;
+            color: #0f172a;
+            font-weight: 900;
+        }
+
+        /* =====================================================================
+           2. 메인 세로 3열 카드 보드
+           ===================================================================== */
+        .board-arena {
+            width: 100%;
+            background: var(--bg-velvet);
+            border: 1.5px solid var(--gold-border);
+            border-radius: 18px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+        }
+
+        .faction-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 900;
+        }
+
+        .faction-ai {
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.32);
+            color: #fda4af;
+        }
+
+        .faction-player {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.32);
+            color: #6ee7b7;
+        }
+
+        .turn-indicator {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 10.5px;
+            font-weight: 900;
+        }
+        .turn-ind-ai { background: #e11d48; color: #ffffff; }
+        .turn-ind-player { background: #059669; color: #ffffff; }
+
+        .columns-grid-3 {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .lane-card {
+            min-height: 226px;
+            background: var(--panel-card);
+            border: 1.5px solid rgba(148, 163, 184, 0.24);
+            border-radius: 14px;
+            padding: 8px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            position: relative;
+            transition: all 0.16s ease;
+        }
+
+        .lane-selectable {
+            cursor: pointer;
+            border-color: var(--player-accent);
+            background: rgba(14, 116, 144, 0.22);
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.24);
+        }
+        .lane-selectable:hover {
+            border-color: #bae6fd;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.42);
+        }
+
+        .lane-smash-target {
+            cursor: pointer;
+            border-color: #ef4444 !important;
+            background: rgba(153, 27, 27, 0.36) !important;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6) !important;
+        }
+        .lane-smash-target:hover {
+            transform: translateY(-2px) scale(1.015);
+            box-shadow: 0 0 26px rgba(239, 68, 68, 0.85) !important;
+        }
+
+        .lane-fixed-ally {
+            cursor: pointer;
+            border-color: #10b981 !important;
+            background: rgba(6, 78, 59, 0.34) !important;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.38) !important;
+        }
+        .lane-fixed-ally:hover { border-color: #6ee7b7 !important; transform: translateY(-2px); }
+
+        .lane-fixed-enemy {
+            cursor: pointer;
+            border-color: #facc15 !important;
+            background: rgba(113, 63, 18, 0.34) !important;
+            box-shadow: 0 0 16px rgba(250, 204, 21, 0.4) !important;
+        }
+        .lane-fixed-enemy:hover { border-color: #fef08a !important; transform: translateY(-2px); }
+
+        .lane-full-dim { opacity: 0.78; cursor: not-allowed; }
+
+        .lane-bonus-bar {
+            width: 100%;
+            min-height: 19px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .bonus-tag {
+            font-size: 10.5px;
+            font-weight: 900;
+            padding: 1.5px 8px;
+            border-radius: 999px;
+        }
+        .bonus-tag-2 {
+            background: rgba(250, 204, 21, 0.22);
+            color: #fde047;
+            border: 1px solid rgba(250, 204, 21, 0.55);
+        }
+        .bonus-tag-3 {
+            background: rgba(244, 63, 94, 0.3);
+            color: #fda4af;
+            border: 1px solid #fb7185;
+        }
+
+        .lane-slots-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .empty-slot {
+            width: var(--die-size);
+            height: var(--die-size);
+            min-width: var(--die-size);
+            min-height: var(--die-size);
+            border-radius: 13px;
+            border: 1.5px dashed rgba(148, 163, 184, 0.28);
+            background: rgba(11, 14, 20, 0.54);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: rgba(148, 163, 184, 0.45);
+            position: relative;
+            transition: all 0.16s ease;
+        }
+
+        .empty-slot-active {
+            border-color: rgba(56, 189, 248, 0.75);
+            background: rgba(14, 116, 144, 0.26);
+            color: #7dd3fc;
+        }
+
+        .empty-slot-fixed {
+            border-color: rgba(16, 185, 129, 0.78);
+            background: rgba(6, 78, 59, 0.3);
+            color: #6ee7b7;
+        }
+
+        /* 열 호버 시 착지 위치 프리뷰 */
+        .slot-ghost-preview {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.92);
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            pointer-events: none;
+        }
+
+        .lane-card:hover .empty-slot-landing {
+            border-style: dashed;
+            border-width: 2px;
+            border-color: #fde047;
+            background: rgba(250, 204, 21, 0.14);
+            box-shadow: 0 0 14px rgba(250, 204, 21, 0.45);
+        }
+
+        .lane-card:hover .empty-slot-landing .slot-default-marker {
+            opacity: 0;
+        }
+
+        .lane-card:hover .empty-slot-landing .slot-ghost-preview {
+            opacity: 0.75;
+            transform: scale(0.96);
+        }
+
+        .smash-floating-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+            box-shadow: 0 3px 10px rgba(239, 68, 68, 0.75);
+            z-index: 8;
+        }
+
+        .inject-floating-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #facc15;
+            color: #0f172a;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+            box-shadow: 0 3px 10px rgba(250, 204, 21, 0.65);
+            z-index: 8;
+        }
+
+        /* =====================================================================
+           3. 중앙 VS 라인 비교 바: 내점수(초록) - 화살표 - 상대점수(빨강)
+           ===================================================================== */
+        .vs-divider-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            padding: 3px 0;
+        }
+
+        .vs-lane-pill {
+            background: rgba(11, 14, 20, 0.9);
+            border: 1px solid rgba(234, 179, 8, 0.32);
+            border-radius: 10px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 900;
+        }
+
+        .vs-score-player {
+            color: #34d399;
+            font-size: 14.5px;
+            font-weight: 900;
+            text-shadow: 0 0 8px rgba(52, 211, 153, 0.35);
+        }
+
+        .vs-score-ai {
+            color: #fb7185;
+            font-size: 14.5px;
+            font-weight: 900;
+            text-shadow: 0 0 8px rgba(251, 113, 133, 0.35);
+        }
+
+        .vs-arrow-up {
+            color: #ef4444;
+            font-size: 15px;
+            line-height: 1;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.85);
+        }
+
+        .vs-arrow-down {
+            color: #10b981;
+            font-size: 15px;
+            line-height: 1;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.85);
+        }
+
+        .vs-arrow-tie {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        /* =====================================================================
+           4. 주사위 디자인 (iPadOS Safari WebKit 100% 호환 명시적 픽셀 Pip 구조)
+           ===================================================================== */
+        .die-face {
+            display: block !important;
+            position: relative;
+            border-radius: 13px;
+            opacity: 1 !important;
+            visibility: visible !important;
+            background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 75%, #cbd5e1 100%);
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 3px 0 #64748b, 0 6px 14px rgba(0, 0, 0, 0.55);
+            -webkit-appearance: none;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            flex-shrink: 0;
+        }
+
+        .die-sz-board {
+            width: var(--die-size);
+            height: var(--die-size);
+            min-width: var(--die-size);
+            min-height: var(--die-size);
+            border-radius: 13px;
+            --dot-d: var(--pip-size);
+        }
+
+        .die-sz-tray {
+            width: 64px;
+            height: 64px;
+            min-width: 64px;
+            min-height: 64px;
+            border-radius: 14px;
+            --dot-d: 12px;
+        }
+
+        .die-sz-reroll {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            min-height: 46px;
+            border-radius: 10px;
+            --dot-d: 8.5px;
+        }
+
+        .die-sz-mini {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            min-height: 34px;
+            border-radius: 8px;
+            --dot-d: 6.5px;
+        }
+
+        .die-sz-full {
+            width: 100%;
+            height: 100%;
+            --dot-d: var(--pip-size);
+        }
+
+        .pip-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            width: 100%;
+            height: 100%;
+            padding: 13%;
+            place-items: center;
+        }
+
+        .pip-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        .pip-dot {
+            display: block !important;
+            width: var(--dot-d, 11px);
+            height: var(--dot-d, 11px);
+            min-width: var(--dot-d, 11px);
+            min-height: var(--dot-d, 11px);
+            border-radius: 50%;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
+        }
+
+        .pip-player { background: #1e293b; }
+        .pip-ai { background: #be123c; }
+        .pip-combo3 { background: #ffffff; }
+
+        .die-combo-2 {
+            background: linear-gradient(145deg, #fef9c3 0%, #fde047 75%, #eab308 100%);
+            border: 2px solid #fef08a;
+            box-shadow: 0 3px 0 #a16207, 0 0 14px rgba(250, 204, 21, 0.6);
+        }
+
+        .die-combo-3 {
+            background: linear-gradient(145deg, #fb7185 0%, #e11d48 70%, #9f1239 100%);
+            border: 2px solid #fecdd3;
+            box-shadow: 0 3px 0 #881337, 0 0 18px rgba(244, 63, 94, 0.75);
+        }
+
+        /* 내 고정 주사위: 초록색(#10b981) 테두리 */
+        .die-fixed-player {
+            border: 3px solid #10b981 !important;
+            outline: 2px solid #6ee7b7 !important;
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.92), inset 0 0 6px rgba(16, 185, 129, 0.35) !important;
+        }
+
+        /* 상대 고정 주사위: 빨간색(#ef4444) 테두리 */
+        .die-fixed-ai {
+            border: 3px solid #ef4444 !important;
+            outline: 2px solid #fca5a5 !important;
+            box-shadow: 0 0 18px rgba(239, 68, 68, 0.92), inset 0 0 6px rgba(239, 68, 68, 0.35) !important;
+        }
+
+        /* 트레이(미배치 상태) 전용 자물쇠 배지 */
+        .die-lock-pin {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+            z-index: 7;
+        }
+
+        .die-lock-pin-player {
+            background: #10b981;
+            border: 1.5px solid #d1fae5;
+            color: #052e16;
+        }
+
+        @keyframes diceShakeRoll {
+            0% { transform: rotate(-18deg) scale(0.9); }
+            25% { transform: rotate(16deg) scale(1.1); }
+            50% { transform: rotate(-14deg) scale(0.94); }
+            75% { transform: rotate(18deg) scale(1.08); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+        .die-rolling-anim { animation: diceShakeRoll 0.14s ease-in-out infinite; }
+
+        @keyframes diePopIn {
+            0% { transform: scale(1.35); opacity: 0.4; }
+            70% { transform: scale(0.94); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .anim-pop { animation: diePopIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        /* =====================================================================
+           5. 하단 / 우측 플레이어 주사위 액션 트레이
+           ===================================================================== */
+        .action-tray {
+            width: 100%;
+            background: rgba(24, 31, 46, 0.96);
+            border: 1.5px solid var(--gold-border);
+            border-radius: 16px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+        }
+
+        .tray-left-die {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .tray-status-title {
+            font-size: 13.5px;
+            font-weight: 900;
+            color: #fef08a;
+            margin-bottom: 3px;
+        }
+
+        .tray-status-sub {
+            font-size: 11.5px;
+            color: #cbd5e1;
+            line-height: 1.38;
+        }
+
+        .tray-buttons-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .btn-roll-main {
+            padding: 10px 16px;
+            border-radius: 11px;
+            border: 1.5px solid #fef08a;
+            background: linear-gradient(180deg, #facc15 0%, #d97706 100%);
+            color: #0f172a;
+            font-size: 13px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(217, 119, 6, 0.45);
+            transition: all 0.14s ease;
+            -webkit-appearance: none;
+        }
+        .btn-roll-main:hover:not(:disabled) { filter: brightness(1.08); }
+        .btn-roll-main:active:not(:disabled) { transform: scale(0.96); }
+        .btn-roll-main:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+        .btn-roll-fixed {
+            border-color: #6ee7b7;
+            background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+            color: #042f2e;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
+        }
+
+        .btn-reroll-sub {
+            padding: 7px 12px;
+            border-radius: 9px;
+            border: 1px solid rgba(168, 85, 247, 0.6);
+            background: rgba(88, 28, 135, 0.38);
+            color: #e9d5ff;
+            font-size: 11.5px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.14s ease;
+            -webkit-appearance: none;
+        }
+        .btn-reroll-sub:hover:not(:disabled) { background: rgba(107, 33, 168, 0.62); border-color: #d8b4fe; }
+        .btn-reroll-sub:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .reroll-pair-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .reroll-pick-card {
+            background: #0f172a;
+            border: 1.5px solid #64748b;
+            border-radius: 11px;
+            padding: 6px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            -webkit-appearance: none;
+        }
+        .reroll-pick-card:hover { border-color: #fde047; transform: translateY(-2px); background: #1e293b; }
+
+        /* =====================================================================
+           6. 코인 토스 & 모달 오버레이
+           ===================================================================== */
+        .overlay-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(6, 9, 15, 0.86);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .coin-stage { perspective: 900px; margin-bottom: 16px; }
+        .coin-3d { width: 108px; height: 108px; position: relative; transform-style: preserve-3d; }
+        .coin-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 9999px;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #fef08a;
+            box-shadow: 0 0 28px rgba(250, 204, 21, 0.6), inset 0 0 16px rgba(120, 53, 15, 0.75);
+        }
+        .coin-front {
+            background: radial-gradient(circle at 35% 30%, #fef08a 0%, #f59e0b 65%, #b45309 100%);
+            color: #1e1b18;
+        }
+        .coin-back {
+            background: radial-gradient(circle at 35% 30%, #fecdd3 0%, #e11d48 65%, #881337 100%);
+            color: #ffffff;
+            transform: rotateY(180deg);
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 470px;
+            background: #181f2e;
+            border: 2px solid #eab308;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+            color: #f8fafc;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin: 14px 0;
+        }
+
+        .stat-box {
+            background: #0f172a;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            padding: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+
+        @keyframes shake-hit {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-7px, 5px); }
+            40% { transform: translate(7px, -5px); }
+            60% { transform: translate(-5px, -3px); }
+            80% { transform: translate(5px, 3px); }
+        }
+        .shake-hit { animation: shake-hit 0.35s ease-out; }
+    </style>
+</head>
+<body class="layout-pad_pc">
+
+    <canvas id="fxCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:40;"></canvas>
+    <div id="projectile-layer" style="position:fixed;inset:0;pointer-events:none;z-index:55;overflow:hidden;"></div>
+    <div id="flash-overlay" style="position:fixed;inset:0;pointer-events:none;z-index:30;opacity:0;transition:opacity 0.18s ease;"></div>
+
+    <!-- 50:50 코인 토스 오버레이 -->
+    <div id="cointoss-overlay" class="overlay-backdrop hidden">
+        <div style="font-size:11px;letter-spacing:0.22em;color:#fde047;margin-bottom:10px;font-weight:900;">FIRST TURN COIN TOSS</div>
+        <div class="coin-stage">
+            <div id="coin-3d-el" class="coin-3d">
+                <div class="coin-face coin-front">
+                    <span style="font-size:28px;">👑</span>
+                    <span style="font-size:12px;font-weight:900;margin-top:2px;">나 선공</span>
+                </div>
+                <div class="coin-face coin-back">
+                    <span style="font-size:28px;">🎭</span>
+                    <span style="font-size:12px;font-weight:900;margin-top:2px;">상대 선공</span>
+                </div>
+            </div>
+        </div>
+        <div id="cointoss-title" style="font-size:21px;font-weight:900;color:#fde047;text-align:center;">
+            🪙 운명의 동전을 던집니다...
+        </div>
+        <div id="cointoss-sub" style="font-size:12.5px;color:#cbd5e1;margin-top:6px;font-weight:700;text-align:center;">
+            앞면(👑): 나 선공 · 뒷면(🎭): 상대 선공 (50:50)
+        </div>
+    </div>
+
+    <!-- 메인 앱 셸 -->
+    <div class="app-shell">
+
+        <!-- 1. 상단 헤더 바 (연승 배지 + 화면 비율 스위치 + 규칙/전적/음소거/새게임) -->
+        <header class="top-header">
+            <div class="brand-group">
+                <div class="brand-icon">🎲</div>
+                <div class="brand-title">티카투카 : 운명의 주사위</div>
+                <span id="streak-badge" class="streak-badge">🔥 0연승 중</span>
+            </div>
+
+            <div class="header-actions">
+                <div class="layout-switcher" role="group" aria-label="화면 비율 선택">
+                    <button type="button" class="layout-opt-btn" data-layout-mode="phone">📱 핸드폰</button>
+                    <button type="button" class="layout-opt-btn active" data-layout-mode="pad_pc">📟 패드·컴퓨터</button>
+                </div>
+                <button type="button" id="btn-rules" class="ui-btn">📖 규칙 설명</button>
+                <button type="button" id="btn-stats" class="ui-btn">📊 전적</button>
+                <button type="button" id="btn-sound" class="ui-btn" title="효과음 토글">🔊</button>
+                <button type="button" id="btn-new-game" class="ui-btn ui-btn-gold">↻ 새 게임</button>
+            </div>
+        </header>
+
+        <!-- 메인 워크스페이스 (패드 모드에서는 좌측 보드 / 우측 컨트롤 2단 분할) -->
+        <div class="workspace-container">
+
+            <!-- 2. 상·하 대칭 세로 3열 카드 보드 -->
+            <main id="board-arena" class="board-arena">
+
+                <!-- 상대 진영 상단 바 -->
+                <div class="faction-bar faction-ai">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span>🎭 상대</span>
+                        <select id="ai-difficulty" style="background:#0f172a;color:#fda4af;border:1px solid rgba(244,63,94,0.45);border-radius:6px;padding:2px 6px;font-size:11px;font-weight:800;outline:none;">
+                            <option value="normal" selected>일반</option>
+                            <option value="tazza">타짜</option>
+                        </select>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span id="ai-turn-status" style="font-size:11px;color:#fecdd3;">대기 중</span>
+                        <div id="ai-mini-die-box" style="display:flex;align-items:center;"></div>
+                        <span style="font-size:11.5px;color:#fecdd3;">총점 <b id="score-ai-total">0</b></span>
+                        <span id="ai-turn-badge" class="turn-indicator turn-ind-ai hidden">상대 턴</span>
+                    </div>
+                </div>
+
+                <!-- 상대 3열 그리드 -->
+                <div id="ai-columns-grid" class="columns-grid-3"></div>
+
+                <!-- 중앙 VS 라인 비교 바: 내점수(초록) - 화살표 - 상대점수(빨강) -->
+                <div id="vs-divider-grid" class="vs-divider-grid"></div>
+
+                <!-- 플레이어 3열 그리드 -->
+                <div id="player-columns-grid" class="columns-grid-3"></div>
+
+                <!-- 플레이어 진영 하단 바 -->
+                <div class="faction-bar faction-player">
+                    <span>👑 나</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:11.5px;color:#a7f3d0;">점령 <b id="score-player-lines">0</b>:<b id="score-ai-lines">0</b> · 총점 <b id="score-player-total">0</b></span>
+                        <span id="player-turn-badge" class="turn-indicator turn-ind-player">내 턴</span>
+                    </div>
+                </div>
+            </main>
+
+            <!-- 3. 플레이어 주사위 액션 트레이 (패드 모드에서는 우측 고정 사이드바) -->
+            <section class="action-tray">
+                <div class="tray-left-die">
+                    <div id="player-die-slot" style="display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
+
+                    <!-- 리롤 전/후 2택 선택 UI -->
+                    <div id="reroll-choice-box" class="reroll-pair-wrap hidden">
+                        <button type="button" id="btn-pick-before" class="reroll-pick-card">
+                            <span style="font-size:10px;font-weight:900;color:#94a3b8;">리롤 전</span>
+                            <div id="reroll-before-die"></div>
+                        </button>
+                        <button type="button" id="btn-pick-after" class="reroll-pick-card" style="border-color:#fde047;">
+                            <span style="font-size:10px;font-weight:900;color:#fde047;">리롤 후</span>
+                            <div id="reroll-after-die"></div>
+                        </button>
+                    </div>
+
+                    <div style="min-width:0;">
+                        <div id="tray-title" class="tray-status-title">주사위를 굴려주세요!</div>
+                        <div id="tray-desc" class="tray-status-sub">[🎲 주사위 굴리기] 버튼이나 Spacebar를 누르세요.</div>
+                    </div>
+                </div>
+
+                <div class="tray-buttons-col">
+                    <button type="button" id="btn-roll" class="btn-roll-main">🎲 주사위 굴리기 (Space)</button>
+                    <button type="button" id="btn-reroll" class="btn-reroll-sub">🃏 타짜의 손놀림 (<span id="reroll-count-text">1/1</span>)</button>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- 승패 결과 모달 -->
+    <div id="gameover-modal" class="overlay-backdrop hidden">
+        <div class="modal-card" style="text-align:center;">
+            <div id="result-trophy" style="font-size:46px;margin-bottom:6px;">🏆</div>
+            <h2 id="result-title" style="font-size:23px;font-weight:900;color:#fde047;margin-bottom:4px;">승리!</h2>
+            <p id="result-subtitle" style="font-size:13px;color:#cbd5e1;margin-bottom:14px;">3개 열 중 2개 열을 점령했습니다!</p>
+            <div id="result-lanes-summary" style="display:flex;flex-direction:column;gap:6px;background:#0f172a;border:1px solid rgba(148,163,184,0.25);border-radius:12px;padding:10px;margin-bottom:16px;"></div>
+            <button type="button" id="btn-modal-rematch" class="btn-roll-main" style="width:100%;padding:11px;">
+                🪙 코인 토스로 한 판 더!
+            </button>
+        </div>
+    </div>
+
+    <!-- 전적 모달 -->
+    <div id="stats-modal" class="overlay-backdrop hidden">
+        <div class="modal-card" style="text-align:center;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid rgba(148,163,184,0.25);">
+                <h3 style="font-size:16px;font-weight:900;color:#fde047;">📊 티카투카 전적 기록</h3>
+                <button type="button" id="btn-close-stats" style="background:none;border:none;color:#cbd5e1;font-size:18px;font-weight:900;cursor:pointer;padding:2px 6px;">✕</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span style="font-size:11px;color:#94a3b8;font-weight:800;">총 게임 수</span>
+                    <span id="stat-total-games" style="font-size:18px;font-weight:900;color:#ffffff;">0판</span>
+                </div>
+                <div class="stat-box">
+                    <span style="font-size:11px;color:#94a3b8;font-weight:800;">승률</span>
+                    <span id="stat-win-rate" style="font-size:18px;font-weight:900;color:#fde047;">0.0%</span>
+                </div>
+                <div class="stat-box">
+                    <span style="font-size:11px;color:#94a3b8;font-weight:800;">승 / 패</span>
+                    <span id="stat-wdl" style="font-size:15px;font-weight:900;color:#6ee7b7;">0승 0패</span>
+                </div>
+                <div class="stat-box">
+                    <span style="font-size:11px;color:#94a3b8;font-weight:800;">현재 연승 / 최고 연승</span>
+                    <span id="stat-streaks" style="font-size:15px;font-weight:900;color:#7dd3fc;">0연승 / 0연승</span>
+                </div>
+                <div class="stat-box" style="grid-column:span 2;">
+                    <span style="font-size:11px;color:#94a3b8;font-weight:800;">💥 누적 알까기 파괴 주사위</span>
+                    <span id="stat-total-smashes" style="font-size:18px;font-weight:900;color:#fda4af;">0개</span>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:8px;">
+                <button type="button" id="btn-reset-stats" class="ui-btn" style="flex:1;border-color:#f43f5e;color:#fda4af;">🗑️ 초기화</button>
+                <button type="button" id="btn-confirm-stats" class="btn-roll-main" style="flex:2;padding:9px;">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 규칙 설명 모달 -->
+    <div id="rules-modal" class="overlay-backdrop hidden">
+        <div class="modal-card" style="max-width:490px;text-align:left;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid rgba(148,163,184,0.25);">
+                <h3 style="font-size:16px;font-weight:900;color:#fde047;">📖 티카투카 : 운명의 주사위 규칙</h3>
+                <button type="button" id="btn-close-rules" style="background:none;border:none;color:#cbd5e1;font-size:18px;font-weight:900;cursor:pointer;padding:2px 6px;">✕</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;font-size:12.5px;color:#e2e8f0;line-height:1.55;max-height:60vh;overflow-y:auto;">
+                <div style="background:#0f172a;padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);">
+                    <div style="font-weight:900;color:#fde047;margin-bottom:2px;">1. 50:50 코인 토스 & 18칸 완주 2선승제</div>
+                    <p>매 판 시작 시 <b>코인 토스(50:50)</b>로 선공을 정합니다. 한쪽 9칸이 먼저 차면 해당 턴은 자동 패스되며, <b>양쪽 18칸(나 9칸 + 상대 9칸)이 전부 채워져야 종료</b>됩니다. 3개 열 중 2개 이상 점수가 높으면 승리하며, 열 승수와 총점까지 모두 동점인 무승부 시 <b>나 승리 판정</b>으로 처리됩니다.</p>
+                </div>
+                <div style="background:#0f172a;padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);">
+                    <div style="font-weight:900;color:#7dd3fc;margin-bottom:2px;">2. 같은 눈 보너스 (+1개 / +2개 추가 합산)</div>
+                    <p>같은 열에 동일한 눈 주사위가 모이면 보너스 개수가 추가 합산됩니다:<br>
+                    • <b>2개 모임 (+1개 보너스)</b>: 동일 눈 1개 추가 → 예: 2, 2면 2+2+<b>2</b> = <b>6점</b> (4, 4면 <b>12점</b>)<br>
+                    • <b>3개 모임 (+2개 보너스)</b>: 동일 눈 2개 추가 → 예: 2, 2, 2면 2×5 = <b>10점</b> (4, 4, 4면 <b>20점</b>)</p>
+                </div>
+                <div style="background:#0f172a;padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);">
+                    <div style="font-weight:900;color:#fda4af;margin-bottom:2px;">3. 알까기 (직접 발사 & 연결된 동일 눈 일괄 파괴)</div>
+                    <p>• 내 열에 빈 칸이 1칸 이상 있고 맞은편 상대 열에 같은 눈(고정 주사위 제외)이 있으면, 내 열이나 상대 열을 클릭해 주사위를 직접 발사하여 파괴합니다.<br>
+                    • 맞은편에 같은 눈이 <b>2~3개 연결</b>되어 있으면 <b>한꺼번에 전부 날아가며</b>, 알까기한 내 주사위도 함께 소멸합니다.</p>
+                </div>
+                <div style="background:#0f172a;padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);">
+                    <div style="font-weight:900;color:#6ee7b7;margin-bottom:2px;">4. 고정 주사위 (초록 테두리: 나 / 빨간 테두리: 상대)</div>
+                    <p>• <b>선공 첫 주사위</b>: 코인 토스 승자의 첫 주사위는 고정 주사위이며, <b>자신의 진영 빈 칸에만 배치 가능</b>하고 정규 턴이므로 <b>리롤(1회) 가능</b>합니다.<br>
+                    • <b>알까기 보너스 고정 주사위</b>: 알까기 성공 시 얻는 고정 주사위는 <b>내 빈 칸 또는 상대 빈 칸(방해 투척) 모두 배치 가능</b>하며, 보너스 턴이므로 리롤할 수 없습니다.</p>
+                </div>
+            </div>
+            <button type="button" id="btn-confirm-rules" class="btn-roll-main" style="width:100%;margin-top:12px;padding:9px;">확인</button>
+        </div>
+    </div>
+
+    <script>
+        /* ============================================================================
+           0. 디바이스 레이아웃 비율 관리 (📱 핸드폰 / 📟 패드·컴퓨터)
+           ============================================================================ */
+        const LAYOUT_KEY = 'tikatuka_layout_v1';
+
+        function detectDefaultLayoutMode() {
+            try {
+                const saved = localStorage.getItem(LAYOUT_KEY);
+                if (saved === 'phone') return 'phone';
+                if (saved === 'pad_pc' || saved === 'pad' || saved === 'pc') {
+                    return 'pad_pc';
+                }
+            } catch (e) {}
+
+            return window.innerWidth <= 640 ? 'phone' : 'pad_pc';
+        }
+
+        function applyLayoutMode(mode) {
+            const validMode = mode === 'phone' ? 'phone' : 'pad_pc';
+            document.body.classList.remove('layout-phone', 'layout-pad', 'layout-pc', 'layout-pad_pc');
+            document.body.classList.add(`layout-${validMode}`);
+
+            document.querySelectorAll('.layout-opt-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.layoutMode === validMode);
+            });
+
+            try {
+                localStorage.setItem(LAYOUT_KEY, validMode);
+            } catch (e) {}
+
+            setTimeout(resizeFxCanvas, 40);
+        }
+
+        /* ============================================================================
+           1. WEB AUDIO API 사운드 엔진
+           ============================================================================ */
+        class TikaSoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                try {
+                    if (!this.ctx) {
+                        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                        if (AudioCtx) this.ctx = new AudioCtx();
+                    }
+                    if (this.ctx && this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                } catch (e) {}
+            }
+
+            playCoinFlip() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                [1480, 2217.46, 2960].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.03);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 1.06, now + idx * 0.03 + 0.35);
+                    gain.gain.setValueAtTime(0.14 / (idx + 1), now + idx * 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.03 + 0.42);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.03);
+                    osc.stop(now + idx * 0.03 + 0.45);
+                });
+            }
+
+            playCoinLand(isPlayerFirst) {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const notes = isPlayerFirst ? [1046.5, 1318.51, 1567.98] : [783.99, 659.25];
+                notes.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.06);
+                    gain.gain.setValueAtTime(0.18, now + i * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.28);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.06);
+                    osc.stop(now + i * 0.06 + 0.3);
+                });
+            }
+
+            playRollTick(step = 0) {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                const freq = 240 + (step % 4) * 65 + Math.random() * 35;
+                osc.frequency.setValueAtTime(freq, now);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.055);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.065);
+            }
+
+            playRollStop(isFixed = false) {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const notes = isFixed ? [587.33, 880, 1174.66] : [392.0, 523.25];
+                notes.forEach((f, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(f, now + idx * 0.04);
+                    gain.gain.setValueAtTime(0.17, now + idx * 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.22);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.04);
+                    osc.stop(now + idx * 0.04 + 0.24);
+                });
+            }
+
+            playWhoosh() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(720, now + 0.18);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.21);
+            }
+
+            playPlace(comboCount = 1, isFixed = false) {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(185 + comboCount * 85, now);
+                osc.frequency.exponentialRampToValueAtTime(70, now + 0.14);
+                gain.gain.setValueAtTime(0.26, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.16);
+
+                if (comboCount >= 2 || isFixed) {
+                    const notes = comboCount === 3
+                        ? [523.25, 659.25, 783.99, 1046.5]
+                        : isFixed
+                        ? [659.25, 987.77, 1318.51]
+                        : [440, 659.25];
+                    notes.forEach((freq, i) => {
+                        const cOsc = this.ctx.createOscillator();
+                        const cGain = this.ctx.createGain();
+                        cOsc.type = 'triangle';
+                        cOsc.frequency.setValueAtTime(freq, now + i * 0.045);
+                        cGain.gain.setValueAtTime(0.15, now + i * 0.045);
+                        cGain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.045 + 0.34);
+                        cOsc.connect(cGain);
+                        cGain.connect(this.ctx.destination);
+                        cOsc.start(now + i * 0.045);
+                        cOsc.stop(now + i * 0.045 + 0.36);
+                    });
+                }
+            }
+
+            playSmash() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+
+                const sub = this.ctx.createOscillator();
+                const subGain = this.ctx.createGain();
+                sub.type = 'sawtooth';
+                sub.frequency.setValueAtTime(180, now);
+                sub.frequency.exponentialRampToValueAtTime(28, now + 0.35);
+                subGain.gain.setValueAtTime(0.4, now);
+                subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+                sub.connect(subGain);
+                subGain.connect(this.ctx.destination);
+                sub.start(now);
+                sub.stop(now + 0.38);
+
+                const bufferSize = Math.floor(this.ctx.sampleRate * 0.25);
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 2600;
+                const nGain = this.ctx.createGain();
+                nGain.gain.setValueAtTime(0.32, now);
+                nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                noise.connect(filter);
+                filter.connect(nGain);
+                nGain.connect(this.ctx.destination);
+                noise.start(now);
+            }
+
+            playEndGame(isWin) {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const notes = isWin
+                    ? [523.25, 659.25, 783.99, 1046.5, 1318.51]
+                    : [392.0, 349.23, 311.13, 261.63];
+                notes.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = isWin ? 'triangle' : 'sawtooth';
+                    const t = now + i * 0.09;
+                    osc.frequency.setValueAtTime(freq, t);
+                    gain.gain.setValueAtTime(0.18, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(t);
+                    osc.stop(t + 0.45);
+                });
+            }
+        }
+
+        const audio = new TikaSoundEngine();
+
+        /* ============================================================================
+           2. 파티클 캔버스 엔진
+           ============================================================================ */
+        const fxCanvas = document.getElementById('fxCanvas');
+        const fxCtx = fxCanvas.getContext('2d');
+        let particles = [];
+        let shockwaves = [];
+
+        function resizeFxCanvas() {
+            fxCanvas.width = window.innerWidth;
+            fxCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeFxCanvas);
+        resizeFxCanvas();
+
+        function spawnFxParticles(x, y, colors, count = 26, speed = 8) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const vel = Math.random() * speed + 2;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * vel,
+                    vy: Math.sin(angle) * vel - 1.5,
+                    size: Math.random() * 5 + 2.5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    decay: Math.random() * 0.026 + 0.018,
+                    rot: Math.random() * Math.PI,
+                    vRot: (Math.random() - 0.5) * 0.25
+                });
+            }
+        }
+
+        function spawnShockwave(x, y, color = '#ef4444') {
+            shockwaves.push({ x, y, radius: 10, maxRadius: 105, alpha: 0.92, color });
+        }
+
+        function renderFxLoop() {
+            fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+
+            for (let i = shockwaves.length - 1; i >= 0; i--) {
+                const sw = shockwaves[i];
+                sw.radius += (sw.maxRadius - sw.radius) * 0.18;
+                sw.alpha -= 0.048;
+                if (sw.alpha <= 0) {
+                    shockwaves.splice(i, 1);
+                    continue;
+                }
+                fxCtx.save();
+                fxCtx.globalAlpha = sw.alpha;
+                fxCtx.strokeStyle = sw.color;
+                fxCtx.lineWidth = 3.5;
+                fxCtx.beginPath();
+                fxCtx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+                fxCtx.stroke();
+                fxCtx.restore();
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.vx *= 0.96;
+                p.vy += 0.22;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.rot += p.vRot;
+                p.alpha -= p.decay;
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+                fxCtx.save();
+                fxCtx.globalAlpha = p.alpha;
+                fxCtx.translate(p.x, p.y);
+                fxCtx.rotate(p.rot);
+                fxCtx.fillStyle = p.color;
+                fxCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                fxCtx.restore();
+            }
+            requestAnimationFrame(renderFxLoop);
+        }
+        requestAnimationFrame(renderFxLoop);
+
+        /* ============================================================================
+           3. 알까기 주사위 직접 발사 & 연결 주사위 일괄 날림 애니메이션
+           ============================================================================ */
+        async function playAlkkagiFlightAnimation({
+            dieValue,
+            sourceSlotEl,
+            targetDiceElements,
+            targetLaneRect,
+            isPlayerAttacking
+        }) {
+            const layer = document.getElementById('projectile-layer');
+            if (!layer || !sourceSlotEl) return;
+
+            const startRect = sourceSlotEl.getBoundingClientRect();
+            const startX = startRect.left + startRect.width / 2;
+            const startY = startRect.top + startRect.height / 2;
+
+            sourceSlotEl.style.visibility = 'hidden';
+
+            try {
+                const firstTargetRect = targetDiceElements.length > 0
+                    ? targetDiceElements[0].getBoundingClientRect()
+                    : targetLaneRect;
+                const endX = firstTargetRect.left + firstTargetRect.width / 2;
+                const endY = firstTargetRect.top + firstTargetRect.height / 2;
+
+                const projSize = 56;
+                const proj = document.createElement('div');
+                proj.style.position = 'fixed';
+                proj.style.left = `${startX - projSize / 2}px`;
+                proj.style.top = `${startY - projSize / 2}px`;
+                proj.style.width = `${projSize}px`;
+                proj.style.height = `${projSize}px`;
+                proj.style.zIndex = '60';
+                proj.style.pointerEvents = 'none';
+                proj.innerHTML = renderDieHTML(
+                    { value: dieValue, fixed: false },
+                    { sizeClass: 'die-sz-full', owner: isPlayerAttacking ? 'player' : 'ai', isSmashable: true, showLockPin: false }
+                );
+                layer.appendChild(proj);
+
+                audio.playWhoosh();
+
+                const dx = endX - startX;
+                const dy = endY - startY;
+                const spinDeg = isPlayerAttacking ? -540 : 540;
+
+                const flyAnim = proj.animate([
+                    { transform: 'translate(0px, 0px) scale(1) rotate(0deg)' },
+                    { transform: `translate(${dx * 0.55}px, ${dy * 0.55}px) scale(1.3) rotate(${spinDeg * 0.55}deg)` },
+                    { transform: `translate(${dx}px, ${dy}px) scale(1.16) rotate(${spinDeg}deg)` }
+                ], {
+                    duration: 240,
+                    easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                    fill: 'forwards'
+                });
+
+                await flyAnim.finished;
+
+                audio.playSmash();
+                triggerShake();
+                triggerFlash('rgba(239, 68, 68, 0.36)');
+                spawnShockwave(endX, endY, '#ef4444');
+                spawnFxParticles(endX, endY, ['#ef4444', '#fde047', '#ffffff', '#fb923c'], 38, 10);
+
+                const shatterAnim = proj.animate([
+                    { transform: `translate(${dx}px, ${dy}px) scale(1.16) rotate(${spinDeg}deg)`, opacity: 1 },
+                    { transform: `translate(${dx + (Math.random() - 0.5) * 60}px, ${dy + (isPlayerAttacking ? -45 : 45)}px) scale(0.15) rotate(${spinDeg + 180}deg)`, opacity: 0 }
+                ], {
+                    duration: 200,
+                    easing: 'ease-out',
+                    fill: 'forwards'
+                });
+
+                const flyingVictimPromises = targetDiceElements.map((el, idx) => {
+                    const r = el.getBoundingClientRect();
+                    el.style.opacity = '0';
+
+                    const victimClone = document.createElement('div');
+                    victimClone.style.position = 'fixed';
+                    victimClone.style.left = `${r.left}px`;
+                    victimClone.style.top = `${r.top}px`;
+                    victimClone.style.width = `${r.width}px`;
+                    victimClone.style.height = `${r.height}px`;
+                    victimClone.style.zIndex = '58';
+                    victimClone.style.pointerEvents = 'none';
+                    victimClone.innerHTML = el.outerHTML;
+                    layer.appendChild(victimClone);
+
+                    const dirX = (idx - (targetDiceElements.length - 1) / 2) * 160 + ((idx % 2 === 0 ? -1 : 1) * 110);
+                    const dirY = isPlayerAttacking ? -(300 + idx * 45) : (300 + idx * 45);
+                    const rotOut = (idx % 2 === 0 ? 1 : -1) * (460 + idx * 90);
+
+                    return victimClone.animate([
+                        { transform: 'translate(0px, 0px) scale(1.08) rotate(0deg)', opacity: 1 },
+                        { transform: `translate(${dirX}px, ${dirY}px) scale(0.5) rotate(${rotOut}deg)`, opacity: 0 }
+                    ], {
+                        duration: 320,
+                        delay: idx * 35,
+                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                        fill: 'forwards'
+                    }).finished.then(() => {
+                        victimClone.remove();
+                    });
+                });
+
+                await Promise.all([shatterAnim.finished, ...flyingVictimPromises]);
+                proj.remove();
+            } finally {
+                sourceSlotEl.style.visibility = 'visible';
+                sourceSlotEl.style.opacity = '1';
+            }
+        }
+
+        /* ============================================================================
+           4. 주사위 핍(Pip) 렌더러 (iPadOS Safari WebKit 완벽 호환 구조)
+           ============================================================================ */
+        const PIP_PATTERNS = {
+            1: [4],
+            2: [2, 6],
+            3: [2, 4, 6],
+            4: [0, 2, 6, 8],
+            5: [0, 2, 4, 6, 8],
+            6: [0, 2, 3, 5, 6, 8]
+        };
+
+        function renderDieHTML(dieObj, options = {}) {
+            const {
+                comboCount = 1,
+                sizeClass = 'die-sz-board',
+                owner = 'player',
+                isSmashable = false,
+                isRolling = false,
+                isPop = false,
+                isQuestionMark = false,
+                showLockPin = false,
+                dataAttr = ''
+            } = options;
+
+            if (isQuestionMark || !dieObj || !dieObj.value) {
+                return `
+                    <div class="${sizeClass}" style="border-radius:13px;border:2px dashed rgba(250,204,21,0.55);background:rgba(11,14,20,0.75);display:flex;align-items:center;justify-content:center;color:#fde047;font-weight:900;font-size:24px;flex-shrink:0;">
+                        ?
+                    </div>
+                `;
+            }
+
+            const val = Math.max(1, Math.min(6, Number(dieObj.value) || 1));
+            const isFixed = Boolean(dieObj.fixed);
+            const fixedSide = dieObj.fixedOwner || owner;
+
+            let styleClass = 'die-face';
+            if (comboCount === 3) styleClass += ' die-combo-3';
+            else if (comboCount === 2) styleClass += ' die-combo-2';
+            if (isFixed) {
+                styleClass += fixedSide === 'ai' ? ' die-fixed-ai' : ' die-fixed-player';
+            }
+            if (isRolling) styleClass += ' die-rolling-anim';
+            if (isPop) styleClass += ' anim-pop';
+
+            const pipClass = comboCount === 3
+                ? 'pip-combo3'
+                : owner === 'ai'
+                ? 'pip-ai'
+                : 'pip-player';
+
+            const activeCells = PIP_PATTERNS[val] || [4];
+            let cellsHtml = '';
+            for (let i = 0; i < 9; i++) {
+                if (activeCells.includes(i)) {
+                    cellsHtml += `<div class="pip-cell"><span class="pip-dot ${pipClass}"></span></div>`;
+                } else {
+                    cellsHtml += `<div class="pip-cell"></div>`;
+                }
+            }
+
+            const fixedBadge = (isFixed && showLockPin)
+                ? `<div class="die-lock-pin die-lock-pin-player">🔒</div>`
+                : '';
+
+            return `<div ${dataAttr} class="${styleClass} ${sizeClass}"><div class="pip-grid">${cellsHtml}</div>${fixedBadge}</div>`;
+        }
+
+        /* ============================================================================
+           5. 핵심 게임 상태 및 규칙 로직
+           ============================================================================ */
+        const STATS_KEY = 'tika_tuka_classic_stats_v5';
+
+        const state = {
+            playerBoard: [[], [], []],
+            aiBoard: [[], [], []],
+            phase: 'coin_toss',
+            isAnimating: false,
+            isOpeningTurn: false,
+            currentDie: null,
+            rerollBeforeDie: null,
+            rerollAfterDie: null,
+            aiDisplayDie: null,
+            aiRollingAnim: false,
+            aiFixedRoll: false,
+            rerollsLeft: 1,
+            stats: {
+                wins: 0,
+                losses: 0,
+                streak: 0,
+                maxStreak: 0,
+                smashes: 0
+            }
+        };
+
+        function loadStats() {
+            try {
+                const raw = localStorage.getItem(STATS_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object') {
+                    state.stats.wins = Number(parsed.wins) || 0;
+                    state.stats.losses = Number(parsed.losses) || 0;
+                    state.stats.streak = Number(parsed.streak) || 0;
+                    state.stats.maxStreak = Number(parsed.maxStreak) || 0;
+                    state.stats.smashes = Number(parsed.smashes) || 0;
+                }
+            } catch (e) {}
+        }
+
+        function saveStats() {
+            try {
+                localStorage.setItem(STATS_KEY, JSON.stringify(state.stats));
+            } catch (e) {}
+        }
+
+        function resetStats() {
+            state.stats = { wins: 0, losses: 0, streak: 0, maxStreak: 0, smashes: 0 };
+            saveStats();
+            renderAll();
+            updateStatsModal();
+        }
+
+        function updateStatsModal() {
+            const { wins, losses, streak, maxStreak, smashes } = state.stats;
+            const total = wins + losses;
+            const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('stat-total-games').textContent = `${total}판`;
+            document.getElementById('stat-win-rate').textContent = `${winRate}%`;
+            document.getElementById('stat-wdl').textContent = `${wins}승 ${losses}패`;
+            document.getElementById('stat-streaks').textContent = `${streak}연승 / ${maxStreak}연승`;
+            document.getElementById('stat-total-smashes').textContent = `${smashes}개`;
+        }
+
+        function rollDieValue() {
+            if (window.crypto && window.crypto.getRandomValues) {
+                const arr = new Uint32Array(1);
+                window.crypto.getRandomValues(arr);
+                return (arr[0] % 6) + 1;
+            }
+            return Math.floor(Math.random() * 6) + 1;
+        }
+
+        function getFairCoinFlip() {
+            if (window.crypto && window.crypto.getRandomValues) {
+                const arr = new Uint32Array(1);
+                window.crypto.getRandomValues(arr);
+                return (arr[0] & 1) === 0;
+            }
+            return Math.random() < 0.5;
+        }
+
+        function analyzeColumn(colDice) {
+            const counts = {};
+            colDice.forEach(d => {
+                counts[d.value] = (counts[d.value] || 0) + 1;
+            });
+
+            let totalScore = 0;
+            let maxCount = 1;
+            Object.entries(counts).forEach(([valStr, count]) => {
+                const val = Number(valStr);
+                const effectiveCount = count === 3 ? 5 : count === 2 ? 3 : 1;
+                totalScore += val * effectiveCount;
+                if (count > maxCount) maxCount = count;
+            });
+
+            return { totalScore, counts, maxCount };
+        }
+
+        function isBoardFull(board) {
+            return board.every(col => col.length >= 3);
+        }
+
+        function isAllBoardsFull() {
+            return isBoardFull(state.playerBoard) && isBoardFull(state.aiBoard);
+        }
+
+        function getSmashableTargets(dieVal, isPlayerAttacker = true) {
+            if (!dieVal) return [];
+            const myBoard = isPlayerAttacker ? state.playerBoard : state.aiBoard;
+            const oppBoard = isPlayerAttacker ? state.aiBoard : state.playerBoard;
+            const targets = [];
+
+            for (let c = 0; c < 3; c++) {
+                const hasMyEmptySlot = myBoard[c].length < 3;
+                const hasEnemyBreakable = oppBoard[c].some(d => d.value === dieVal && !d.fixed);
+                if (hasMyEmptySlot && hasEnemyBreakable) {
+                    targets.push(c);
+                }
+            }
+            return targets;
+        }
+
+        function triggerShake() {
+            const el = document.getElementById('board-arena');
+            el.classList.remove('shake-hit');
+            void el.offsetWidth;
+            el.classList.add('shake-hit');
+        }
+
+        function triggerFlash(color = 'rgba(255,255,255,0.35)') {
+            const flash = document.getElementById('flash-overlay');
+            flash.style.backgroundColor = color;
+            flash.style.opacity = '1';
+            setTimeout(() => { flash.style.opacity = '0'; }, 90);
+        }
+
+        /* ============================================================================
+           6. 50:50 코인 토스 & 턴 전환
+           ============================================================================ */
+        async function runPreRoundCoinToss() {
+            const overlay = document.getElementById('cointoss-overlay');
+            const coinEl = document.getElementById('coin-3d-el');
+            const titleEl = document.getElementById('cointoss-title');
+            const subEl = document.getElementById('cointoss-sub');
+
+            const isPlayerFirst = getFairCoinFlip();
+            const endDeg = isPlayerFirst ? 1800 : 1980;
+
+            coinEl.getAnimations().forEach(a => a.cancel());
+            coinEl.style.transform = 'translateY(0px) rotateY(0deg) scale(1)';
+
+            titleEl.textContent = '🪙 운명의 동전을 던집니다...';
+            titleEl.style.color = '#fde047';
+            subEl.textContent = '앞면(👑): 나 선공 · 뒷면(🎭): 상대 선공 (50:50)';
+
+            overlay.classList.remove('hidden');
+            audio.playCoinFlip();
+
+            const anim = coinEl.animate([
+                { transform: 'translateY(0px) rotateY(0deg) scale(0.9)' },
+                { transform: `translateY(-90px) rotateY(${endDeg * 0.5}deg) scale(1.25)` },
+                { transform: `translateY(0px) rotateY(${endDeg}deg) scale(1.0)` }
+            ], {
+                duration: 1100,
+                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                fill: 'forwards'
+            });
+
+            await anim.finished;
+
+            audio.playCoinLand(isPlayerFirst);
+            triggerShake();
+
+            if (isPlayerFirst) {
+                titleEl.textContent = '👑 앞면! 나 선공!';
+                titleEl.style.color = '#6ee7b7';
+                subEl.textContent = '선공 첫 주사위(고정 · 리롤 가능)를 내 진영에 배치하세요!';
+            } else {
+                titleEl.textContent = '🎭 뒷면! 상대 선공!';
+                titleEl.style.color = '#fda4af';
+                subEl.textContent = '상대가 선공 첫 고정 주사위를 굴립니다!';
+            }
+
+            await new Promise(r => setTimeout(r, 820));
+            overlay.classList.add('hidden');
+
+            if (isPlayerFirst) {
+                state.isOpeningTurn = true;
+                state.phase = 'player_wait_roll';
+                renderAll();
+            } else {
+                state.isOpeningTurn = true;
+                state.phase = 'ai_turn';
+                renderAll();
+                runAiTurn();
+            }
+        }
+
+        function advanceTurnAfterAction(justActedSide) {
+            if (isAllBoardsFull()) {
+                state.phase = 'gameover';
+                renderAll();
+                setTimeout(showGameOverModal, 420);
+                return;
+            }
+
+            if (justActedSide === 'player') {
+                if (isBoardFull(state.aiBoard)) {
+                    state.phase = 'player_wait_roll';
+                    state.currentDie = null;
+                    renderAll();
+                    return;
+                }
+                state.phase = 'ai_turn';
+                state.currentDie = null;
+                renderAll();
+                runAiTurn();
+            } else {
+                if (isBoardFull(state.playerBoard)) {
+                    state.phase = 'ai_turn';
+                    renderAll();
+                    runAiTurn();
+                    return;
+                }
+                state.phase = 'player_wait_roll';
+                state.currentDie = null;
+                state.aiDisplayDie = null;
+                state.aiFixedRoll = false;
+                renderAll();
+            }
+        }
+
+        /* ============================================================================
+           7. 플레이어 굴리기 · 리롤(물리 굴림 애니메이션 포함) · 배치 · 알까기
+           ============================================================================ */
+        function animateDieRoll({ durationMs = 550, tickIntervalMs = 50, isFixedStyle = false }) {
+            return new Promise((resolve) => {
+                let elapsed = 0;
+                let ticks = 0;
+
+                state.currentDie = rollDieValue();
+                audio.playRollTick(ticks);
+                renderTrayOnly(true, isFixedStyle);
+
+                const timer = setInterval(() => {
+                    elapsed += tickIntervalMs;
+                    ticks++;
+                    state.currentDie = rollDieValue();
+                    audio.playRollTick(ticks);
+                    renderTrayOnly(true, isFixedStyle);
+
+                    if (elapsed >= durationMs) {
+                        clearInterval(timer);
+                        const finalVal = rollDieValue();
+                        state.currentDie = finalVal;
+                        audio.playRollStop(isFixedStyle);
+                        renderTrayOnly(false, isFixedStyle);
+                        resolve(finalVal);
+                    }
+                }, tickIntervalMs);
+            });
+        }
+
+        async function handlePlayerRoll(isBonus = false) {
+            const expectedPhase = isBonus ? 'player_bonus_wait_roll' : 'player_wait_roll';
+            if (state.phase !== expectedPhase || state.isAnimating) return;
+
+            const isFixedRoll = isBonus || state.isOpeningTurn;
+            state.isAnimating = true;
+            state.phase = isBonus ? 'player_bonus_rolling' : 'player_rolling';
+            audio.init();
+            renderAll();
+
+            await animateDieRoll({
+                durationMs: 520,
+                tickIntervalMs: 50,
+                isFixedStyle: isFixedRoll
+            });
+
+            state.isAnimating = false;
+            state.phase = isBonus ? 'player_bonus_place' : 'player_place';
+            renderAll();
+        }
+
+        async function handlePlayerReroll() {
+            if (state.phase !== 'player_place' || state.rerollsLeft <= 0 || state.isAnimating) return;
+
+            const savedBeforeDie = state.currentDie;
+            const isFixedOpening = state.isOpeningTurn;
+
+            state.rerollsLeft--;
+            state.rerollBeforeDie = savedBeforeDie;
+            state.isAnimating = true;
+            state.phase = 'player_rerolling';
+            audio.init();
+            renderAll();
+
+            const newRolledDie = await animateDieRoll({
+                durationMs: 560,
+                tickIntervalMs: 50,
+                isFixedStyle: isFixedOpening
+            });
+
+            state.rerollAfterDie = newRolledDie;
+            state.currentDie = newRolledDie;
+            state.isAnimating = false;
+            state.phase = 'player_reroll_choose';
+            renderAll();
+        }
+
+        function handlePickRerollOption(chooseAfter) {
+            if (state.phase !== 'player_reroll_choose' || state.isAnimating) return;
+            state.currentDie = chooseAfter ? state.rerollAfterDie : state.rerollBeforeDie;
+            state.rerollBeforeDie = null;
+            state.rerollAfterDie = null;
+            state.phase = 'player_place';
+            audio.playPlace(1, state.isOpeningTurn);
+            renderAll();
+        }
+
+        async function handleBoardColumnClick(side, colIdx) {
+            if (state.isAnimating) return;
+
+            // 1) 정규 턴 배치 / 알까기
+            if (state.phase === 'player_place') {
+                const dieVal = state.currentDie;
+                if (!dieVal) return;
+
+                // 선공 첫 턴 고정 주사위는 자신의 진영 빈 칸에만 배치 가능
+                if (state.isOpeningTurn) {
+                    if (side !== 'player') return;
+                    if (state.playerBoard[colIdx].length >= 3) return;
+
+                    state.playerBoard[colIdx].push({ value: dieVal, fixed: true, fixedOwner: 'player' });
+                    state.isOpeningTurn = false;
+                    const evalAfter = analyzeColumn(state.playerBoard[colIdx]);
+                    audio.playPlace(evalAfter.maxCount, true);
+                    triggerFlash('rgba(16, 185, 129, 0.28)');
+
+                    const targetLane = document.querySelector(`[data-player-lane="${colIdx}"]`);
+                    if (targetLane) {
+                        const rect = targetLane.getBoundingClientRect();
+                        spawnFxParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, ['#10b981', '#6ee7b7', '#ffffff'], 24, 7);
+                    }
+
+                    renderAll(colIdx, 'player');
+                    advanceTurnAfterAction('player');
+                    return;
+                }
+
+                // 일반 턴: 알까기 대상 열이면 내 진영/상대 진영 어느 쪽을 눌러도 발동
+                const smashableCols = getSmashableTargets(dieVal, true);
+                if (smashableCols.includes(colIdx)) {
+                    await executePlayerAlkkagiSmash(colIdx, dieVal);
+                    return;
+                }
+
+                // 일반 배치 (내 진영만)
+                if (side !== 'player') return;
+                if (state.playerBoard[colIdx].length >= 3) return;
+
+                state.playerBoard[colIdx].push({ value: dieVal, fixed: false });
+                const evalAfter = analyzeColumn(state.playerBoard[colIdx]);
+                audio.playPlace(evalAfter.maxCount, false);
+
+                if (evalAfter.maxCount >= 2) {
+                    const targetLane = document.querySelector(`[data-player-lane="${colIdx}"]`);
+                    if (targetLane) {
+                        const rect = targetLane.getBoundingClientRect();
+                        spawnFxParticles(
+                            rect.left + rect.width / 2,
+                            rect.top + rect.height / 2,
+                            evalAfter.maxCount === 3 ? ['#fb7185', '#fde047', '#ffffff'] : ['#fde047', '#f59e0b'],
+                            evalAfter.maxCount === 3 ? 34 : 18,
+                            8
+                        );
+                    }
+                }
+
+                renderAll(colIdx, 'player');
+                advanceTurnAfterAction('player');
+                return;
+            }
+
+            // 2) 알까기 보너스 고정 주사위 배치 (내 진영 또는 상대 진영 빈 칸 모두 가능)
+            if (state.phase === 'player_bonus_place') {
+                const dieVal = state.currentDie;
+                if (!dieVal) return;
+
+                const targetBoard = side === 'player' ? state.playerBoard : state.aiBoard;
+                if (targetBoard[colIdx].length >= 3) return;
+
+                targetBoard[colIdx].push({ value: dieVal, fixed: true, fixedOwner: 'player' });
+                const evalAfter = analyzeColumn(targetBoard[colIdx]);
+                audio.playPlace(evalAfter.maxCount, true);
+                triggerFlash('rgba(16, 185, 129, 0.28)');
+
+                const laneSelector = side === 'player' ? `[data-player-lane="${colIdx}"]` : `[data-ai-lane="${colIdx}"]`;
+                const targetLane = document.querySelector(laneSelector);
+                if (targetLane) {
+                    const rect = targetLane.getBoundingClientRect();
+                    spawnFxParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, ['#10b981', '#6ee7b7', '#ffffff'], 26, 7);
+                }
+
+                renderAll(colIdx, side);
+                advanceTurnAfterAction('player');
+            }
+        }
+
+        async function executePlayerAlkkagiSmash(colIdx, dieVal) {
+            state.isAnimating = true;
+            state.phase = 'player_animating';
+            renderAll();
+
+            const sourceSlotEl = document.getElementById('player-die-slot');
+            const aiLaneEl = document.querySelector(`[data-ai-lane="${colIdx}"]`);
+            const targetDiceElements = aiLaneEl
+                ? Array.from(aiLaneEl.querySelectorAll(`[data-die-val="${dieVal}"][data-die-fixed="0"]`))
+                : [];
+            const targetLaneRect = aiLaneEl
+                ? aiLaneEl.getBoundingClientRect()
+                : { left: window.innerWidth / 2, top: window.innerHeight * 0.25, width: 60, height: 60 };
+
+            await playAlkkagiFlightAnimation({
+                dieValue: dieVal,
+                sourceSlotEl,
+                targetDiceElements,
+                targetLaneRect,
+                isPlayerAttacking: true
+            });
+
+            const beforeLen = state.aiBoard[colIdx].length;
+            state.aiBoard[colIdx] = state.aiBoard[colIdx].filter(d => !(d.value === dieVal && !d.fixed));
+            const destroyedCount = beforeLen - state.aiBoard[colIdx].length;
+
+            if (destroyedCount > 0) {
+                state.stats.smashes += destroyedCount;
+                saveStats();
+            }
+
+            state.isAnimating = false;
+            state.currentDie = null;
+            state.phase = 'player_bonus_wait_roll';
+            renderAll();
+        }
+
+        /* ============================================================================
+           8. 상대 AI 턴 로직
+           ============================================================================ */
+        async function runAiTurn() {
+            const difficulty = document.getElementById('ai-difficulty').value;
+            const isOpening = state.isOpeningTurn;
+
+            if (isBoardFull(state.aiBoard)) {
+                advanceTurnAfterAction('ai');
+                return;
+            }
+
+            state.aiFixedRoll = isOpening;
+            state.aiDisplayDie = null;
+            state.aiRollingAnim = false;
+            renderAll();
+            await new Promise(r => setTimeout(r, 520));
+
+            state.aiRollingAnim = true;
+            for (let t = 0; t < 8; t++) {
+                state.aiDisplayDie = rollDieValue();
+                audio.playRollTick(t);
+                renderAll();
+                await new Promise(r => setTimeout(r, 55));
+            }
+            state.aiRollingAnim = false;
+            let chosenVal = rollDieValue();
+            state.aiDisplayDie = chosenVal;
+            audio.playRollStop(isOpening);
+            renderAll();
+
+            if (!isOpening && difficulty === 'tazza') {
+                const canSmashNow = getSmashableTargets(chosenVal, false).length > 0;
+                const hasMatchNow = state.aiBoard.some(col => col.length < 3 && col.some(d => d.value === chosenVal));
+                if (!canSmashNow && !hasMatchNow && chosenVal <= 2 && Math.random() < 0.65) {
+                    await new Promise(r => setTimeout(r, 420));
+                    state.aiRollingAnim = true;
+                    for (let t = 0; t < 8; t++) {
+                        state.aiDisplayDie = rollDieValue();
+                        audio.playRollTick(t);
+                        renderAll();
+                        await new Promise(r => setTimeout(r, 55));
+                    }
+                    state.aiRollingAnim = false;
+                    chosenVal = rollDieValue();
+                    state.aiDisplayDie = chosenVal;
+                    audio.playRollStop(false);
+                    renderAll();
+                }
+            }
+
+            await new Promise(r => setTimeout(r, 560));
+
+            if (isOpening) {
+                const colIdx = chooseAiOwnColumn(chosenVal, difficulty, false);
+                state.aiBoard[colIdx].push({ value: chosenVal, fixed: true, fixedOwner: 'ai' });
+                state.isOpeningTurn = false;
+                const evalAfter = analyzeColumn(state.aiBoard[colIdx]);
+                audio.playPlace(evalAfter.maxCount, true);
+                triggerFlash('rgba(239, 68, 68, 0.24)');
+                state.aiDisplayDie = null;
+                state.aiFixedRoll = false;
+                renderAll(colIdx, 'ai');
+                await new Promise(r => setTimeout(r, 320));
+                advanceTurnAfterAction('ai');
+                return;
+            }
+
+            const smashCols = getSmashableTargets(chosenVal, false);
+            if (smashCols.length > 0) {
+                let targetCol = smashCols[0];
+                let maxDestroyed = -1;
+                smashCols.forEach(c => {
+                    const cnt = state.playerBoard[c].filter(d => d.value === chosenVal && !d.fixed).length;
+                    if (cnt > maxDestroyed) {
+                        maxDestroyed = cnt;
+                        targetCol = c;
+                    }
+                });
+
+                const sourceSlotEl = document.getElementById('ai-mini-die-box');
+                const playerLaneEl = document.querySelector(`[data-player-lane="${targetCol}"]`);
+                const targetDiceElements = playerLaneEl
+                    ? Array.from(playerLaneEl.querySelectorAll(`[data-die-val="${chosenVal}"][data-die-fixed="0"]`))
+                    : [];
+                const targetLaneRect = playerLaneEl
+                    ? playerLaneEl.getBoundingClientRect()
+                    : { left: window.innerWidth / 2, top: window.innerHeight * 0.65, width: 60, height: 60 };
+
+                await playAlkkagiFlightAnimation({
+                    dieValue: chosenVal,
+                    sourceSlotEl,
+                    targetDiceElements,
+                    targetLaneRect,
+                    isPlayerAttacking: false
+                });
+
+                state.playerBoard[targetCol] = state.playerBoard[targetCol].filter(d => !(d.value === chosenVal && !d.fixed));
+                state.aiDisplayDie = null;
+                renderAll();
+
+                await new Promise(r => setTimeout(r, 420));
+                state.aiFixedRoll = true;
+                state.aiRollingAnim = true;
+                for (let t = 0; t < 7; t++) {
+                    state.aiDisplayDie = rollDieValue();
+                    audio.playRollTick(t);
+                    renderAll();
+                    await new Promise(r => setTimeout(r, 55));
+                }
+                state.aiRollingAnim = false;
+                const bonusVal = rollDieValue();
+                state.aiDisplayDie = bonusVal;
+                audio.playRollStop(true);
+                renderAll();
+                await new Promise(r => setTimeout(r, 540));
+
+                const aiAvail = [0, 1, 2].filter(c => state.aiBoard[c].length < 3);
+                const playerAvail = [0, 1, 2].filter(c => state.playerBoard[c].length < 3);
+
+                if (bonusVal <= 3 && playerAvail.length > 0) {
+                    let bestPCol = playerAvail[0];
+                    let highestPScore = -1;
+                    playerAvail.forEach(c => {
+                        const s = analyzeColumn(state.playerBoard[c]).totalScore;
+                        if (s > highestPScore) {
+                            highestPScore = s;
+                            bestPCol = c;
+                        }
+                    });
+                    state.playerBoard[bestPCol].push({ value: bonusVal, fixed: true, fixedOwner: 'ai' });
+                    audio.playPlace(1, true);
+                    triggerFlash('rgba(239, 68, 68, 0.28)');
+                    state.aiDisplayDie = null;
+                    state.aiFixedRoll = false;
+                    renderAll(bestPCol, 'player');
+                } else if (aiAvail.length > 0) {
+                    const bestACol = chooseAiOwnColumn(bonusVal, difficulty, false);
+                    state.aiBoard[bestACol].push({ value: bonusVal, fixed: true, fixedOwner: 'ai' });
+                    const evalAfter = analyzeColumn(state.aiBoard[bestACol]);
+                    audio.playPlace(evalAfter.maxCount, true);
+                    triggerFlash('rgba(239, 68, 68, 0.28)');
+                    state.aiDisplayDie = null;
+                    state.aiFixedRoll = false;
+                    renderAll(bestACol, 'ai');
+                } else if (playerAvail.length > 0) {
+                    const pCol = playerAvail[0];
+                    state.playerBoard[pCol].push({ value: bonusVal, fixed: true, fixedOwner: 'ai' });
+                    audio.playPlace(1, true);
+                    state.aiDisplayDie = null;
+                    state.aiFixedRoll = false;
+                    renderAll(pCol, 'player');
+                }
+
+                await new Promise(r => setTimeout(r, 320));
+                advanceTurnAfterAction('ai');
+                return;
+            }
+
+            const chosenCol = chooseAiOwnColumn(chosenVal, difficulty, false);
+            state.aiBoard[chosenCol].push({ value: chosenVal, fixed: false });
+            const evalAfter = analyzeColumn(state.aiBoard[chosenCol]);
+            audio.playPlace(evalAfter.maxCount, false);
+            state.aiDisplayDie = null;
+            state.aiFixedRoll = false;
+            renderAll(chosenCol, 'ai');
+            await new Promise(r => setTimeout(r, 320));
+            advanceTurnAfterAction('ai');
+        }
+
+        function chooseAiOwnColumn(dieVal, difficulty, isFixed) {
+            const available = [0, 1, 2].filter(c => state.aiBoard[c].length < 3);
+            if (available.length === 0) return 0;
+            if (available.length === 1) return available[0];
+
+            if (difficulty === 'normal' && Math.random() < 0.25) {
+                return available[Math.floor(Math.random() * available.length)];
+            }
+
+            let bestCol = available[0];
+            let bestScore = -9999;
+
+            available.forEach(c => {
+                const beforeScore = analyzeColumn(state.aiBoard[c]).totalScore;
+                const simCol = [...state.aiBoard[c], { value: dieVal, fixed: isFixed }];
+                const afterScore = analyzeColumn(simCol).totalScore;
+                let score = (afterScore - beforeScore) * 10;
+
+                const playerColScore = analyzeColumn(state.playerBoard[c]).totalScore;
+                if (beforeScore <= playerColScore && afterScore > playerColScore) {
+                    score += 18;
+                }
+                if (simCol.length === 3 && afterScore < 10) {
+                    score -= 10;
+                }
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestCol = c;
+                }
+            });
+
+            return bestCol;
+        }
+
+        /* ============================================================================
+           9. UI 전체 렌더링
+           ============================================================================ */
+        function renderTrayOnly(isRollingAnim = false, isFixedStyle = false) {
+            const slotEl = document.getElementById('player-die-slot');
+            if (!slotEl) return;
+            slotEl.style.visibility = 'visible';
+            slotEl.style.opacity = '1';
+            slotEl.classList.remove('hidden');
+
+            slotEl.innerHTML = renderDieHTML(
+                { value: state.currentDie, fixed: isFixedStyle, fixedOwner: 'player' },
+                {
+                    sizeClass: 'die-sz-tray',
+                    owner: 'player',
+                    isRolling: isRollingAnim,
+                    isQuestionMark: !state.currentDie,
+                    showLockPin: true
+                }
+            );
+        }
+
+        function renderAll(popColIdx = -1, popSide = '') {
+            const streakEl = document.getElementById('streak-badge');
+            streakEl.textContent = `🔥 ${state.stats.streak}연승 중`;
+            streakEl.className = state.stats.streak > 0 ? 'streak-badge streak-badge-hot' : 'streak-badge';
+
+            let playerWins = 0;
+            let aiWins = 0;
+            let playerTotal = 0;
+            let aiTotal = 0;
+
+            const colEvals = [0, 1, 2].map(idx => {
+                const pEval = analyzeColumn(state.playerBoard[idx]);
+                const aEval = analyzeColumn(state.aiBoard[idx]);
+                playerTotal += pEval.totalScore;
+                aiTotal += aEval.totalScore;
+                if (pEval.totalScore > aEval.totalScore) playerWins++;
+                else if (aEval.totalScore > pEval.totalScore) aiWins++;
+                return { pEval, aEval };
+            });
+
+            document.getElementById('score-player-lines').textContent = playerWins;
+            document.getElementById('score-ai-lines').textContent = aiWins;
+            document.getElementById('score-player-total').textContent = playerTotal;
+            document.getElementById('score-ai-total').textContent = aiTotal;
+
+            const isAiTurn = state.phase === 'ai_turn';
+            document.getElementById('ai-turn-badge').classList.toggle('hidden', !isAiTurn);
+            document.getElementById('player-turn-badge').classList.toggle('hidden', isAiTurn || state.phase === 'coin_toss' || state.phase === 'gameover');
+
+            const aiStatusEl = document.getElementById('ai-turn-status');
+            const aiMiniBox = document.getElementById('ai-mini-die-box');
+            if (isAiTurn) {
+                aiStatusEl.textContent = state.aiFixedRoll ? '고정 주사위 굴림' : '주사위 굴리는 중...';
+                aiMiniBox.innerHTML = state.aiDisplayDie
+                    ? renderDieHTML(
+                        { value: state.aiDisplayDie, fixed: state.aiFixedRoll, fixedOwner: 'ai' },
+                        { sizeClass: 'die-sz-mini', owner: 'ai', isRolling: state.aiRollingAnim, showLockPin: false }
+                    )
+                    : '';
+            } else {
+                aiStatusEl.textContent = '대기 중';
+                aiMiniBox.innerHTML = '';
+            }
+
+            const isNormalPlace = state.phase === 'player_place' && !state.isAnimating;
+            const isFixedPlace = state.phase === 'player_bonus_place' && !state.isAnimating;
+            const smashableCols = (isNormalPlace && !state.isOpeningTurn)
+                ? getSmashableTargets(state.currentDie, true)
+                : [];
+
+            // 중앙 VS 비교 바: 내점수(초록) - 화살표 - 상대점수(빨강)
+            const vsGrid = document.getElementById('vs-divider-grid');
+            vsGrid.innerHTML = [0, 1, 2].map(idx => {
+                const { pEval, aEval } = colEvals[idx];
+                let statusHtml = `<span class="vs-arrow-tie">=</span>`;
+                if (pEval.totalScore > aEval.totalScore) {
+                    statusHtml = `<span class="vs-arrow-down" title="나 우위">▼</span>`;
+                } else if (aEval.totalScore > pEval.totalScore) {
+                    statusHtml = `<span class="vs-arrow-up" title="상대 우위">▲</span>`;
+                }
+                return `
+                    <div class="vs-lane-pill">
+                        <span class="vs-score-player">${pEval.totalScore}</span>
+                        ${statusHtml}
+                        <span class="vs-score-ai">${aEval.totalScore}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // 상대 3열 보드 렌더링
+            const aiGrid = document.getElementById('ai-columns-grid');
+            aiGrid.innerHTML = [0, 1, 2].map(colIdx => {
+                const dice = state.aiBoard[colIdx];
+                const { aEval } = colEvals[colIdx];
+                const isFull = dice.length >= 3;
+                const isSmashTarget = isNormalPlace && !state.isOpeningTurn && smashableCols.includes(colIdx);
+                const canInjectFixed = isFixedPlace && !isFull;
+
+                let cardClass = 'lane-card';
+                if (isSmashTarget) cardClass += ' lane-smash-target';
+                else if (canInjectFixed) cardClass += ' lane-fixed-enemy';
+
+                let bonusTag = '';
+                if (aEval.maxCount === 3) bonusTag = `<span class="bonus-tag bonus-tag-3">+2개 보너스</span>`;
+                else if (aEval.maxCount === 2) bonusTag = `<span class="bonus-tag bonus-tag-2">+1개 보너스</span>`;
+
+                const floatingBadge = isSmashTarget
+                    ? `<div class="smash-floating-badge">💥 알까기 발사!</div>`
+                    : canInjectFixed
+                    ? `<div class="inject-floating-badge">방해 투척 가능</div>`
+                    : '';
+
+                let slotsHtml = '';
+                for (let s = 2; s >= 0; s--) {
+                    if (s < dice.length) {
+                        const d = dice[s];
+                        const comboCnt = aEval.counts[d.value] || 1;
+                        const isDieSmashable = isSmashTarget && d.value === state.currentDie && !d.fixed;
+                        const isPop = popSide === 'ai' && popColIdx === colIdx && s === dice.length - 1;
+                        slotsHtml += renderDieHTML(d, {
+                            comboCount: comboCnt,
+                            sizeClass: 'die-sz-board',
+                            owner: 'ai',
+                            isSmashable: isDieSmashable,
+                            isPop,
+                            showLockPin: false,
+                            dataAttr: `data-die-val="${d.value}" data-die-fixed="${d.fixed ? '1' : '0'}"`
+                        });
+                    } else {
+                        const isNextLanding = (s === dice.length) && canInjectFixed;
+                        const ghostHtml = isNextLanding && state.currentDie
+                            ? `<div class="slot-ghost-preview">${renderDieHTML({ value: state.currentDie, fixed: true, fixedOwner: 'player' }, { sizeClass: 'die-sz-full', owner: 'player', showLockPin: false })}</div>`
+                            : '';
+                        slotsHtml += `
+                            <div class="empty-slot ${canInjectFixed ? 'empty-slot-fixed' : ''} ${isNextLanding ? 'empty-slot-landing' : ''}">
+                                <span class="slot-default-marker">${canInjectFixed ? '+' : '·'}</span>
+                                ${ghostHtml}
+                            </div>
+                        `;
+                    }
+                }
+
+                return `
+                    <div data-ai-lane="${colIdx}" class="${cardClass}" onclick="handleBoardColumnClick('ai', ${colIdx})">
+                        ${floatingBadge}
+                        <div class="lane-bonus-bar">${bonusTag}</div>
+                        <div class="lane-slots-stack">${slotsHtml}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // 플레이어 3열 보드 렌더링
+            const playerGrid = document.getElementById('player-columns-grid');
+            playerGrid.innerHTML = [0, 1, 2].map(colIdx => {
+                const dice = state.playerBoard[colIdx];
+                const { pEval } = colEvals[colIdx];
+                const isFull = dice.length >= 3;
+                const isSmashTarget = isNormalPlace && !state.isOpeningTurn && smashableCols.includes(colIdx);
+                const canPlaceNormal = isNormalPlace && !isFull && !isSmashTarget;
+                const canPlaceFixed = isFixedPlace && !isFull;
+                const canLandHere = canPlaceNormal || canPlaceFixed;
+
+                let cardClass = 'lane-card';
+                if (isSmashTarget) cardClass += ' lane-smash-target';
+                else if (canPlaceFixed || (canPlaceNormal && state.isOpeningTurn)) cardClass += ' lane-fixed-ally';
+                else if (canPlaceNormal) cardClass += ' lane-selectable';
+                else if ((isNormalPlace || isFixedPlace) && isFull) cardClass += ' lane-full-dim';
+
+                let bonusTag = '';
+                if (pEval.maxCount === 3) bonusTag = `<span class="bonus-tag bonus-tag-3">+2개 보너스</span>`;
+                else if (pEval.maxCount === 2) bonusTag = `<span class="bonus-tag bonus-tag-2">+1개 보너스</span>`;
+
+                const floatingBadge = isSmashTarget
+                    ? `<div class="smash-floating-badge">💥 알까기 발사!</div>`
+                    : '';
+
+                let slotsHtml = '';
+                for (let s = 0; s < 3; s++) {
+                    if (s < dice.length) {
+                        const d = dice[s];
+                        const comboCnt = pEval.counts[d.value] || 1;
+                        const isPop = popSide === 'player' && popColIdx === colIdx && s === dice.length - 1;
+                        slotsHtml += renderDieHTML(d, {
+                            comboCount: comboCnt,
+                            sizeClass: 'die-sz-board',
+                            owner: 'player',
+                            isPop,
+                            showLockPin: false
+                        });
+                    } else {
+                        const isNextSlot = s === dice.length;
+                        const isFixedPlacement = canPlaceFixed || (canPlaceNormal && state.isOpeningTurn);
+                        const activeCls = isNextSlot && isFixedPlacement
+                            ? 'empty-slot-fixed'
+                            : isNextSlot && canPlaceNormal
+                            ? 'empty-slot-active'
+                            : '';
+                        const isLandingSlot = isNextSlot && canLandHere;
+                        const ghostHtml = isLandingSlot && state.currentDie
+                            ? `<div class="slot-ghost-preview">${renderDieHTML({ value: state.currentDie, fixed: isFixedPlacement, fixedOwner: 'player' }, { sizeClass: 'die-sz-full', owner: 'player', showLockPin: false })}</div>`
+                            : '';
+                        slotsHtml += `
+                            <div class="empty-slot ${activeCls} ${isLandingSlot ? 'empty-slot-landing' : ''}">
+                                <span class="slot-default-marker">${isLandingSlot ? '+' : '·'}</span>
+                                ${ghostHtml}
+                            </div>
+                        `;
+                    }
+                }
+
+                return `
+                    <div data-player-lane="${colIdx}" class="${cardClass}" onclick="handleBoardColumnClick('player', ${colIdx})">
+                        ${floatingBadge}
+                        <div class="lane-slots-stack">${slotsHtml}</div>
+                        <div class="lane-bonus-bar">${bonusTag}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // 하단 / 우측 액션 트레이 렌더링
+            const slotEl = document.getElementById('player-die-slot');
+            const rerollChoiceBox = document.getElementById('reroll-choice-box');
+            const trayTitle = document.getElementById('tray-title');
+            const trayDesc = document.getElementById('tray-desc');
+            const btnRoll = document.getElementById('btn-roll');
+            const btnReroll = document.getElementById('btn-reroll');
+
+            document.getElementById('reroll-count-text').textContent = `${state.rerollsLeft}/1`;
+
+            if (state.phase === 'player_reroll_choose') {
+                slotEl.classList.add('hidden');
+                rerollChoiceBox.classList.remove('hidden');
+
+                const isFixedOpening = state.isOpeningTurn;
+                document.getElementById('reroll-before-die').innerHTML = renderDieHTML(
+                    { value: state.rerollBeforeDie, fixed: isFixedOpening, fixedOwner: 'player' },
+                    { sizeClass: 'die-sz-reroll', owner: 'player', showLockPin: false }
+                );
+                document.getElementById('reroll-after-die').innerHTML = renderDieHTML(
+                    { value: state.rerollAfterDie, fixed: isFixedOpening, fixedOwner: 'player' },
+                    { sizeClass: 'die-sz-reroll', owner: 'player', showLockPin: false }
+                );
+            } else {
+                rerollChoiceBox.classList.add('hidden');
+                const isFixedDieNow = isFixedPlace ||
+                    state.phase === 'player_bonus_wait_roll' ||
+                    state.phase === 'player_bonus_rolling' ||
+                    (state.isOpeningTurn && (
+                        state.phase === 'player_wait_roll' ||
+                        state.phase === 'player_rolling' ||
+                        state.phase === 'player_rerolling' ||
+                        state.phase === 'player_place'
+                    ));
+                const isRollingNow =
+                    state.phase === 'player_rolling' ||
+                    state.phase === 'player_bonus_rolling' ||
+                    state.phase === 'player_rerolling';
+                renderTrayOnly(isRollingNow, isFixedDieNow);
+            }
+
+            if (state.phase === 'coin_toss') {
+                trayTitle.textContent = '🪙 코인 토스 진행 중';
+                trayDesc.textContent = '선공과 후공을 결정하고 있습니다.';
+                btnRoll.disabled = true;
+                btnRoll.className = 'btn-roll-main';
+                btnRoll.textContent = '🎲 주사위 굴리기 (Space)';
+                btnReroll.disabled = true;
+            } else if (state.phase === 'player_wait_roll') {
+                if (state.isOpeningTurn) {
+                    trayTitle.textContent = '선공 첫 고정 주사위 차례!';
+                    trayDesc.textContent = '선공 첫 주사위는 고정 주사위(내 진영 배치 전용 · 리롤 가능)입니다.';
+                    btnRoll.disabled = false;
+                    btnRoll.className = 'btn-roll-main btn-roll-fixed';
+                    btnRoll.textContent = '🎲 선공 주사위 굴리기 (Space)';
+                } else {
+                    trayTitle.textContent = '내 차례입니다!';
+                    trayDesc.textContent = '[🎲 주사위 굴리기] 버튼이나 Spacebar를 눌러 굴리세요.';
+                    btnRoll.disabled = false;
+                    btnRoll.className = 'btn-roll-main';
+                    btnRoll.textContent = '🎲 주사위 굴리기 (Space)';
+                }
+                btnReroll.disabled = true;
+            } else if (state.phase === 'player_rolling' || state.phase === 'player_bonus_rolling') {
+                trayTitle.textContent = '🎲 주사위가 구르는 중...';
+                trayDesc.textContent = '잠시만 기다려주세요!';
+                btnRoll.disabled = true;
+                btnReroll.disabled = true;
+            } else if (state.phase === 'player_rerolling') {
+                trayTitle.textContent = '🃏 타짜의 손놀림으로 다시 굴리는 중...';
+                trayDesc.textContent = '새로운 운명의 주사위가 회전하고 있습니다!';
+                btnRoll.disabled = true;
+                btnReroll.disabled = true;
+            } else if (state.phase === 'player_reroll_choose') {
+                trayTitle.textContent = '🃏 타짜의 손놀림 발동!';
+                trayDesc.textContent = '[리롤 전]과 [리롤 후] 중 사용할 주사위를 클릭해 선택하세요.';
+                btnRoll.disabled = true;
+                btnReroll.disabled = true;
+            } else if (isNormalPlace && state.isOpeningTurn) {
+                trayTitle.textContent = '선공 첫 고정 주사위 배치';
+                trayDesc.textContent = '내 진영의 빈 열을 클릭해 배치하거나 리롤할 수 있습니다.';
+                btnRoll.disabled = true;
+                btnRoll.className = 'btn-roll-main btn-roll-fixed';
+                btnReroll.disabled = state.rerollsLeft <= 0 || state.isAnimating;
+            } else if (isNormalPlace) {
+                if (smashableCols.length > 0) {
+                    trayTitle.textContent = '💥 알까기 가능!';
+                    trayDesc.textContent = '강조된 내 열이나 상대 열을 클릭하면 주사위가 직접 날아가 파괴합니다!';
+                } else {
+                    trayTitle.textContent = '주사위 배치';
+                    trayDesc.textContent = '내 진영에서 주사위를 배치할 열을 클릭하세요.';
+                }
+                btnRoll.disabled = true;
+                btnRoll.className = 'btn-roll-main';
+                btnReroll.disabled = state.rerollsLeft <= 0 || state.isAnimating;
+            } else if (state.phase === 'player_bonus_wait_roll') {
+                trayTitle.textContent = '보너스 고정 주사위 차례!';
+                trayDesc.textContent = '알까기 성공 보상! 고정 주사위(양진영 배치 가능 · 리롤 불가)를 굴리세요.';
+                btnRoll.disabled = false;
+                btnRoll.className = 'btn-roll-main btn-roll-fixed';
+                btnRoll.textContent = '🎲 고정 주사위 굴리기 (Space)';
+                btnReroll.disabled = true;
+            } else if (isFixedPlace) {
+                trayTitle.textContent = '보너스 고정 주사위 배치';
+                trayDesc.textContent = '내 빈 열(방어·보너스) 또는 상대 빈 열(방해 투척)을 클릭하세요.';
+                btnRoll.disabled = true;
+                btnRoll.className = 'btn-roll-main btn-roll-fixed';
+                btnReroll.disabled = true;
+            } else if (state.phase === 'player_animating') {
+                trayTitle.textContent = '💥 알까기 타격 중!';
+                trayDesc.textContent = '주사위가 날아가 상대 주사위를 날려버립니다!';
+                btnRoll.disabled = true;
+                btnReroll.disabled = true;
+            } else if (state.phase === 'ai_turn') {
+                trayTitle.textContent = '🎭 상대 턴 진행 중...';
+                trayDesc.textContent = '상대가 주사위를 굴리고 수를 고민하고 있습니다.';
+                btnRoll.disabled = true;
+                btnRoll.className = 'btn-roll-main';
+                btnRoll.textContent = '🎲 주사위 굴리기 (Space)';
+                btnReroll.disabled = true;
+            } else if (state.phase === 'gameover') {
+                trayTitle.textContent = '🏁 경기 종료!';
+                trayDesc.textContent = '18칸이 모두 채워져 최종 결과를 집계했습니다.';
+                btnRoll.disabled = true;
+                btnReroll.disabled = true;
+            }
+        }
+
+        /* ============================================================================
+           10. 게임 종료 모달 (무승부 시 무조건 나 승리 판정) & 새 게임 시작
+           ============================================================================ */
+        function showGameOverModal() {
+            let playerWins = 0;
+            let aiWins = 0;
+            let playerTotal = 0;
+            let aiTotal = 0;
+
+            const summaryEl = document.getElementById('result-lanes-summary');
+            summaryEl.innerHTML = [0, 1, 2].map(idx => {
+                const pScore = analyzeColumn(state.playerBoard[idx]).totalScore;
+                const aScore = analyzeColumn(state.aiBoard[idx]).totalScore;
+                playerTotal += pScore;
+                aiTotal += aScore;
+                if (pScore > aScore) playerWins++;
+                else if (aScore > pScore) aiWins++;
+
+                let arrow = `<span style="color:#94a3b8;font-weight:900;">=</span>`;
+                if (pScore > aScore) arrow = `<span style="color:#10b981;font-weight:900;">▼</span>`;
+                else if (aScore > pScore) arrow = `<span style="color:#ef4444;font-weight:900;">▲</span>`;
+
+                return `
+                    <div style="display:flex;align-items:center;justify-content:space-between;background:#181f2e;border:1px solid rgba(148,163,184,0.2);border-radius:8px;padding:7px 14px;font-size:13px;">
+                        <span style="font-weight:900;color:#34d399;">나 ${pScore}점</span>
+                        ${arrow}
+                        <span style="font-weight:900;color:#fb7185;">상대 ${aScore}점</span>
+                    </div>
+                `;
+            }).join('');
+
+            let isVictory = false;
+            let isDrawAdvantageWin = false;
+
+            if (playerWins > aiWins) {
+                isVictory = true;
+            } else if (aiWins > playerWins) {
+                isVictory = false;
+            } else if (playerTotal > aiTotal) {
+                isVictory = true;
+            } else if (aiTotal > playerTotal) {
+                isVictory = false;
+            } else {
+                isVictory = true;
+                isDrawAdvantageWin = true;
+            }
+
+            if (isVictory) {
+                state.stats.wins++;
+                state.stats.streak++;
+                if (state.stats.streak > state.stats.maxStreak) state.stats.maxStreak = state.stats.streak;
+                saveStats();
+                audio.playEndGame(true);
+                spawnFxParticles(window.innerWidth / 2, window.innerHeight / 2, ['#fde047', '#10b981', '#38bdf8', '#ffffff'], 65, 11);
+                document.getElementById('result-trophy').textContent = '🏆';
+                document.getElementById('result-title').textContent = isDrawAdvantageWin
+                    ? '승리! (무승부 우세 판정)'
+                    : `승리! (🔥 ${state.stats.streak}연승 중)`;
+                document.getElementById('result-title').style.color = '#fde047';
+                document.getElementById('result-subtitle').textContent = isDrawAdvantageWin
+                    ? `열 점령(${playerWins}:${aiWins})과 총점(${playerTotal}점) 동률로 나 승리!`
+                    : `열 점령 ${playerWins} : ${aiWins} (총점 ${playerTotal}점 vs ${aiTotal}점)`;
+            } else {
+                state.stats.losses++;
+                state.stats.streak = 0;
+                saveStats();
+                audio.playEndGame(false);
+                document.getElementById('result-trophy').textContent = '💀';
+                document.getElementById('result-title').textContent = '패배...';
+                document.getElementById('result-title').style.color = '#fda4af';
+                document.getElementById('result-subtitle').textContent = `열 점령 ${playerWins} : ${aiWins} (총점 ${playerTotal}점 vs ${aiTotal}점)`;
+            }
+
+            renderAll();
+            document.getElementById('gameover-modal').classList.remove('hidden');
+        }
+
+        function startNewGame() {
+            state.playerBoard = [[], [], []];
+            state.aiBoard = [[], [], []];
+            state.phase = 'coin_toss';
+            state.isAnimating = false;
+            state.isOpeningTurn = false;
+            state.currentDie = null;
+            state.rerollBeforeDie = null;
+            state.rerollAfterDie = null;
+            state.aiDisplayDie = null;
+            state.aiRollingAnim = false;
+            state.aiFixedRoll = false;
+            state.rerollsLeft = 1;
+
+            document.getElementById('gameover-modal').classList.add('hidden');
+            renderAll();
+            runPreRoundCoinToss();
+        }
+
+        /* ============================================================================
+           11. 이벤트 바인딩 및 즉시 실행
+           ============================================================================ */
+        function bindEvents() {
+            document.querySelectorAll('.layout-opt-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    applyLayoutMode(btn.dataset.layoutMode);
+                });
+            });
+
+            document.getElementById('btn-roll').addEventListener('click', () => {
+                if (state.isAnimating) return;
+                if (state.phase === 'player_wait_roll') handlePlayerRoll(false);
+                else if (state.phase === 'player_bonus_wait_roll') handlePlayerRoll(true);
+            });
+
+            document.getElementById('btn-reroll').addEventListener('click', handlePlayerReroll);
+            document.getElementById('btn-pick-before').addEventListener('click', () => handlePickRerollOption(false));
+            document.getElementById('btn-pick-after').addEventListener('click', () => handlePickRerollOption(true));
+
+            document.getElementById('btn-new-game').addEventListener('click', () => {
+                audio.init();
+                startNewGame();
+            });
+            document.getElementById('btn-modal-rematch').addEventListener('click', () => {
+                audio.init();
+                startNewGame();
+            });
+
+            document.getElementById('btn-sound').addEventListener('click', () => {
+                audio.enabled = !audio.enabled;
+                if (audio.enabled) audio.init();
+                document.getElementById('btn-sound').textContent = audio.enabled ? '🔊' : '🔇';
+            });
+
+            const rulesModal = document.getElementById('rules-modal');
+            document.getElementById('btn-rules').addEventListener('click', () => rulesModal.classList.remove('hidden'));
+            document.getElementById('btn-close-rules').addEventListener('click', () => rulesModal.classList.add('hidden'));
+            document.getElementById('btn-confirm-rules').addEventListener('click', () => rulesModal.classList.add('hidden'));
+            rulesModal.addEventListener('click', (e) => {
+                if (e.target === rulesModal) rulesModal.classList.add('hidden');
+            });
+
+            const statsModal = document.getElementById('stats-modal');
+            document.getElementById('btn-stats').addEventListener('click', () => {
+                updateStatsModal();
+                statsModal.classList.remove('hidden');
+            });
+            document.getElementById('btn-close-stats').addEventListener('click', () => statsModal.classList.add('hidden'));
+            document.getElementById('btn-confirm-stats').addEventListener('click', () => statsModal.classList.add('hidden'));
+            document.getElementById('btn-reset-stats').addEventListener('click', resetStats);
+            statsModal.addEventListener('click', (e) => {
+                if (e.target === statsModal) statsModal.classList.add('hidden');
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    rulesModal.classList.add('hidden');
+                    statsModal.classList.add('hidden');
+                    return;
+                }
+                if (e.code === 'Space') {
+                    if (state.isAnimating) return;
+                    if (!rulesModal.classList.contains('hidden') || !statsModal.classList.contains('hidden')) return;
+                    if (state.phase === 'player_wait_roll') {
+                        e.preventDefault();
+                        handlePlayerRoll(false);
+                    } else if (state.phase === 'player_bonus_wait_roll') {
+                        e.preventDefault();
+                        handlePlayerRoll(true);
+                    }
+                }
+            });
+        }
+
+        function bootstrap() {
+            applyLayoutMode(detectDefaultLayoutMode());
+            loadStats();
+            bindEvents();
+            startNewGame();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootstrap);
+        } else {
+            bootstrap();
+        }
+    </script>
+</body>
+</html>
