@@ -406,6 +406,50 @@
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
         }
 
+        /* AI 모드 강조 세그먼트 스위치 */
+        .ai-mode-switcher {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1.5px solid rgba(244, 63, 94, 0.55);
+            border-radius: 10px;
+            padding: 2px;
+            gap: 2px;
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.22);
+        }
+
+        .ai-mode-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 3px 9px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.16s ease;
+            white-space: nowrap;
+            -webkit-appearance: none;
+        }
+        .ai-mode-btn:hover {
+            color: #f8fafc;
+        }
+        .ai-mode-btn.active-normal {
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            color: #38bdf8;
+            box-shadow: 0 1px 6px rgba(56, 189, 248, 0.45);
+        }
+        .ai-mode-btn.active-tazza {
+            background: linear-gradient(180deg, #e11d48 0%, #9f1239 100%);
+            color: #fef08a;
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.75);
+        }
+
+        body.layout-phone .ai-mode-btn {
+            padding: 2px 6px;
+            font-size: 10px;
+        }
+
         .ui-btn {
             background: #1e293b;
             border: 1px solid rgba(148, 163, 184, 0.3);
@@ -1125,12 +1169,12 @@
 
                 <!-- 상대 진영 상단 바 -->
                 <div class="faction-bar faction-ai">
-                    <div style="display:flex;align-items:center;gap:6px;">
+                    <div style="display:flex;align-items:center;gap:8px;">
                         <span>🎭 상대</span>
-                        <select id="ai-difficulty" style="background:#0f172a;color:#fda4af;border:1px solid rgba(244,63,94,0.45);border-radius:6px;padding:1px 5px;font-size:10.5px;font-weight:800;outline:none;">
-                            <option value="normal" selected>일반</option>
-                            <option value="tazza">타짜</option>
-                        </select>
+                        <div class="ai-mode-switcher" role="group" aria-label="AI 난이도 전환" title="클릭하여 일반 AI와 타짜 AI를 언제든 전환할 수 있습니다">
+                            <button type="button" id="btn-ai-normal" class="ai-mode-btn active-normal" data-ai-mode="normal">🤖 일반</button>
+                            <button type="button" id="btn-ai-tazza" class="ai-mode-btn" data-ai-mode="tazza">🃏 타짜</button>
+                        </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span id="ai-turn-status" style="font-size:10.5px;color:#fecdd3;">대기 중</span>
@@ -1266,9 +1310,10 @@
                     • 맞은편에 같은 눈이 <b>2~3개 연결</b>되어 있으면 <b>한꺼번에 전부 날아가며</b>, 알까기한 내 주사위도 함께 소멸합니다.</p>
                 </div>
                 <div style="background:#0f172a;padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);">
-                    <div style="font-weight:900;color:#6ee7b7;margin-bottom:2px;">4. 고정 주사위 (초록 테두리: 나 / 빨간 테두리: 상대)</div>
+                    <div style="font-weight:900;color:#6ee7b7;margin-bottom:2px;">4. 고정 주사위 & 리롤 (타짜의 손놀림)</div>
                     <p>• <b>선공 첫 주사위</b>: 코인 토스 승자의 첫 주사위는 고정 주사위이며, <b>자신의 진영 빈 칸에만 배치 가능</b>하고 정규 턴이므로 <b>리롤(1회) 가능</b>합니다.<br>
-                    • <b>알까기 보너스 고정 주사위</b>: 알까기 성공 시 얻는 고정 주사위는 <b>내 빈 칸 또는 상대 빈 칸(방해 투척) 모두 배치 가능</b>하며, 보너스 턴이므로 리롤할 수 없습니다.</p>
+                    • <b>알까기 보너스 고정 주사위</b>: 알까기 성공 시 얻는 고정 주사위는 <b>내 빈 칸 또는 상대 빈 칸(방해 투척) 모두 배치 가능</b>하며, 보너스 턴이므로 리롤할 수 없습니다.<br>
+                    • <b>타짜의 손놀림(리롤)</b>: 게임당 1회 사용 가능하며, 리롤 시 <b>기존과 같은 눈은 나오지 않고</b> 다른 눈이 나옵니다.</p>
                 </div>
             </div>
             <button type="button" id="btn-confirm-rules" class="btn-roll-main" style="width:100%;margin-top:12px;padding:9px;">확인</button>
@@ -1803,6 +1848,8 @@
             phase: 'coin_toss',
             isAnimating: false,
             isOpeningTurn: false,
+            aiMode: 'normal',
+            aiRerollUsed: false,
             currentDie: null,
             rerollBeforeDie: null,
             rerollAfterDie: null,
@@ -1859,7 +1906,18 @@
             document.getElementById('stat-total-smashes').textContent = `${smashes}개`;
         }
 
-        function rollDieValue() {
+        function rollDieValue(excludeVal = null) {
+            const validEx = Number(excludeVal);
+            if (validEx >= 1 && validEx <= 6) {
+                const candidates = [1, 2, 3, 4, 5, 6].filter(v => v !== validEx);
+                if (window.crypto && window.crypto.getRandomValues) {
+                    const arr = new Uint32Array(1);
+                    window.crypto.getRandomValues(arr);
+                    return candidates[arr[0] % candidates.length];
+                }
+                return candidates[Math.floor(Math.random() * candidates.length)];
+            }
+
             if (window.crypto && window.crypto.getRandomValues) {
                 const arr = new Uint32Array(1);
                 window.crypto.getRandomValues(arr);
@@ -2030,9 +2088,9 @@
         }
 
         /* ============================================================================
-           7. 플레이어 굴리기 · 리롤(물리 굴림 애니메이션 포함) · 배치 · 알까기
+           7. 플레이어 굴리기 · 리롤(동일 눈 제외 물리 굴림) · 배치 · 알까기
            ============================================================================ */
-        function animateDieRoll({ durationMs = 550, tickIntervalMs = 50, isFixedStyle = false }) {
+        function animateDieRoll({ durationMs = 550, tickIntervalMs = 50, isFixedStyle = false, excludeVal = null }) {
             return new Promise((resolve) => {
                 let elapsed = 0;
                 let ticks = 0;
@@ -2050,7 +2108,7 @@
 
                     if (elapsed >= durationMs) {
                         clearInterval(timer);
-                        const finalVal = rollDieValue();
+                        const finalVal = rollDieValue(excludeVal);
                         state.currentDie = finalVal;
                         audio.playRollStop(isFixedStyle);
                         renderTrayOnly(false, isFixedStyle);
@@ -2073,7 +2131,8 @@
             await animateDieRoll({
                 durationMs: 520,
                 tickIntervalMs: 50,
-                isFixedStyle: isFixedRoll
+                isFixedStyle: isFixedRoll,
+                excludeVal: null
             });
 
             state.isAnimating = false;
@@ -2094,10 +2153,12 @@
             audio.init();
             renderAll();
 
+            // 리롤 시 이전 눈(savedBeforeDie)을 제외한 나머지 5개 눈 중에서만 결정
             const newRolledDie = await animateDieRoll({
                 durationMs: 560,
                 tickIntervalMs: 50,
-                isFixedStyle: isFixedOpening
+                isFixedStyle: isFixedOpening,
+                excludeVal: savedBeforeDie
             });
 
             state.rerollAfterDie = newRolledDie;
@@ -2247,7 +2308,7 @@
            8. 상대 AI 턴 로직
            ============================================================================ */
         async function runAiTurn() {
-            const difficulty = document.getElementById('ai-difficulty').value;
+            const difficulty = state.aiMode;
             const isOpening = state.isOpeningTurn;
 
             if (isBoardFull(state.aiBoard)) {
@@ -2274,10 +2335,13 @@
             audio.playRollStop(isOpening);
             renderAll();
 
-            if (!isOpening && difficulty === 'tazza') {
-                const canSmashNow = getSmashableTargets(chosenVal, false).length > 0;
+            // 타짜 AI: 게임당 최대 1회만 리롤 허용, 리롤 시 기존 눈(prevVal) 제외
+            if (difficulty === 'tazza' && !state.aiRerollUsed) {
+                const canSmashNow = !isOpening && getSmashableTargets(chosenVal, false).length > 0;
                 const hasMatchNow = state.aiBoard.some(col => col.length < 3 && col.some(d => d.value === chosenVal));
                 if (!canSmashNow && !hasMatchNow && chosenVal <= 2 && Math.random() < 0.65) {
+                    const prevAiVal = chosenVal;
+                    state.aiRerollUsed = true;
                     await new Promise(r => setTimeout(r, 420));
                     state.aiRollingAnim = true;
                     for (let t = 0; t < 8; t++) {
@@ -2287,9 +2351,9 @@
                         await new Promise(r => setTimeout(r, 55));
                     }
                     state.aiRollingAnim = false;
-                    chosenVal = rollDieValue();
+                    chosenVal = rollDieValue(prevAiVal);
                     state.aiDisplayDie = chosenVal;
-                    audio.playRollStop(false);
+                    audio.playRollStop(isOpening);
                     renderAll();
                 }
             }
@@ -2311,6 +2375,7 @@
                 return;
             }
 
+            // 알까기 가능 열 탐색 (일반 AI는 알까기 가능하면 무조건 발동, 타짜 AI도 우선 발동)
             const smashCols = getSmashableTargets(chosenVal, false);
             if (smashCols.length > 0) {
                 let targetCol = smashCols[0];
@@ -2475,201 +2540,214 @@
             streakEl.textContent = `🔥 ${state.stats.streak}연승 중`;
             streakEl.className = state.stats.streak > 0 ? 'streak-badge streak-badge-hot' : 'streak-badge';
 
-            let playerWins = 0;
-            let aiWins = 0;
-            let playerTotal = 0;
-            let aiTotal = 0;
-
-            const colEvals = [0, 1, 2].map(idx => {
-                const pEval = analyzeColumn(state.playerBoard[idx]);
-                const aEval = analyzeColumn(state.aiBoard[idx]);
-                playerTotal += pEval.totalScore;
-                aiTotal += aEval.totalScore;
-                if (pEval.totalScore > aEval.totalScore) playerWins++;
-                else if (aEval.totalScore > pEval.totalScore) aiWins++;
-                return { pEval, aEval };
-            });
-
-            document.getElementById('score-player-lines').textContent = playerWins;
-            document.getElementById('score-ai-lines').textContent = aiWins;
-            document.getElementById('score-player-total').textContent = playerTotal;
-            document.getElementById('score-ai-total').textContent = aiTotal;
-
-            const isAiTurn = state.phase === 'ai_turn';
-            document.getElementById('ai-turn-badge').classList.toggle('hidden', !isAiTurn);
-            document.getElementById('player-turn-badge').classList.toggle('hidden', isAiTurn || state.phase === 'coin_toss' || state.phase === 'gameover');
-
-            const aiStatusEl = document.getElementById('ai-turn-status');
-            const aiMiniBox = document.getElementById('ai-mini-die-box');
-            if (isAiTurn) {
-                aiStatusEl.textContent = state.aiFixedRoll ? '고정 주사위 굴림' : '주사위 굴리는 중...';
-                aiMiniBox.innerHTML = state.aiDisplayDie
-                    ? renderDieHTML(
-                        { value: state.aiDisplayDie, fixed: state.aiFixedRoll, fixedOwner: 'ai' },
-                        { sizeClass: 'die-sz-mini', owner: 'ai', isRolling: state.aiRollingAnim, showLockPin: false }
-                    )
-                    : '';
-            } else {
-                aiStatusEl.textContent = '대기 중';
-                aiMiniBox.innerHTML = '';
+            const btnNormal = document.getElementById('btn-ai-normal');
+            const btnTazza = document.getElementById('btn-ai-tazza');
+            if (btnNormal && btnTazza) {
+                btnNormal.classList.toggle('active-normal', state.aiMode === 'normal');
+                btnTazza.classList.toggle('active-tazza', state.aiMode === 'tazza');
             }
 
-            const isNormalPlace = state.phase === 'player_place' && !state.isAnimating;
-            const isFixedPlace = state.phase === 'player_bonus_place' && !state.isAnimating;
-            const smashableCols = (isNormalPlace && !state.isOpeningTurn)
+            const isPlayerTurn = state.phase.startsWith('player_');
+            const isAiTurn = state.phase === 'ai_turn';
+            document.getElementById('player-turn-badge').classList.toggle('hidden', !isPlayerTurn);
+            document.getElementById('ai-turn-badge').classList.toggle('hidden', !isAiTurn);
+
+            const aiStatusEl = document.getElementById('ai-turn-status');
+            const aiMiniDieBox = document.getElementById('ai-mini-die-box');
+            if (isAiTurn) {
+                aiStatusEl.textContent = state.aiFixedRoll ? '고정 주사위 굴리는 중' : '주사위 굴리는 중';
+                if (state.aiDisplayDie) {
+                    aiMiniDieBox.innerHTML = renderDieHTML(
+                        { value: state.aiDisplayDie, fixed: state.aiFixedRoll, fixedOwner: 'ai' },
+                        { sizeClass: 'die-sz-mini', owner: 'ai', isRolling: state.aiRollingAnim, showLockPin: false }
+                    );
+                } else {
+                    aiMiniDieBox.innerHTML = renderDieHTML(null, { sizeClass: 'die-sz-mini', isQuestionMark: true });
+                }
+            } else {
+                aiStatusEl.textContent = '대기 중';
+                aiMiniDieBox.innerHTML = '';
+            }
+
+            const smashTargets = (state.phase === 'player_place' && !state.isOpeningTurn && !state.isAnimating && state.currentDie)
                 ? getSmashableTargets(state.currentDie, true)
                 : [];
+            const isBonusPlace = state.phase === 'player_bonus_place' && !state.isAnimating && state.currentDie;
+            const isOpeningPlace = state.phase === 'player_place' && state.isOpeningTurn && !state.isAnimating && state.currentDie;
+            const isNormalPlace = state.phase === 'player_place' && !state.isOpeningTurn && !state.isAnimating && state.currentDie;
 
-            // 중앙 VS 비교 바: 내점수(초록) - 화살표 - 상대점수(빨강)
-            const vsGrid = document.getElementById('vs-divider-grid');
-            vsGrid.innerHTML = [0, 1, 2].map(idx => {
-                const { pEval, aEval } = colEvals[idx];
-                let statusHtml = `<span class="vs-arrow-tie">=</span>`;
-                if (pEval.totalScore > aEval.totalScore) {
-                    statusHtml = `<span class="vs-arrow-down" title="나 우위">▼</span>`;
-                } else if (aEval.totalScore > pEval.totalScore) {
-                    statusHtml = `<span class="vs-arrow-up" title="상대 우위">▲</span>`;
-                }
-                return `
-                    <div class="vs-lane-pill">
-                        <span class="vs-score-player">${pEval.totalScore}</span>
-                        ${statusHtml}
-                        <span class="vs-score-ai">${aEval.totalScore}</span>
-                    </div>
-                `;
-            }).join('');
+            let playerLineWins = 0;
+            let aiLineWins = 0;
+            let playerTotalScore = 0;
+            let aiTotalScore = 0;
 
-            // 상대 3열 보드 렌더링
+            const aiEvalList = [0, 1, 2].map(c => analyzeColumn(state.aiBoard[c]));
+            const playerEvalList = [0, 1, 2].map(c => analyzeColumn(state.playerBoard[c]));
+
+            for (let c = 0; c < 3; c++) {
+                playerTotalScore += playerEvalList[c].totalScore;
+                aiTotalScore += aiEvalList[c].totalScore;
+                if (playerEvalList[c].totalScore > aiEvalList[c].totalScore) playerLineWins++;
+                else if (aiEvalList[c].totalScore > playerEvalList[c].totalScore) aiLineWins++;
+            }
+
+            document.getElementById('score-ai-total').textContent = aiTotalScore;
+            document.getElementById('score-player-total').textContent = playerTotalScore;
+            document.getElementById('score-player-lines').textContent = playerLineWins;
+            document.getElementById('score-ai-lines').textContent = aiLineWins;
+
+            // 1. 상대 3열 렌더링
             const aiGrid = document.getElementById('ai-columns-grid');
             aiGrid.innerHTML = [0, 1, 2].map(colIdx => {
-                const dice = state.aiBoard[colIdx];
-                const { aEval } = colEvals[colIdx];
-                const isFull = dice.length >= 3;
-                const isSmashTarget = isNormalPlace && !state.isOpeningTurn && smashableCols.includes(colIdx);
-                const canInjectFixed = isFixedPlace && !isFull;
+                const colDice = state.aiBoard[colIdx];
+                const evalRes = aiEvalList[colIdx];
+                const isSmashCol = smashTargets.includes(colIdx);
+                const canInjectFixed = isBonusPlace && colDice.length < 3;
+                const landingRowIdx = canInjectFixed ? 2 - colDice.length : -1;
 
                 let cardClass = 'lane-card';
-                if (isSmashTarget) cardClass += ' lane-smash-target';
+                if (isSmashCol) cardClass += ' lane-smash-target';
                 else if (canInjectFixed) cardClass += ' lane-fixed-enemy';
 
-                let bonusTag = '';
-                if (aEval.maxCount === 3) bonusTag = `<span class="bonus-tag bonus-tag-3">+2개 보너스</span>`;
-                else if (aEval.maxCount === 2) bonusTag = `<span class="bonus-tag bonus-tag-2">+1개 보너스</span>`;
+                let badgeHtml = '';
+                if (isSmashCol) badgeHtml = `<div class="smash-floating-badge">💥 알까기 발사!</div>`;
+                else if (canInjectFixed) badgeHtml = `<div class="inject-floating-badge">투척 가능</div>`;
 
-                const floatingBadge = isSmashTarget
-                    ? `<div class="smash-floating-badge">💥 알까기 발사!</div>`
-                    : canInjectFixed
-                    ? `<div class="inject-floating-badge">방해 투척 가능</div>`
+                const bonusHtml = evalRes.maxCount === 3
+                    ? `<span class="bonus-tag bonus-tag-3">+2개 보너스</span>`
+                    : evalRes.maxCount === 2
+                    ? `<span class="bonus-tag bonus-tag-2">+1개 보너스</span>`
                     : '';
 
                 let slotsHtml = '';
-                for (let s = 2; s >= 0; s--) {
-                    if (s < dice.length) {
-                        const d = dice[s];
-                        const comboCnt = aEval.counts[d.value] || 1;
-                        const isDieSmashable = isSmashTarget && d.value === state.currentDie && !d.fixed;
-                        const isPop = popSide === 'ai' && popColIdx === colIdx && s === dice.length - 1;
-                        slotsHtml += renderDieHTML(d, {
+                for (let row = 0; row < 3; row++) {
+                    const dieIdx = 2 - row;
+                    const dieObj = colDice[dieIdx];
+                    if (dieObj) {
+                        const comboCnt = evalRes.counts[dieObj.value] || 1;
+                        const isPop = popSide === 'ai' && popColIdx === colIdx && dieIdx === colDice.length - 1;
+                        slotsHtml += renderDieHTML(dieObj, {
                             comboCount: comboCnt,
                             sizeClass: 'die-sz-board',
                             owner: 'ai',
-                            isSmashable: isDieSmashable,
                             isPop,
                             showLockPin: false,
-                            dataAttr: `data-die-val="${d.value}" data-die-fixed="${d.fixed ? '1' : '0'}"`
+                            dataAttr: `data-die-val="${dieObj.value}" data-die-fixed="${dieObj.fixed ? 1 : 0}"`
                         });
                     } else {
-                        const isNextLanding = (s === dice.length) && canInjectFixed;
-                        const ghostHtml = isNextLanding && state.currentDie
+                        const isLanding = row === landingRowIdx;
+                        const slotCls = isLanding
+                            ? 'empty-slot empty-slot-fixed empty-slot-landing'
+                            : canInjectFixed
+                            ? 'empty-slot empty-slot-fixed'
+                            : 'empty-slot';
+                        const ghostHtml = isLanding
                             ? `<div class="slot-ghost-preview">${renderDieHTML({ value: state.currentDie, fixed: true, fixedOwner: 'player' }, { sizeClass: 'die-sz-full', owner: 'player', showLockPin: false })}</div>`
                             : '';
-                        slotsHtml += `
-                            <div class="empty-slot ${canInjectFixed ? 'empty-slot-fixed' : ''} ${isNextLanding ? 'empty-slot-landing' : ''}">
-                                <span class="slot-default-marker">${canInjectFixed ? '+' : '·'}</span>
-                                ${ghostHtml}
-                            </div>
-                        `;
+                        slotsHtml += `<div class="${slotCls}"><span class="slot-default-marker">${canInjectFixed ? '+' : '·'}</span>${ghostHtml}</div>`;
                     }
                 }
 
                 return `
-                    <div data-ai-lane="${colIdx}" class="${cardClass}" onclick="handleBoardColumnClick('ai', ${colIdx})">
-                        ${floatingBadge}
-                        <div class="lane-bonus-bar">${bonusTag}</div>
+                    <div data-ai-lane="${colIdx}" data-side="ai" data-col="${colIdx}" class="${cardClass}">
+                        ${badgeHtml}
+                        <div class="lane-bonus-bar">${bonusHtml}</div>
                         <div class="lane-slots-stack">${slotsHtml}</div>
                     </div>
                 `;
             }).join('');
 
-            // 플레이어 3열 보드 렌더링
+            // 2. 중앙 VS 비교 바 렌더링: 내점수(초록) - 화살표 - 상대점수(빨강)
+            const vsGrid = document.getElementById('vs-divider-grid');
+            vsGrid.innerHTML = [0, 1, 2].map(colIdx => {
+                const aScore = aiEvalList[colIdx].totalScore;
+                const pScore = playerEvalList[colIdx].totalScore;
+
+                let arrowHtml = `<span class="vs-arrow-tie">=</span>`;
+                if (aScore > pScore) arrowHtml = `<span class="vs-arrow-up">▲</span>`;
+                else if (pScore > aScore) arrowHtml = `<span class="vs-arrow-down">▼</span>`;
+
+                return `
+                    <div class="vs-lane-pill">
+                        <span class="vs-score-player">${pScore}</span>
+                        ${arrowHtml}
+                        <span class="vs-score-ai">${aScore}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // 3. 플레이어 3열 렌더링
             const playerGrid = document.getElementById('player-columns-grid');
             playerGrid.innerHTML = [0, 1, 2].map(colIdx => {
-                const dice = state.playerBoard[colIdx];
-                const { pEval } = colEvals[colIdx];
-                const isFull = dice.length >= 3;
-                const isSmashTarget = isNormalPlace && !state.isOpeningTurn && smashableCols.includes(colIdx);
-                const canPlaceNormal = isNormalPlace && !isFull && !isSmashTarget;
-                const canPlaceFixed = isFixedPlace && !isFull;
-                const canLandHere = canPlaceNormal || canPlaceFixed;
+                const colDice = state.playerBoard[colIdx];
+                const evalRes = playerEvalList[colIdx];
+                const isSmashCol = smashTargets.includes(colIdx);
+                const canPlaceAlly = (isNormalPlace || isOpeningPlace || isBonusPlace) && colDice.length < 3;
+                const isFull = (isNormalPlace || isOpeningPlace || isBonusPlace) && colDice.length >= 3 && !isSmashCol;
+                const landingRowIdx = (canPlaceAlly && !isSmashCol) ? colDice.length : -1;
 
                 let cardClass = 'lane-card';
-                if (isSmashTarget) cardClass += ' lane-smash-target';
-                else if (canPlaceFixed || (canPlaceNormal && state.isOpeningTurn)) cardClass += ' lane-fixed-ally';
-                else if (canPlaceNormal) cardClass += ' lane-selectable';
-                else if ((isNormalPlace || isFixedPlace) && isFull) cardClass += ' lane-full-dim';
+                if (isSmashCol) cardClass += ' lane-smash-target';
+                else if ((isOpeningPlace || isBonusPlace) && canPlaceAlly) cardClass += ' lane-fixed-ally';
+                else if (isNormalPlace && canPlaceAlly) cardClass += ' lane-selectable';
+                else if (isFull) cardClass += ' lane-full-dim';
 
-                let bonusTag = '';
-                if (pEval.maxCount === 3) bonusTag = `<span class="bonus-tag bonus-tag-3">+2개 보너스</span>`;
-                else if (pEval.maxCount === 2) bonusTag = `<span class="bonus-tag bonus-tag-2">+1개 보너스</span>`;
+                let badgeHtml = '';
+                if (isSmashCol) badgeHtml = `<div class="smash-floating-badge">💥 알까기 발사!</div>`;
 
-                const floatingBadge = isSmashTarget
-                    ? `<div class="smash-floating-badge">💥 알까기 발사!</div>`
+                const bonusHtml = evalRes.maxCount === 3
+                    ? `<span class="bonus-tag bonus-tag-3">+2개 보너스</span>`
+                    : evalRes.maxCount === 2
+                    ? `<span class="bonus-tag bonus-tag-2">+1개 보너스</span>`
                     : '';
 
                 let slotsHtml = '';
-                for (let s = 0; s < 3; s++) {
-                    if (s < dice.length) {
-                        const d = dice[s];
-                        const comboCnt = pEval.counts[d.value] || 1;
-                        const isPop = popSide === 'player' && popColIdx === colIdx && s === dice.length - 1;
-                        slotsHtml += renderDieHTML(d, {
+                for (let row = 0; row < 3; row++) {
+                    const dieObj = colDice[row];
+                    if (dieObj) {
+                        const comboCnt = evalRes.counts[dieObj.value] || 1;
+                        const isPop = popSide === 'player' && popColIdx === colIdx && row === colDice.length - 1;
+                        slotsHtml += renderDieHTML(dieObj, {
                             comboCount: comboCnt,
                             sizeClass: 'die-sz-board',
                             owner: 'player',
                             isPop,
-                            showLockPin: false
+                            showLockPin: false,
+                            dataAttr: `data-die-val="${dieObj.value}" data-die-fixed="${dieObj.fixed ? 1 : 0}"`
                         });
                     } else {
-                        const isNextSlot = s === dice.length;
-                        const isFixedPlacement = canPlaceFixed || (canPlaceNormal && state.isOpeningTurn);
-                        const activeCls = isNextSlot && isFixedPlacement
-                            ? 'empty-slot-fixed'
-                            : isNextSlot && canPlaceNormal
-                            ? 'empty-slot-active'
+                        const isFixedMode = isOpeningPlace || isBonusPlace;
+                        const isLanding = row === landingRowIdx;
+                        let slotCls = 'empty-slot';
+                        if (canPlaceAlly) {
+                            slotCls = isFixedMode ? 'empty-slot empty-slot-fixed' : 'empty-slot empty-slot-active';
+                            if (isLanding) slotCls += ' empty-slot-landing';
+                        }
+                        const ghostHtml = isLanding
+                            ? `<div class="slot-ghost-preview">${renderDieHTML({ value: state.currentDie, fixed: isFixedMode, fixedOwner: 'player' }, { sizeClass: 'die-sz-full', owner: 'player', showLockPin: false })}</div>`
                             : '';
-                        const isLandingSlot = isNextSlot && canLandHere;
-                        const ghostHtml = isLandingSlot && state.currentDie
-                            ? `<div class="slot-ghost-preview">${renderDieHTML({ value: state.currentDie, fixed: isFixedPlacement, fixedOwner: 'player' }, { sizeClass: 'die-sz-full', owner: 'player', showLockPin: false })}</div>`
-                            : '';
-                        slotsHtml += `
-                            <div class="empty-slot ${activeCls} ${isLandingSlot ? 'empty-slot-landing' : ''}">
-                                <span class="slot-default-marker">${isLandingSlot ? '+' : '·'}</span>
-                                ${ghostHtml}
-                            </div>
-                        `;
+                        slotsHtml += `<div class="${slotCls}"><span class="slot-default-marker">${canPlaceAlly ? '+' : '·'}</span>${ghostHtml}</div>`;
                     }
                 }
 
                 return `
-                    <div data-player-lane="${colIdx}" class="${cardClass}" onclick="handleBoardColumnClick('player', ${colIdx})">
-                        ${floatingBadge}
+                    <div data-player-lane="${colIdx}" data-side="player" data-col="${colIdx}" class="${cardClass}">
+                        ${badgeHtml}
                         <div class="lane-slots-stack">${slotsHtml}</div>
-                        <div class="lane-bonus-bar">${bonusTag}</div>
+                        <div class="lane-bonus-bar">${bonusHtml}</div>
                     </div>
                 `;
             }).join('');
 
-            // 하단 / 우측 액션 트레이 렌더링
+            document.querySelectorAll('[data-side][data-col]').forEach(el => {
+                el.onclick = () => {
+                    const s = el.getAttribute('data-side');
+                    const c = Number(el.getAttribute('data-col'));
+                    handleBoardColumnClick(s, c);
+                };
+            });
+
+            // 4. 하단 플레이어 주사위 트레이 렌더링
             const slotEl = document.getElementById('player-die-slot');
             const rerollChoiceBox = document.getElementById('reroll-choice-box');
             const trayTitle = document.getElementById('tray-title');
@@ -2679,126 +2757,111 @@
 
             document.getElementById('reroll-count-text').textContent = `${state.rerollsLeft}/1`;
 
-            if (state.phase === 'player_reroll_choose') {
+            slotEl.classList.remove('hidden');
+            rerollChoiceBox.classList.add('hidden');
+            btnRoll.classList.remove('btn-roll-fixed');
+
+            if (state.phase === 'player_wait_roll') {
+                const isFirstLock = state.isOpeningTurn;
+                renderTrayOnly(false, isFirstLock);
+                trayTitle.textContent = isFirstLock
+                    ? '👑 선공 첫 고정 주사위 차례!'
+                    : '내 턴입니다! 주사위를 굴려주세요.';
+                trayDesc.textContent = isFirstLock
+                    ? '고정 주사위(내 진영 전용 · 리롤 가능)를 굴립니다.'
+                    : '[🎲 주사위 굴리기] 버튼이나 Spacebar를 누르세요.';
+                btnRoll.disabled = false;
+                btnRoll.textContent = isFirstLock ? '🔒 선공 고정 주사위 굴리기' : '🎲 주사위 굴리기 (Space)';
+                if (isFirstLock) btnRoll.classList.add('btn-roll-fixed');
+                btnReroll.disabled = true;
+
+            } else if (state.phase === 'player_rolling' || state.phase === 'player_bonus_rolling') {
+                const isFixedRoll = state.phase === 'player_bonus_rolling' || state.isOpeningTurn;
+                renderTrayOnly(true, isFixedRoll);
+                trayTitle.textContent = '주사위가 구르는 중...';
+                trayDesc.textContent = '잠시만 기다려주세요.';
+                btnRoll.disabled = true;
+                btnReroll.disabled = true;
+
+            } else if (state.phase === 'player_rerolling') {
+                renderTrayOnly(true, state.isOpeningTurn);
+                trayTitle.textContent = '🃏 타짜의 손놀림 발동!';
+                trayDesc.textContent = '다른 눈이 나오도록 주사위를 다시 굴리는 중...';
+                btnRoll.disabled = true;
+                btnReroll.disabled = true;
+
+            } else if (state.phase === 'player_place') {
+                const isFirstLock = state.isOpeningTurn;
+                renderTrayOnly(false, isFirstLock);
+
+                if (isFirstLock) {
+                    trayTitle.textContent = `🔒 선공 고정 [${state.currentDie}] — 내 진영에 배치`;
+                    trayDesc.textContent = '내 진영 빈 칸에 배치하거나 [🃏 타짜의 손놀림] 리롤을 쓸 수 있습니다.';
+                } else if (smashTargets.length > 0) {
+                    trayTitle.textContent = `💥 [${state.currentDie}] 알까기 발사 가능!`;
+                    trayDesc.textContent = '강조된 열을 눌러 상대 같은 눈 주사위를 날려버리세요!';
+                } else {
+                    trayTitle.textContent = `주사위 [${state.currentDie}] 배치`;
+                    trayDesc.textContent = '내 진영의 빈 열을 클릭해 주사위를 놓으세요.';
+                }
+
+                btnRoll.disabled = true;
+                btnRoll.textContent = '보드에서 열 선택';
+                btnReroll.disabled = state.rerollsLeft <= 0 || state.isAnimating;
+
+            } else if (state.phase === 'player_reroll_choose') {
                 slotEl.classList.add('hidden');
                 rerollChoiceBox.classList.remove('hidden');
-
-                const isFixedOpening = state.isOpeningTurn;
                 document.getElementById('reroll-before-die').innerHTML = renderDieHTML(
-                    { value: state.rerollBeforeDie, fixed: isFixedOpening, fixedOwner: 'player' },
+                    { value: state.rerollBeforeDie, fixed: state.isOpeningTurn, fixedOwner: 'player' },
                     { sizeClass: 'die-sz-reroll', owner: 'player', showLockPin: false }
                 );
                 document.getElementById('reroll-after-die').innerHTML = renderDieHTML(
-                    { value: state.rerollAfterDie, fixed: isFixedOpening, fixedOwner: 'player' },
+                    { value: state.rerollAfterDie, fixed: state.isOpeningTurn, fixedOwner: 'player' },
                     { sizeClass: 'die-sz-reroll', owner: 'player', showLockPin: false }
                 );
-            } else {
-                rerollChoiceBox.classList.add('hidden');
-                const isFixedDieNow = isFixedPlace ||
-                    state.phase === 'player_bonus_wait_roll' ||
-                    state.phase === 'player_bonus_rolling' ||
-                    (state.isOpeningTurn && (
-                        state.phase === 'player_wait_roll' ||
-                        state.phase === 'player_rolling' ||
-                        state.phase === 'player_rerolling' ||
-                        state.phase === 'player_place'
-                    ));
-                const isRollingNow =
-                    state.phase === 'player_rolling' ||
-                    state.phase === 'player_bonus_rolling' ||
-                    state.phase === 'player_rerolling';
-                renderTrayOnly(isRollingNow, isFixedDieNow);
-            }
+                trayTitle.textContent = '🃏 리롤 결과 선택';
+                trayDesc.textContent = `[리롤 전: ${state.rerollBeforeDie}] vs [리롤 후: ${state.rerollAfterDie}] 중 선택하세요.`;
+                btnRoll.disabled = true;
+                btnReroll.disabled = true;
 
-            if (state.phase === 'coin_toss') {
-                trayTitle.textContent = '🪙 코인 토스 진행 중';
-                trayDesc.textContent = '선공과 후공을 결정하고 있습니다.';
-                btnRoll.disabled = true;
-                btnRoll.className = 'btn-roll-main';
-                btnRoll.textContent = '🎲 주사위 굴리기 (Space)';
-                btnReroll.disabled = true;
-            } else if (state.phase === 'player_wait_roll') {
-                if (state.isOpeningTurn) {
-                    trayTitle.textContent = '선공 첫 고정 주사위 차례!';
-                    trayDesc.textContent = '선공 첫 주사위는 고정 주사위(내 진영 배치 전용 · 리롤 가능)입니다.';
-                    btnRoll.disabled = false;
-                    btnRoll.className = 'btn-roll-main btn-roll-fixed';
-                    btnRoll.textContent = '🎲 선공 주사위 굴리기 (Space)';
-                } else {
-                    trayTitle.textContent = '내 차례입니다!';
-                    trayDesc.textContent = '[🎲 주사위 굴리기] 버튼이나 Spacebar를 눌러 굴리세요.';
-                    btnRoll.disabled = false;
-                    btnRoll.className = 'btn-roll-main';
-                    btnRoll.textContent = '🎲 주사위 굴리기 (Space)';
-                }
-                btnReroll.disabled = true;
-            } else if (state.phase === 'player_rolling' || state.phase === 'player_bonus_rolling') {
-                trayTitle.textContent = '🎲 주사위가 구르는 중...';
-                trayDesc.textContent = '잠시만 기다려주세요!';
-                btnRoll.disabled = true;
-                btnReroll.disabled = true;
-            } else if (state.phase === 'player_rerolling') {
-                trayTitle.textContent = '🃏 타짜의 손놀림으로 다시 굴리는 중...';
-                trayDesc.textContent = '새로운 운명의 주사위가 회전하고 있습니다!';
-                btnRoll.disabled = true;
-                btnReroll.disabled = true;
-            } else if (state.phase === 'player_reroll_choose') {
-                trayTitle.textContent = '🃏 타짜의 손놀림 발동!';
-                trayDesc.textContent = '[리롤 전]과 [리롤 후] 중 사용할 주사위를 클릭해 선택하세요.';
-                btnRoll.disabled = true;
-                btnReroll.disabled = true;
-            } else if (isNormalPlace && state.isOpeningTurn) {
-                trayTitle.textContent = '선공 첫 고정 주사위 배치';
-                trayDesc.textContent = '내 진영의 빈 열을 클릭해 배치하거나 리롤할 수 있습니다.';
-                btnRoll.disabled = true;
-                btnRoll.className = 'btn-roll-main btn-roll-fixed';
-                btnReroll.disabled = state.rerollsLeft <= 0 || state.isAnimating;
-            } else if (isNormalPlace) {
-                if (smashableCols.length > 0) {
-                    trayTitle.textContent = '💥 알까기 가능!';
-                    trayDesc.textContent = '강조된 내 열이나 상대 열을 클릭하면 주사위가 직접 날아가 파괴합니다!';
-                } else {
-                    trayTitle.textContent = '주사위 배치';
-                    trayDesc.textContent = '내 진영에서 주사위를 배치할 열을 클릭하세요.';
-                }
-                btnRoll.disabled = true;
-                btnRoll.className = 'btn-roll-main';
-                btnReroll.disabled = state.rerollsLeft <= 0 || state.isAnimating;
             } else if (state.phase === 'player_bonus_wait_roll') {
-                trayTitle.textContent = '보너스 고정 주사위 차례!';
-                trayDesc.textContent = '알까기 성공 보상! 고정 주사위(양진영 배치 가능 · 리롤 불가)를 굴리세요.';
+                renderTrayOnly(false, true);
+                trayTitle.textContent = '🔒 알까기 보너스 고정 주사위';
+                trayDesc.textContent = '고정 주사위를 굴려 내 진영이나 상대 진영에 배치하세요!';
                 btnRoll.disabled = false;
-                btnRoll.className = 'btn-roll-main btn-roll-fixed';
-                btnRoll.textContent = '🎲 고정 주사위 굴리기 (Space)';
+                btnRoll.textContent = '🔒 고정 주사위 굴리기 (Space)';
+                btnRoll.classList.add('btn-roll-fixed');
                 btnReroll.disabled = true;
-            } else if (isFixedPlace) {
-                trayTitle.textContent = '보너스 고정 주사위 배치';
-                trayDesc.textContent = '내 빈 열(방어·보너스) 또는 상대 빈 열(방해 투척)을 클릭하세요.';
+
+            } else if (state.phase === 'player_bonus_place') {
+                renderTrayOnly(false, true);
+                trayTitle.textContent = `🔒 고정 주사위 [${state.currentDie}] 배치`;
+                trayDesc.textContent = '내 빈 칸(방어) 또는 상대 빈 칸(방해 투척)을 클릭하세요!';
                 btnRoll.disabled = true;
-                btnRoll.className = 'btn-roll-main btn-roll-fixed';
+                btnRoll.textContent = '배치할 열 클릭';
+                btnRoll.classList.add('btn-roll-fixed');
                 btnReroll.disabled = true;
-            } else if (state.phase === 'player_animating') {
-                trayTitle.textContent = '💥 알까기 타격 중!';
-                trayDesc.textContent = '주사위가 날아가 상대 주사위를 날려버립니다!';
-                btnRoll.disabled = true;
-                btnReroll.disabled = true;
+
             } else if (state.phase === 'ai_turn') {
-                trayTitle.textContent = '🎭 상대 턴 진행 중...';
-                trayDesc.textContent = '상대가 주사위를 굴리고 수를 고민하고 있습니다.';
+                renderTrayOnly(false, false);
+                trayTitle.textContent = '상대 턴 진행 중...';
+                trayDesc.textContent = '상대가 주사위를 굴리고 배치하고 있습니다.';
                 btnRoll.disabled = true;
-                btnRoll.className = 'btn-roll-main';
-                btnRoll.textContent = '🎲 주사위 굴리기 (Space)';
+                btnRoll.textContent = '상대 턴 대기';
                 btnReroll.disabled = true;
-            } else if (state.phase === 'gameover') {
-                trayTitle.textContent = '🏁 경기 종료!';
-                trayDesc.textContent = '18칸이 모두 채워져 최종 결과를 집계했습니다.';
+
+            } else {
+                renderTrayOnly(false, false);
+                trayTitle.textContent = '게임 진행 대기';
+                trayDesc.textContent = '새 게임 버튼으로 대결을 시작할 수 있습니다.';
                 btnRoll.disabled = true;
                 btnReroll.disabled = true;
             }
         }
 
         /* ============================================================================
-           10. 게임 종료 모달 (무승부 시 무조건 나 승리 판정) & 새 게임 시작
+           10. 게임 종료 모달 (무승부 시 무조건 내 승리 판정) & 새 게임
            ============================================================================ */
         function showGameOverModal() {
             let playerWins = 0;
@@ -2880,6 +2943,7 @@
             state.phase = 'coin_toss';
             state.isAnimating = false;
             state.isOpeningTurn = false;
+            state.aiRerollUsed = false;
             state.currentDie = null;
             state.rerollBeforeDie = null;
             state.rerollAfterDie = null;
@@ -2900,6 +2964,14 @@
             document.querySelectorAll('.layout-opt-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     applyLayoutMode(btn.dataset.layoutMode);
+                });
+            });
+
+            document.querySelectorAll('.ai-mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const mode = btn.dataset.aiMode === 'tazza' ? 'tazza' : 'normal';
+                    state.aiMode = mode;
+                    renderAll();
                 });
             });
 
