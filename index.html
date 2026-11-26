@@ -2395,9 +2395,17 @@
                         await new Promise(r => setTimeout(r, 55));
                     }
                     state.aiRollingAnim = false;
-                    chosenVal = rollDieValue(prevAiVal);
-                    state.aiDisplayDie = chosenVal;
+                    const rerolledVal = rollDieValue(prevAiVal);
+                    state.aiDisplayDie = rerolledVal;
                     audio.playRollStop(isOpening);
+                    renderAll();
+                    await new Promise(r => setTimeout(r, 380));
+
+                    // 플레이어와 동일하게 리롤 전 vs 리롤 후 최선 수 가치를 비교해 더 유리한 쪽 선택
+                    const beforeScore = evaluateAiDieUtility(prevAiVal, isOpening);
+                    const afterScore = evaluateAiDieUtility(rerolledVal, isOpening);
+                    chosenVal = afterScore >= beforeScore ? rerolledVal : prevAiVal;
+                    state.aiDisplayDie = chosenVal;
                     renderAll();
                 }
             }
@@ -2578,6 +2586,48 @@
             });
 
             return bestCol;
+        }
+
+        // 타짜 AI용 주사위 가치 평가 함수 (리롤 전 vs 리롤 후 비교 선택에 사용)
+        function evaluateAiDieUtility(dieVal, isOpening) {
+            if (!isOpening) {
+                const smashCols = getSmashableTargets(dieVal, false);
+                if (smashCols.length > 0) {
+                    let bestSmashScore = 0;
+                    smashCols.forEach(c => {
+                        const victims = state.playerBoard[c].filter(d => d.value === dieVal && !d.fixed);
+                        const beforePScore = analyzeColumn(state.playerBoard[c]).totalScore;
+                        const remainP = state.playerBoard[c].filter(d => !(d.value === dieVal && !d.fixed));
+                        const afterPScore = analyzeColumn(remainP).totalScore;
+                        const destroyedGain = (beforePScore - afterPScore) * 12 + victims.length * 15 + 25;
+                        if (destroyedGain > bestSmashScore) bestSmashScore = destroyedGain;
+                    });
+                    return bestSmashScore;
+                }
+            }
+
+            const available = [0, 1, 2].filter(c => state.aiBoard[c].length < 3);
+            if (available.length === 0) return -9999;
+
+            let bestPlaceScore = -9999;
+            available.forEach(c => {
+                const beforeScore = analyzeColumn(state.aiBoard[c]).totalScore;
+                const simCol = [...state.aiBoard[c], { value: dieVal, fixed: isOpening }];
+                compactColumnMatchingDice(simCol);
+                const afterScore = analyzeColumn(simCol).totalScore;
+                let score = (afterScore - beforeScore) * 10;
+
+                const playerColScore = analyzeColumn(state.playerBoard[c]).totalScore;
+                if (beforeScore <= playerColScore && afterScore > playerColScore) {
+                    score += 18;
+                }
+                if (simCol.length === 3 && afterScore < 10) {
+                    score -= 10;
+                }
+                if (score > bestPlaceScore) bestPlaceScore = score;
+            });
+
+            return bestPlaceScore;
         }
 
         /* ============================================================================
