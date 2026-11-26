@@ -26,7 +26,8 @@
 
         html, body {
             width: 100%;
-            min-height: 100dvh;
+            height: 100dvh;
+            max-height: 100dvh;
             font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
             background-color: var(--bg-deep);
             background-image:
@@ -34,7 +35,7 @@
                 radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
                 linear-gradient(180deg, #0b0e14 0%, #111622 100%);
             color: var(--text-primary);
-            overflow-x: hidden;
+            overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
         }
@@ -42,79 +43,183 @@
         .hidden { display: none !important; }
 
         /* =====================================================================
-           레이아웃 모드 (📱 핸드폰 / 📟 패드·컴퓨터 가로 무스크롤)
+           레이아웃 모드 (📱 핸드폰 1화면 무스크롤 / 📟 패드·컴퓨터 가로 무스크롤)
            ===================================================================== */
         .app-shell {
             width: 100%;
-            max-width: 780px;
-            min-height: 100dvh;
+            height: 100dvh;
+            max-height: 100dvh;
             margin: 0 auto;
-            padding: 10px 14px 16px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            gap: 10px;
+            overflow: hidden;
         }
 
         .workspace-container {
             width: 100%;
+            flex: 1;
+            min-height: 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            flex: 1;
+            overflow: hidden;
         }
 
-        /* 📱 핸드폰 모드 */
+        /* 📱 핸드폰 모드 (100dvh 한 화면 무스크롤 최적화) */
         body.layout-phone {
-            --die-size: 50px;
-            --pip-size: 9px;
+            --die-size: clamp(36px, 5.1dvh, 46px);
+            --pip-size: clamp(6.5px, 0.95dvh, 8.5px);
         }
         body.layout-phone .app-shell {
-            max-width: 460px;
-            padding: 8px 10px 12px;
-            gap: 8px;
-        }
-        body.layout-phone .top-header {
-            padding: 7px 10px;
+            max-width: 480px;
+            padding: 6px 8px 8px;
             gap: 6px;
         }
+        body.layout-phone .top-header {
+            padding: 5px 8px;
+            gap: 4px;
+            border-radius: 11px;
+            flex-shrink: 0;
+        }
+        body.layout-phone .brand-icon {
+            width: 24px;
+            height: 24px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
         body.layout-phone .brand-title {
-            font-size: 13.5px;
+            font-size: 12.5px;
+        }
+        body.layout-phone .streak-badge {
+            padding: 2px 7px;
+            font-size: 10.5px;
+        }
+        body.layout-phone .header-actions {
+            width: 100%;
+            justify-content: space-between;
+            gap: 4px;
+        }
+        body.layout-phone .layout-opt-btn {
+            padding: 3px 6px;
+            font-size: 10px;
+        }
+        body.layout-phone .ui-btn {
+            padding: 4px 7px;
+            font-size: 10.5px;
+            border-radius: 7px;
+        }
+        body.layout-phone .workspace-container {
+            gap: 6px;
+        }
+        body.layout-phone .board-arena {
+            flex: 1;
+            min-height: 0;
+            padding: 6px 7px;
+            gap: 4px;
+            border-radius: 13px;
+            justify-content: space-between;
+        }
+        body.layout-phone .faction-bar {
+            padding: 3px 8px;
+            font-size: 11px;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        body.layout-phone .columns-grid-3 {
+            flex: 1;
+            min-height: 0;
+            gap: 6px;
         }
         body.layout-phone .lane-card {
-            min-height: 194px;
-            padding: 6px 4px;
+            height: 100%;
+            min-height: 0;
+            padding: 3px 3px;
+            gap: 2px;
+            border-radius: 10px;
+            justify-content: space-evenly;
+        }
+        body.layout-phone .lane-bonus-bar {
+            min-height: 14px;
+        }
+        body.layout-phone .bonus-tag {
+            font-size: 9px;
+            padding: 1px 6px;
+        }
+        body.layout-phone .lane-slots-stack {
+            gap: 3px;
+        }
+        body.layout-phone .empty-slot {
+            border-radius: 9px;
+            font-size: 13px;
+        }
+        body.layout-phone .die-face {
+            border-radius: 9px;
+        }
+        body.layout-phone .vs-divider-grid {
+            gap: 6px;
+            padding: 1px 0;
+            flex-shrink: 0;
+        }
+        body.layout-phone .vs-lane-pill {
+            padding: 3px 8px;
+            border-radius: 8px;
+        }
+        body.layout-phone .vs-score-player,
+        body.layout-phone .vs-score-ai {
+            font-size: 12.5px;
+        }
+        body.layout-phone .vs-arrow-up,
+        body.layout-phone .vs-arrow-down {
+            font-size: 12.5px;
         }
         body.layout-phone .action-tray {
+            flex-shrink: 0;
             flex-direction: column;
             align-items: stretch;
-            padding: 10px;
-            gap: 8px;
+            padding: 7px 9px;
+            gap: 6px;
+            border-radius: 12px;
+        }
+        body.layout-phone .tray-left-die {
+            gap: 9px;
+        }
+        body.layout-phone .die-sz-tray {
+            width: clamp(44px, 6.2dvh, 54px);
+            height: clamp(44px, 6.2dvh, 54px);
+            min-width: clamp(44px, 6.2dvh, 54px);
+            min-height: clamp(44px, 6.2dvh, 54px);
+            border-radius: 11px;
+            --dot-d: clamp(8.5px, 1.2dvh, 10px);
+        }
+        body.layout-phone .tray-status-title {
+            font-size: 12px;
+            margin-bottom: 1px;
+        }
+        body.layout-phone .tray-status-sub {
+            font-size: 10.5px;
+            line-height: 1.25;
         }
         body.layout-phone .tray-buttons-col {
             flex-direction: row;
+            gap: 6px;
         }
         body.layout-phone .btn-roll-main,
         body.layout-phone .btn-reroll-sub {
             flex: 1;
-            padding: 9px 10px;
-            font-size: 12px;
+            padding: 7px 8px;
+            font-size: 11px;
+            border-radius: 8px;
         }
 
         /* 📟 패드·컴퓨터 모드 (가로 최적화 · 화면 스크롤 없음 100dvh) */
         body.layout-pad_pc {
-            --die-size: 58px;
-            --pip-size: 10.5px;
-            height: 100dvh;
-            overflow: hidden;
+            --die-size: 60px;
+            --pip-size: 11px;
         }
         body.layout-pad_pc .app-shell {
             max-width: 1180px;
-            height: 100dvh;
-            min-height: 0;
             padding: 8px 14px 10px;
             gap: 8px;
-            overflow: hidden;
         }
         body.layout-pad_pc .top-header {
             padding: 7px 12px;
@@ -125,8 +230,6 @@
             grid-template-columns: minmax(0, 1fr) 300px;
             gap: 14px;
             height: 100%;
-            min-height: 0;
-            overflow: hidden;
         }
         body.layout-pad_pc .board-arena {
             height: 100%;
@@ -380,7 +483,6 @@
         }
 
         .lane-card {
-            min-height: 226px;
             background: var(--panel-card);
             border: 1.5px solid rgba(148, 163, 184, 0.24);
             border-radius: 14px;
@@ -654,21 +756,21 @@
         }
 
         .die-sz-reroll {
-            width: 46px;
-            height: 46px;
-            min-width: 46px;
-            min-height: 46px;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            min-height: 44px;
             border-radius: 10px;
-            --dot-d: 8.5px;
+            --dot-d: 8px;
         }
 
         .die-sz-mini {
-            width: 34px;
-            height: 34px;
-            min-width: 34px;
-            min-height: 34px;
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            min-height: 30px;
             border-radius: 8px;
-            --dot-d: 6.5px;
+            --dot-d: 5.5px;
         }
 
         .die-sz-full {
@@ -871,11 +973,11 @@
             background: #0f172a;
             border: 1.5px solid #64748b;
             border-radius: 11px;
-            padding: 6px 10px;
+            padding: 5px 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             cursor: pointer;
             transition: all 0.15s ease;
             -webkit-appearance: none;
@@ -993,7 +1095,7 @@
     </div>
 
     <!-- 메인 앱 셸 -->
-    <div class="app-shell">
+    <div id="app" class="app-shell">
 
         <!-- 1. 상단 헤더 바 (연승 배지 + 화면 비율 스위치 + 규칙/전적/음소거/새게임) -->
         <header class="top-header">
@@ -1015,7 +1117,7 @@
             </div>
         </header>
 
-        <!-- 메인 워크스페이스 (패드 모드에서는 좌측 보드 / 우측 컨트롤 2단 분할) -->
+        <!-- 메인 워크스페이스 (패드·컴퓨터에서는 좌측 보드 / 우측 컨트롤 2단 분할, 핸드폰에서는 무스크롤 세로 배치) -->
         <div class="workspace-container">
 
             <!-- 2. 상·하 대칭 세로 3열 카드 보드 -->
@@ -1025,15 +1127,15 @@
                 <div class="faction-bar faction-ai">
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span>🎭 상대</span>
-                        <select id="ai-difficulty" style="background:#0f172a;color:#fda4af;border:1px solid rgba(244,63,94,0.45);border-radius:6px;padding:2px 6px;font-size:11px;font-weight:800;outline:none;">
+                        <select id="ai-difficulty" style="background:#0f172a;color:#fda4af;border:1px solid rgba(244,63,94,0.45);border-radius:6px;padding:1px 5px;font-size:10.5px;font-weight:800;outline:none;">
                             <option value="normal" selected>일반</option>
                             <option value="tazza">타짜</option>
                         </select>
                     </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span id="ai-turn-status" style="font-size:11px;color:#fecdd3;">대기 중</span>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span id="ai-turn-status" style="font-size:10.5px;color:#fecdd3;">대기 중</span>
                         <div id="ai-mini-die-box" style="display:flex;align-items:center;"></div>
-                        <span style="font-size:11.5px;color:#fecdd3;">총점 <b id="score-ai-total">0</b></span>
+                        <span style="font-size:11px;color:#fecdd3;">총점 <b id="score-ai-total">0</b></span>
                         <span id="ai-turn-badge" class="turn-indicator turn-ind-ai hidden">상대 턴</span>
                     </div>
                 </div>
@@ -1050,14 +1152,14 @@
                 <!-- 플레이어 진영 하단 바 -->
                 <div class="faction-bar faction-player">
                     <span>👑 나</span>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span style="font-size:11.5px;color:#a7f3d0;">점령 <b id="score-player-lines">0</b>:<b id="score-ai-lines">0</b> · 총점 <b id="score-player-total">0</b></span>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="font-size:11px;color:#a7f3d0;">점령 <b id="score-player-lines">0</b>:<b id="score-ai-lines">0</b> · 총점 <b id="score-player-total">0</b></span>
                         <span id="player-turn-badge" class="turn-indicator turn-ind-player">내 턴</span>
                     </div>
                 </div>
             </main>
 
-            <!-- 3. 플레이어 주사위 액션 트레이 (패드 모드에서는 우측 고정 사이드바) -->
+            <!-- 3. 플레이어 주사위 액션 트레이 -->
             <section class="action-tray">
                 <div class="tray-left-die">
                     <div id="player-die-slot" style="display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
@@ -1065,11 +1167,11 @@
                     <!-- 리롤 전/후 2택 선택 UI -->
                     <div id="reroll-choice-box" class="reroll-pair-wrap hidden">
                         <button type="button" id="btn-pick-before" class="reroll-pick-card">
-                            <span style="font-size:10px;font-weight:900;color:#94a3b8;">리롤 전</span>
+                            <span style="font-size:9.5px;font-weight:900;color:#94a3b8;">리롤 전</span>
                             <div id="reroll-before-die"></div>
                         </button>
                         <button type="button" id="btn-pick-after" class="reroll-pick-card" style="border-color:#fde047;">
-                            <span style="font-size:10px;font-weight:900;color:#fde047;">리롤 후</span>
+                            <span style="font-size:9.5px;font-weight:900;color:#fde047;">리롤 후</span>
                             <div id="reroll-after-die"></div>
                         </button>
                     </div>
@@ -1534,7 +1636,7 @@
                 const endX = firstTargetRect.left + firstTargetRect.width / 2;
                 const endY = firstTargetRect.top + firstTargetRect.height / 2;
 
-                const projSize = 56;
+                const projSize = 52;
                 const proj = document.createElement('div');
                 proj.style.position = 'fixed';
                 proj.style.left = `${startX - projSize / 2}px`;
@@ -1639,7 +1741,6 @@
                 comboCount = 1,
                 sizeClass = 'die-sz-board',
                 owner = 'player',
-                isSmashable = false,
                 isRolling = false,
                 isPop = false,
                 isQuestionMark = false,
@@ -1649,7 +1750,7 @@
 
             if (isQuestionMark || !dieObj || !dieObj.value) {
                 return `
-                    <div class="${sizeClass}" style="border-radius:13px;border:2px dashed rgba(250,204,21,0.55);background:rgba(11,14,20,0.75);display:flex;align-items:center;justify-content:center;color:#fde047;font-weight:900;font-size:24px;flex-shrink:0;">
+                    <div class="${sizeClass}" style="border-radius:11px;border:2px dashed rgba(250,204,21,0.55);background:rgba(11,14,20,0.75);display:flex;align-items:center;justify-content:center;color:#fde047;font-weight:900;font-size:21px;flex-shrink:0;">
                         ?
                     </div>
                 `;
@@ -2752,7 +2853,7 @@
                 spawnFxParticles(window.innerWidth / 2, window.innerHeight / 2, ['#fde047', '#10b981', '#38bdf8', '#ffffff'], 65, 11);
                 document.getElementById('result-trophy').textContent = '🏆';
                 document.getElementById('result-title').textContent = isDrawAdvantageWin
-                    ? '승리! (무승부 우세 판정)'
+                    ? '승리! (동점 우세 판정)'
                     : `승리! (🔥 ${state.stats.streak}연승 중)`;
                 document.getElementById('result-title').style.color = '#fde047';
                 document.getElementById('result-subtitle').textContent = isDrawAdvantageWin
