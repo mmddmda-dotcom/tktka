@@ -13,14 +13,20 @@
         }
 
         :root {
-            --bg-deep: #0b0e14;
-            --bg-velvet: #131823;
-            --panel-card: #1d2536;
-            --gold-light: #fde047;
-            --gold-border: rgba(234, 179, 8, 0.38);
-            --player-accent: #38bdf8;
-            --text-primary: #f8fafc;
-            --die-size: 60px;
+            --wood-darkest: #120905;
+            --wood-deep: #1e110a;
+            --wood-board: #2d190e;
+            --wood-lane: #372013;
+            --wood-slot: #150b06;
+            --velvet-crimson: #6b0f1c;
+            --velvet-deep: #38060d;
+            --brass-bright: #f5d47e;
+            --brass-mid: #c8963e;
+            --brass-dark: #744e17;
+            --brass-border: rgba(218, 174, 88, 0.62);
+            --ivory-text: #fbf4e4;
+            --ivory-muted: #d8c7ab;
+            --die-size: 58px;
             --pip-size: 11px;
         }
 
@@ -29,12 +35,27 @@
             height: 100dvh;
             max-height: 100dvh;
             font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-            background-color: var(--bg-deep);
+            background-color: var(--wood-darkest);
+            /* 순수 CSS 월넛 원목 결 테이블 상판 텍스처 */
             background-image:
-                radial-gradient(circle at 50% 0%, rgba(234, 179, 8, 0.12) 0%, transparent 55%),
-                radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
-                linear-gradient(180deg, #0b0e14 0%, #111622 100%);
-            color: var(--text-primary);
+                radial-gradient(ellipse at 50% 35%, rgba(245, 212, 126, 0.13) 0%, rgba(8, 4, 2, 0.78) 82%),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(0, 0, 0, 0.24) 0px,
+                    rgba(255, 215, 165, 0.03) 3px,
+                    transparent 6px,
+                    transparent 38px,
+                    rgba(0, 0, 0, 0.18) 40px,
+                    transparent 42px,
+                    transparent 96px
+                ),
+                repeating-linear-gradient(
+                    180deg,
+                    rgba(58, 32, 17, 0.45) 0px,
+                    rgba(24, 13, 7, 0.55) 14px,
+                    rgba(44, 24, 13, 0.48) 28px
+                );
+            color: var(--ivory-text);
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
@@ -43,7 +64,7 @@
         .hidden { display: none !important; }
 
         /* =====================================================================
-           레이아웃 모드 (📱 핸드폰 1화면 무스크롤 / 📟 패드·컴퓨터 가로 무스크롤)
+           레이아웃 모드 (📱 핸드폰 / 📟 패드·컴퓨터 — 둘 다 100dvh 무스크롤)
            ===================================================================== */
         .app-shell {
             width: 100%;
@@ -65,9 +86,9 @@
             overflow: hidden;
         }
 
-        /* 📱 핸드폰 모드 (100dvh 한 화면 무스크롤 최적화) */
+        /* 📱 핸드폰 모드 */
         body.layout-phone {
-            --die-size: clamp(36px, 5.1dvh, 46px);
+            --die-size: clamp(36px, 5.0dvh, 46px);
             --pip-size: clamp(6.5px, 0.95dvh, 8.5px);
         }
         body.layout-phone .app-shell {
@@ -114,10 +135,14 @@
         body.layout-phone .board-arena {
             flex: 1;
             min-height: 0;
-            padding: 6px 7px;
+            padding: 7px 8px;
             gap: 4px;
-            border-radius: 13px;
+            border-radius: 14px;
             justify-content: space-between;
+        }
+        body.layout-phone .brass-rivet {
+            width: 6px;
+            height: 6px;
         }
         body.layout-phone .faction-bar {
             padding: 3px 8px;
@@ -184,12 +209,12 @@
             gap: 9px;
         }
         body.layout-phone .die-sz-tray {
-            width: clamp(44px, 6.2dvh, 54px);
-            height: clamp(44px, 6.2dvh, 54px);
-            min-width: clamp(44px, 6.2dvh, 54px);
-            min-height: clamp(44px, 6.2dvh, 54px);
+            width: clamp(44px, 6.0dvh, 54px);
+            height: clamp(44px, 6.0dvh, 54px);
+            min-width: clamp(44px, 6.0dvh, 54px);
+            min-height: clamp(44px, 6.0dvh, 54px);
             border-radius: 11px;
-            --dot-d: clamp(8.5px, 1.2dvh, 10px);
+            --dot-d: clamp(8.5px, 1.15dvh, 10px);
         }
         body.layout-phone .tray-status-title {
             font-size: 12px;
@@ -211,10 +236,10 @@
             border-radius: 8px;
         }
 
-        /* 📟 패드·컴퓨터 모드 (가로 최적화 · 화면 스크롤 없음 100dvh) */
+        /* 📟 패드·컴퓨터 모드 */
         body.layout-pad_pc {
-            --die-size: 60px;
-            --pip-size: 11px;
+            --die-size: clamp(48px, 6.6dvh, 60px);
+            --pip-size: clamp(9px, 1.2dvh, 11px);
         }
         body.layout-pad_pc .app-shell {
             max-width: 1180px;
@@ -227,14 +252,14 @@
         }
         body.layout-pad_pc .workspace-container {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 300px;
+            grid-template-columns: minmax(0, 1fr) 308px;
             gap: 14px;
             height: 100%;
         }
         body.layout-pad_pc .board-arena {
             height: 100%;
             min-height: 0;
-            padding: 9px 12px;
+            padding: 10px 14px;
             gap: 6px;
             justify-content: space-between;
             overflow: hidden;
@@ -306,12 +331,15 @@
         }
 
         /* =====================================================================
-           1. 상단 헤더 & 화면 비율 스위치
+           1. 상단 헤더 & 황동 프레임 스위치
            ===================================================================== */
         .top-header {
             width: 100%;
-            background: rgba(24, 31, 46, 0.95);
-            border: 1px solid var(--gold-border);
+            background-color: #2b180d;
+            background-image:
+                linear-gradient(180deg, rgba(255, 224, 178, 0.09) 0%, rgba(12, 6, 3, 0.52) 100%),
+                repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.14) 0px, transparent 4px, rgba(255, 210, 160, 0.03) 9px, transparent 22px);
+            border: 1.5px solid var(--brass-border);
             border-radius: 14px;
             padding: 9px 12px;
             display: flex;
@@ -319,7 +347,10 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 8px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            box-shadow:
+                0 8px 24px rgba(0, 0, 0, 0.72),
+                inset 0 1px 0 rgba(245, 212, 126, 0.34),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.65);
         }
 
         .brand-group {
@@ -332,20 +363,24 @@
             width: 30px;
             height: 30px;
             border-radius: 8px;
-            background: linear-gradient(135deg, #fde047 0%, #ca8a04 100%);
-            color: #0f172a;
+            background: linear-gradient(145deg, #f7dc94 0%, #c8963e 55%, #8a5e1b 100%);
+            border: 1px solid #fef3c7;
+            color: #241307;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 16px;
             font-weight: 900;
             flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.6);
         }
 
         .brand-title {
             font-size: 15px;
             font-weight: 900;
-            color: #fef3c7;
+            color: #f9e6b8;
+            letter-spacing: -0.01em;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
             white-space: nowrap;
         }
 
@@ -354,17 +389,17 @@
             border-radius: 999px;
             font-size: 11.5px;
             font-weight: 900;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            color: #cbd5e1;
+            background: rgba(20, 11, 6, 0.85);
+            border: 1px solid rgba(200, 150, 62, 0.42);
+            color: var(--ivory-muted);
             white-space: nowrap;
         }
 
         .streak-badge-hot {
-            background: linear-gradient(90deg, rgba(234, 88, 12, 0.35), rgba(225, 29, 72, 0.35));
-            border-color: #fde047;
+            background: linear-gradient(90deg, rgba(180, 83, 9, 0.45), rgba(159, 18, 57, 0.45));
+            border-color: var(--brass-bright);
             color: #fef08a;
-            box-shadow: 0 0 12px rgba(250, 204, 21, 0.35);
+            box-shadow: 0 0 12px rgba(243, 208, 120, 0.35);
         }
 
         .header-actions {
@@ -377,17 +412,18 @@
         .layout-switcher {
             display: inline-flex;
             align-items: center;
-            background: #0f172a;
-            border: 1px solid rgba(148, 163, 184, 0.32);
+            background: #170d07;
+            border: 1px solid rgba(200, 150, 62, 0.4);
             border-radius: 9px;
             padding: 2px;
             gap: 2px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
         }
 
         .layout-opt-btn {
             background: transparent;
             border: none;
-            color: #94a3b8;
+            color: #b59f80;
             font-size: 11px;
             font-weight: 800;
             padding: 4px 8px;
@@ -398,30 +434,30 @@
             -webkit-appearance: none;
         }
         .layout-opt-btn:hover {
-            color: #f8fafc;
+            color: var(--ivory-text);
         }
         .layout-opt-btn.active {
-            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
-            color: #fde047;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(180deg, #5c361e 0%, #3d2212 100%);
+            border: 1px solid rgba(243, 208, 120, 0.48);
+            color: var(--brass-bright);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
         }
 
-        /* AI 모드 강조 세그먼트 스위치 */
         .ai-mode-switcher {
             display: inline-flex;
             align-items: center;
-            background: rgba(15, 23, 42, 0.95);
-            border: 1.5px solid rgba(244, 63, 94, 0.55);
+            background: rgba(20, 11, 6, 0.92);
+            border: 1.5px solid rgba(212, 168, 83, 0.58);
             border-radius: 10px;
             padding: 2px;
             gap: 2px;
-            box-shadow: 0 0 12px rgba(244, 63, 94, 0.22);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.65);
         }
 
         .ai-mode-btn {
             background: transparent;
             border: none;
-            color: #94a3b8;
+            color: #b59f80;
             font-size: 11px;
             font-weight: 900;
             padding: 3px 9px;
@@ -432,17 +468,19 @@
             -webkit-appearance: none;
         }
         .ai-mode-btn:hover {
-            color: #f8fafc;
+            color: var(--ivory-text);
         }
         .ai-mode-btn.active-normal {
-            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
-            color: #38bdf8;
-            box-shadow: 0 1px 6px rgba(56, 189, 248, 0.45);
+            background: linear-gradient(180deg, #4b2d1a 0%, #2f1b0f 100%);
+            border: 1px solid rgba(243, 208, 120, 0.48);
+            color: #fde68a;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
         }
         .ai-mode-btn.active-tazza {
-            background: linear-gradient(180deg, #e11d48 0%, #9f1239 100%);
+            background: linear-gradient(180deg, #b91c1c 0%, #7f1d1d 100%);
+            border: 1px solid #fca5a5;
             color: #fef08a;
-            box-shadow: 0 0 12px rgba(244, 63, 94, 0.75);
+            box-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
         }
 
         body.layout-phone .ai-mode-btn {
@@ -450,10 +488,21 @@
             font-size: 10px;
         }
 
+        .ai-queued-badge {
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(200, 150, 62, 0.24);
+            border: 1px solid rgba(243, 208, 120, 0.65);
+            color: #fef08a;
+            white-space: nowrap;
+        }
+
         .ui-btn {
-            background: #1e293b;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            color: #f1f5f9;
+            background: linear-gradient(180deg, #472a18 0%, #2e1a0e 100%);
+            border: 1px solid rgba(200, 150, 62, 0.44);
+            color: var(--ivory-text);
             font-size: 11.5px;
             font-weight: 800;
             padding: 6px 10px;
@@ -461,53 +510,97 @@
             cursor: pointer;
             transition: all 0.14s ease;
             white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 232, 185, 0.16);
             -webkit-appearance: none;
         }
-        .ui-btn:hover { border-color: var(--gold-light); background: #273549; }
+        .ui-btn:hover { border-color: var(--brass-bright); background: linear-gradient(180deg, #59351f 0%, #3a2112 100%); }
         .ui-btn:active { transform: scale(0.95); }
 
         .ui-btn-gold {
-            background: linear-gradient(180deg, #facc15 0%, #ca8a04 100%);
-            border-color: #fef08a;
-            color: #0f172a;
+            background: linear-gradient(180deg, #f3d078 0%, #c8963e 60%, #9b6c22 100%);
+            border-color: #fef3c7;
+            color: #241307;
             font-weight: 900;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.55);
         }
 
         /* =====================================================================
-           2. 메인 세로 3열 카드 보드
+           2. 메인 월넛 원목 & 황동 프레임 3열 보드게임 판
            ===================================================================== */
         .board-arena {
+            position: relative;
             width: 100%;
-            background: var(--bg-velvet);
-            border: 1.5px solid var(--gold-border);
+            background-color: var(--wood-board);
+            /* 순수 CSS 월넛 원목 나뭇결 다중 레이어 */
+            background-image:
+                radial-gradient(ellipse at 50% 50%, rgba(245, 212, 126, 0.09) 0%, rgba(10, 5, 2, 0.65) 100%),
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(18, 9, 4, 0.28) 0px,
+                    rgba(255, 214, 165, 0.035) 2px,
+                    transparent 5px,
+                    transparent 19px,
+                    rgba(15, 7, 3, 0.24) 21px,
+                    transparent 24px,
+                    transparent 46px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(0, 0, 0, 0.18) 0px,
+                    transparent 12px,
+                    rgba(92, 54, 28, 0.22) 28px,
+                    transparent 54px
+                );
+            border: 3px solid var(--brass-mid);
             border-radius: 18px;
             padding: 12px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.85),
+                0 0 0 2px #1a0e07,
+                inset 0 0 0 2px rgba(245, 212, 126, 0.34),
+                inset 0 4px 16px rgba(0, 0, 0, 0.78);
         }
+
+        .brass-rivet {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fef3c7 0%, #c8963e 65%, #694412 100%);
+            border: 1px solid #4a2e0a;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+            pointer-events: none;
+            z-index: 6;
+        }
+        .rivet-tl { top: 6px; left: 6px; }
+        .rivet-tr { top: 6px; right: 6px; }
+        .rivet-bl { bottom: 6px; left: 6px; }
+        .rivet-br { bottom: 6px; right: 6px; }
 
         .faction-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 5px 10px;
+            padding: 5px 11px;
             border-radius: 10px;
             font-size: 12.5px;
             font-weight: 900;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.55);
         }
 
         .faction-ai {
-            background: rgba(244, 63, 94, 0.12);
-            border: 1px solid rgba(244, 63, 94, 0.32);
-            color: #fda4af;
+            background: linear-gradient(90deg, rgba(136, 19, 55, 0.36) 0%, rgba(42, 22, 14, 0.86) 100%);
+            border: 1px solid rgba(244, 63, 94, 0.42);
+            color: #fecdd3;
         }
 
         .faction-player {
-            background: rgba(16, 185, 129, 0.12);
-            border: 1px solid rgba(16, 185, 129, 0.32);
-            color: #6ee7b7;
+            background: linear-gradient(90deg, rgba(6, 95, 70, 0.38) 0%, rgba(42, 22, 14, 0.86) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.44);
+            color: #a7f3d0;
         }
 
         .turn-indicator {
@@ -515,9 +608,10 @@
             border-radius: 999px;
             font-size: 10.5px;
             font-weight: 900;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
         }
-        .turn-ind-ai { background: #e11d48; color: #ffffff; }
-        .turn-ind-player { background: #059669; color: #ffffff; }
+        .turn-ind-ai { background: #be123c; color: #ffffff; border: 1px solid #fda4af; }
+        .turn-ind-player { background: #047857; color: #ffffff; border: 1px solid #6ee7b7; }
 
         .columns-grid-3 {
             width: 100%;
@@ -526,9 +620,19 @@
             gap: 10px;
         }
 
+        /* 원목 판 위에 깎아 만든 나뭇결 열 트레이 */
         .lane-card {
-            background: var(--panel-card);
-            border: 1.5px solid rgba(148, 163, 184, 0.24);
+            background-color: var(--wood-lane);
+            background-image:
+                linear-gradient(180deg, rgba(255, 222, 175, 0.08) 0%, rgba(14, 7, 3, 0.48) 100%),
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(14, 7, 3, 0.25) 0px,
+                    rgba(255, 212, 160, 0.03) 2px,
+                    transparent 4px,
+                    transparent 15px
+                );
+            border: 1.5px solid rgba(200, 150, 62, 0.45);
             border-radius: 14px;
             padding: 8px 6px;
             display: flex;
@@ -537,45 +641,53 @@
             justify-content: space-between;
             gap: 6px;
             position: relative;
+            box-shadow:
+                inset 0 3px 8px rgba(0, 0, 0, 0.75),
+                inset 0 -1px 0 rgba(245, 212, 126, 0.18),
+                0 3px 8px rgba(0, 0, 0, 0.5);
             transition: all 0.16s ease;
         }
 
         .lane-selectable {
             cursor: pointer;
-            border-color: var(--player-accent);
-            background: rgba(14, 116, 144, 0.22);
-            box-shadow: 0 0 16px rgba(56, 189, 248, 0.24);
+            border-color: #f3d078;
+            background-image:
+                linear-gradient(180deg, rgba(96, 61, 31, 0.88) 0%, rgba(56, 33, 17, 0.94) 100%),
+                repeating-linear-gradient(0deg, rgba(14, 7, 3, 0.22) 0px, transparent 4px, transparent 15px);
+            box-shadow:
+                0 0 16px rgba(243, 208, 120, 0.32),
+                inset 0 1px 0 rgba(254, 243, 199, 0.28);
         }
         .lane-selectable:hover {
-            border-color: #bae6fd;
+            border-color: #fef3c7;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.42);
+            box-shadow: 0 6px 20px rgba(243, 208, 120, 0.48);
         }
 
         .lane-smash-target {
             cursor: pointer;
             border-color: #ef4444 !important;
-            background: rgba(153, 27, 27, 0.36) !important;
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6) !important;
+            background-image: linear-gradient(180deg, rgba(136, 26, 26, 0.72) 0%, rgba(72, 14, 14, 0.88) 100%) !important;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.65) !important;
         }
         .lane-smash-target:hover {
             transform: translateY(-2px) scale(1.015);
-            box-shadow: 0 0 26px rgba(239, 68, 68, 0.85) !important;
+            box-shadow: 0 0 26px rgba(239, 68, 68, 0.88) !important;
         }
 
         .lane-fixed-ally {
             cursor: pointer;
             border-color: #10b981 !important;
-            background: rgba(6, 78, 59, 0.34) !important;
-            box-shadow: 0 0 16px rgba(16, 185, 129, 0.38) !important;
+            background-image: linear-gradient(180deg, rgba(6, 78, 59, 0.6) 0%, rgba(28, 38, 24, 0.9) 100%) !important;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.4) !important;
         }
         .lane-fixed-ally:hover { border-color: #6ee7b7 !important; transform: translateY(-2px); }
 
         .lane-fixed-enemy {
             cursor: pointer;
-            border-color: #facc15 !important;
-            background: rgba(113, 63, 18, 0.34) !important;
-            box-shadow: 0 0 16px rgba(250, 204, 21, 0.4) !important;
+            border-color: #f3d078 !important;
+            background-image: linear-gradient(180deg, rgba(120, 67, 19, 0.58) 0%, rgba(58, 33, 14, 0.92) 100%) !important;
+            box-shadow: 0 0 16px rgba(243, 208, 120, 0.45) !important;
         }
         .lane-fixed-enemy:hover { border-color: #fef08a !important; transform: translateY(-2px); }
 
@@ -597,17 +709,16 @@
             border-radius: 999px;
         }
         .bonus-tag-2 {
-            background: rgba(250, 204, 21, 0.22);
-            color: #fde047;
-            border: 1px solid rgba(250, 204, 21, 0.55);
+            background: rgba(200, 150, 62, 0.3);
+            color: #fef08a;
+            border: 1px solid rgba(243, 208, 120, 0.68);
         }
         .bonus-tag-3 {
-            background: rgba(244, 63, 94, 0.3);
-            color: #fda4af;
+            background: rgba(225, 29, 72, 0.36);
+            color: #fecdd3;
             border: 1px solid #fb7185;
         }
 
-        /* 3칸 고정 세로 스택 컨테이너 (position: relative 로 같은 눈 뭉침 직사각형 오버레이 기준 제공) */
         .lane-slots-stack {
             position: relative;
             display: flex;
@@ -619,14 +730,15 @@
             margin: 0 auto;
         }
 
-        /* 같은 눈 2~3개 뭉침을 하나로 감싸는 단일 직사각형 테두리 오버레이 (기존 3칸 배치 절대 변형 없음) */
+        /* 같은 눈 2~3개 뭉침을 하나로 감싸는 황동빛 단일 직사각형 테두리 오버레이 */
         .combo-group-box {
             position: absolute;
             left: -4px;
             right: -4px;
             border-radius: 15px;
-            border: 2px solid rgba(253, 224, 71, 0.72);
-            background: rgba(253, 224, 71, 0.08);
+            border: 2.5px solid rgba(245, 212, 126, 0.92);
+            background: rgba(245, 212, 126, 0.13);
+            box-shadow: 0 0 12px rgba(245, 212, 126, 0.32);
             pointer-events: none;
             z-index: 4;
         }
@@ -636,47 +748,40 @@
             border-radius: 11px;
         }
 
-        .ai-queued-badge {
-            font-size: 10px;
-            font-weight: 900;
-            padding: 2px 6px;
-            border-radius: 999px;
-            background: rgba(250, 204, 21, 0.18);
-            border: 1px solid rgba(250, 204, 21, 0.55);
-            color: #fde047;
-            white-space: nowrap;
-        }
-
+        /* 원목 판 위에 깊게 파인 나무 음각 슬롯 홈 */
         .empty-slot {
             width: var(--die-size);
             height: var(--die-size);
             min-width: var(--die-size);
             min-height: var(--die-size);
             border-radius: 13px;
-            border: 1.5px dashed rgba(148, 163, 184, 0.28);
-            background: rgba(11, 14, 20, 0.54);
+            border: 1.5px solid rgba(116, 78, 23, 0.58);
+            background: radial-gradient(circle at 50% 58%, #110804 0%, #1d1008 72%, #29170d 100%);
+            box-shadow:
+                inset 0 4px 9px rgba(0, 0, 0, 0.94),
+                inset 0 -1px 2px rgba(245, 212, 126, 0.14),
+                0 1px 0 rgba(255, 224, 180, 0.15);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 16px;
-            color: rgba(148, 163, 184, 0.45);
+            color: rgba(216, 199, 171, 0.35);
             position: relative;
             transition: all 0.16s ease;
         }
 
         .empty-slot-active {
-            border-color: rgba(56, 189, 248, 0.75);
-            background: rgba(14, 116, 144, 0.26);
-            color: #7dd3fc;
+            border-color: rgba(243, 208, 120, 0.68);
+            background: radial-gradient(circle at 50% 50%, rgba(66, 40, 19, 0.88) 0%, #190e08 100%);
+            color: #f3d078;
         }
 
         .empty-slot-fixed {
-            border-color: rgba(16, 185, 129, 0.78);
-            background: rgba(6, 78, 59, 0.3);
+            border-color: rgba(16, 185, 129, 0.74);
+            background: radial-gradient(circle at 50% 50%, rgba(6, 78, 59, 0.42) 0%, #15120c 100%);
             color: #6ee7b7;
         }
 
-        /* 열 호버 시 착지 위치 프리뷰 */
         .slot-ghost-preview {
             position: absolute;
             inset: 0;
@@ -692,9 +797,9 @@
         .lane-card:hover .empty-slot-landing {
             border-style: dashed;
             border-width: 2px;
-            border-color: #fde047;
-            background: rgba(250, 204, 21, 0.14);
-            box-shadow: 0 0 14px rgba(250, 204, 21, 0.45);
+            border-color: #f3d078;
+            background: rgba(243, 208, 120, 0.18);
+            box-shadow: 0 0 14px rgba(243, 208, 120, 0.48);
         }
 
         .lane-card:hover .empty-slot-landing .slot-default-marker {
@@ -702,7 +807,7 @@
         }
 
         .lane-card:hover .empty-slot-landing .slot-ghost-preview {
-            opacity: 0.75;
+            opacity: 0.78;
             transform: scale(0.96);
         }
 
@@ -711,14 +816,15 @@
             top: -10px;
             left: 50%;
             transform: translateX(-50%);
-            background: #ef4444;
+            background: #dc2626;
+            border: 1px solid #fecaca;
             color: #ffffff;
             font-size: 10px;
             font-weight: 900;
             padding: 2px 8px;
             border-radius: 999px;
             white-space: nowrap;
-            box-shadow: 0 3px 10px rgba(239, 68, 68, 0.75);
+            box-shadow: 0 3px 10px rgba(220, 38, 38, 0.75);
             z-index: 8;
         }
 
@@ -727,37 +833,41 @@
             top: -10px;
             left: 50%;
             transform: translateX(-50%);
-            background: #facc15;
-            color: #0f172a;
+            background: linear-gradient(180deg, #f3d078 0%, #c8963e 100%);
+            border: 1px solid #fef3c7;
+            color: #241307;
             font-size: 10px;
             font-weight: 900;
             padding: 2px 8px;
             border-radius: 999px;
             white-space: nowrap;
-            box-shadow: 0 3px 10px rgba(250, 204, 21, 0.65);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.65);
             z-index: 8;
         }
 
         /* =====================================================================
-           3. 중앙 VS 라인 비교 바: 내점수(초록) - 화살표 - 상대점수(빨강)
+           3. 중앙 VS 라인 비교 바
            ===================================================================== */
         .vs-divider-grid {
             width: 100%;
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 10px;
-            padding: 3px 0;
+            align-items: center;
         }
 
         .vs-lane-pill {
-            background: rgba(11, 14, 20, 0.9);
-            border: 1px solid rgba(234, 179, 8, 0.32);
+            background: linear-gradient(180deg, #1b1009 0%, #120a05 100%);
+            border: 1px solid rgba(200, 150, 62, 0.48);
             border-radius: 10px;
             padding: 6px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             font-weight: 900;
+            box-shadow:
+                inset 0 2px 4px rgba(0, 0, 0, 0.8),
+                0 1px 0 rgba(255, 224, 180, 0.12);
         }
 
         .vs-score-player {
@@ -789,13 +899,13 @@
         }
 
         .vs-arrow-tie {
-            color: #94a3b8;
+            color: #b59f80;
             font-size: 14px;
             line-height: 1;
         }
 
         /* =====================================================================
-           4. 주사위 디자인 (iPadOS Safari WebKit 100% 호환 명시적 픽셀 Pip 구조)
+           4. 순백색 입체 주사위 디자인 (iPadOS Safari 완벽 호환 구조)
            ===================================================================== */
         .die-face {
             display: block !important;
@@ -803,9 +913,13 @@
             border-radius: 13px;
             opacity: 1 !important;
             visibility: visible !important;
-            background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 75%, #cbd5e1 100%);
-            border: 1.5px solid #e2e8f0;
-            box-shadow: 0 3px 0 #64748b, 0 6px 14px rgba(0, 0, 0, 0.55);
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 68%, #e2e8f0 100%);
+            border: 1.5px solid #ffffff;
+            box-shadow:
+                0 3px 0 #94a3b8,
+                0 6px 14px rgba(0, 0, 0, 0.72),
+                inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
+                inset 0 -2px 3px rgba(148, 163, 184, 0.35);
             -webkit-appearance: none;
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
@@ -881,43 +995,31 @@
             min-width: var(--dot-d, 11px);
             min-height: var(--dot-d, 11px);
             border-radius: 50%;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow:
+                inset 0 1.5px 2px rgba(0, 0, 0, 0.7),
+                0 0.5px 0 rgba(255, 255, 255, 0.8);
             flex-shrink: 0;
         }
 
-        .pip-player { background: #1e293b; }
+        .pip-player { background: #18202c; }
         .pip-ai { background: #be123c; }
 
-        /* 내 고정 주사위: 단일 초록색 테두리 (4px 두께, 이중 외곽 광원 제거) */
+        /* 내 고정 주사위: 단일 초록색 4px 테두리 */
         .die-fixed-player {
             border: 4px solid #10b981 !important;
-            box-shadow: none !important;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65) !important;
             outline: none !important;
             box-sizing: border-box;
         }
 
-        /* 상대 고정 주사위: 단일 빨간색 테두리 (4px 두께, 이중 외곽 광원 제거) */
+        /* 상대 고정 주사위: 단일 빨간색 4px 테두리 */
         .die-fixed-ai {
             border: 4px solid #ef4444 !important;
-            box-shadow: none !important;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65) !important;
             outline: none !important;
             box-sizing: border-box;
         }
 
-        /* 트레이 고정 주사위 테두리 */
-        .die-fixed-tray-player {
-            border: 4px solid #10b981 !important;
-            box-shadow: none !important;
-            box-sizing: border-box;
-        }
-
-        .die-fixed-tray-ai {
-            border: 4px solid #ef4444 !important;
-            box-shadow: none !important;
-            box-sizing: border-box;
-        }
-
-        /* 트레이(미배치 상태) 전용 자물쇠 배지 */
         .die-lock-pin {
             position: absolute;
             top: -7px;
@@ -957,20 +1059,47 @@
         .anim-pop { animation: diePopIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
         /* =====================================================================
-           5. 하단 / 우측 플레이어 주사위 액션 트레이
+           5. 원목 테두리 + 로열 크림슨 빨간 벨벳 주사위 트레이 (Dice Tray)
            ===================================================================== */
         .action-tray {
+            position: relative;
             width: 100%;
-            background: rgba(24, 31, 46, 0.96);
-            border: 1.5px solid var(--gold-border);
-            border-radius: 16px;
+            background-color: var(--velvet-crimson);
+            /* 순수 CSS 로열 크림슨 빨간 벨벳 직물 교차 위빙 + 벨벳 광택 + 깊은 안쪽 음영 */
+            background-image:
+                radial-gradient(ellipse at 40% 38%, rgba(225, 29, 72, 0.46) 0%, rgba(127, 17, 34, 0.22) 52%, rgba(36, 4, 9, 0.88) 100%),
+                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.025) 0px, rgba(255, 255, 255, 0.025) 1px, transparent 1px, transparent 4px),
+                repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.14) 0px, rgba(0, 0, 0, 0.14) 1px, transparent 1px, transparent 4px);
+            border: 3px solid #4a2a16;
+            border-radius: 17px;
             padding: 12px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+            box-shadow:
+                0 12px 30px rgba(0, 0, 0, 0.8),
+                0 0 0 1.5px var(--brass-mid),
+                inset 0 0 0 1.5px rgba(245, 212, 126, 0.44),
+                inset 0 6px 18px rgba(24, 2, 6, 0.88),
+                inset 0 -4px 12px rgba(24, 2, 6, 0.72);
         }
+
+        .tray-stud {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fef3c7 0%, #c8963e 65%, #5c3a0e 100%);
+            border: 1px solid #382107;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+            pointer-events: none;
+            z-index: 4;
+        }
+        .tray-stud-tl { top: 5px; left: 5px; }
+        .tray-stud-tr { top: 5px; right: 5px; }
+        .tray-stud-bl { bottom: 5px; left: 5px; }
+        .tray-stud-br { bottom: 5px; right: 5px; }
 
         .tray-left-die {
             display: flex;
@@ -980,17 +1109,29 @@
             flex: 1;
         }
 
+        #player-die-slot {
+            padding: 6px;
+            border-radius: 18px;
+            background: radial-gradient(circle at 50% 45%, rgba(159, 18, 57, 0.48) 0%, rgba(36, 4, 9, 0.68) 100%);
+            border: 1px dashed rgba(245, 212, 126, 0.45);
+            box-shadow:
+                inset 0 3px 8px rgba(15, 2, 4, 0.8),
+                0 1px 0 rgba(255, 200, 210, 0.14);
+        }
+
         .tray-status-title {
             font-size: 13.5px;
             font-weight: 900;
             color: #fef08a;
             margin-bottom: 3px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.88);
         }
 
         .tray-status-sub {
             font-size: 11.5px;
-            color: #cbd5e1;
+            color: #fce7f3;
             line-height: 1.38;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
         }
 
         .tray-buttons-col {
@@ -1003,22 +1144,24 @@
         .btn-roll-main {
             padding: 10px 16px;
             border-radius: 11px;
-            border: 1.5px solid #fef08a;
-            background: linear-gradient(180deg, #facc15 0%, #d97706 100%);
-            color: #0f172a;
+            border: 1.5px solid #fef3c7;
+            background: linear-gradient(180deg, #f3d078 0%, #c8963e 55%, #9b6c22 100%);
+            color: #241307;
             font-size: 13px;
             font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(217, 119, 6, 0.45);
+            box-shadow:
+                0 4px 14px rgba(0, 0, 0, 0.55),
+                inset 0 1px 0 rgba(255, 255, 255, 0.55);
             transition: all 0.14s ease;
             -webkit-appearance: none;
         }
-        .btn-roll-main:hover:not(:disabled) { filter: brightness(1.08); }
+        .btn-roll-main:hover:not(:disabled) { filter: brightness(1.07); }
         .btn-roll-main:active:not(:disabled) { transform: scale(0.96); }
         .btn-roll-main:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 
         .btn-roll-fixed {
-            border-color: #6ee7b7;
+            border-color: #a7f3d0;
             background: linear-gradient(180deg, #34d399 0%, #059669 100%);
             color: #042f2e;
             box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
@@ -1027,16 +1170,16 @@
         .btn-reroll-sub {
             padding: 7px 12px;
             border-radius: 9px;
-            border: 1px solid rgba(168, 85, 247, 0.6);
-            background: rgba(88, 28, 135, 0.38);
-            color: #e9d5ff;
+            border: 1px solid rgba(243, 208, 120, 0.65);
+            background: linear-gradient(180deg, rgba(42, 16, 12, 0.85) 0%, rgba(22, 8, 6, 0.92) 100%);
+            color: #fde68a;
             font-size: 11.5px;
             font-weight: 900;
             cursor: pointer;
             transition: all 0.14s ease;
             -webkit-appearance: none;
         }
-        .btn-reroll-sub:hover:not(:disabled) { background: rgba(107, 33, 168, 0.62); border-color: #d8b4fe; }
+        .btn-reroll-sub:hover:not(:disabled) { background: rgba(68, 28, 18, 0.92); border-color: var(--brass-bright); }
         .btn-reroll-sub:disabled { opacity: 0.35; cursor: not-allowed; }
 
         .reroll-pair-wrap {
@@ -1047,8 +1190,8 @@
         }
 
         .reroll-pick-card {
-            background: #0f172a;
-            border: 1.5px solid #64748b;
+            background: rgba(24, 6, 9, 0.88);
+            border: 1.5px solid rgba(200, 150, 62, 0.65);
             border-radius: 11px;
             padding: 5px 8px;
             display: flex;
@@ -1059,16 +1202,16 @@
             transition: all 0.15s ease;
             -webkit-appearance: none;
         }
-        .reroll-pick-card:hover { border-color: #fde047; transform: translateY(-2px); background: #1e293b; }
+        .reroll-pick-card:hover { border-color: var(--brass-bright); transform: translateY(-2px); background: rgba(48, 12, 18, 0.95); }
 
         /* =====================================================================
-           6. 코인 토스 & 모달 오버레이
+           6. 황동 코인 토스 & 원목 모달 오버레이
            ===================================================================== */
         .overlay-backdrop {
             position: fixed;
             inset: 0;
             z-index: 50;
-            background: rgba(6, 9, 15, 0.86);
+            background: rgba(10, 5, 2, 0.86);
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
             display: flex;
@@ -1090,15 +1233,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 4px solid #fef08a;
-            box-shadow: 0 0 28px rgba(250, 204, 21, 0.6), inset 0 0 16px rgba(120, 53, 15, 0.75);
+            border: 4px solid #fef3c7;
+            box-shadow: 0 0 28px rgba(243, 208, 120, 0.6), inset 0 0 16px rgba(120, 53, 15, 0.75);
         }
         .coin-front {
-            background: radial-gradient(circle at 35% 30%, #fef08a 0%, #f59e0b 65%, #b45309 100%);
-            color: #1e1b18;
+            background: radial-gradient(circle at 35% 30%, #fef3c7 0%, #d4a853 65%, #8a5e1b 100%);
+            color: #241307;
         }
         .coin-back {
-            background: radial-gradient(circle at 35% 30%, #fecdd3 0%, #e11d48 65%, #881337 100%);
+            background: radial-gradient(circle at 35% 30%, #fecdd3 0%, #be123c 65%, #7f1d1d 100%);
             color: #ffffff;
             transform: rotateY(180deg);
         }
@@ -1106,12 +1249,14 @@
         .modal-card {
             width: 100%;
             max-width: 470px;
-            background: #181f2e;
-            border: 2px solid #eab308;
+            background: linear-gradient(180deg, #331e12 0%, #1f120a 100%);
+            border: 2px solid var(--brass-mid);
             border-radius: 18px;
             padding: 20px;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
-            color: #f8fafc;
+            box-shadow:
+                0 24px 60px rgba(0, 0, 0, 0.92),
+                inset 0 1px 0 rgba(243, 208, 120, 0.3);
+            color: var(--ivory-text);
         }
 
         @keyframes shake-hit {
@@ -1132,7 +1277,7 @@
 
     <!-- 50:50 코인 토스 오버레이 -->
     <div id="cointoss-overlay" class="overlay-backdrop hidden">
-        <div style="font-size:11px;letter-spacing:0.22em;color:#fde047;margin-bottom:10px;font-weight:900;">FIRST TURN COIN TOSS</div>
+        <div style="font-size:11px;letter-spacing:0.22em;color:#f3d078;margin-bottom:10px;font-weight:900;">FIRST TURN COIN TOSS</div>
         <div class="coin-stage">
             <div id="coin-3d-el" class="coin-3d">
                 <div class="coin-face coin-front">
@@ -1145,10 +1290,10 @@
                 </div>
             </div>
         </div>
-        <div id="cointoss-title" style="font-size:21px;font-weight:900;color:#fde047;text-align:center;">
+        <div id="cointoss-title" style="font-size:21px;font-weight:900;color:#f3d078;text-align:center;">
             🪙 운명의 동전을 던집니다...
         </div>
-        <div id="cointoss-sub" style="font-size:12.5px;color:#cbd5e1;margin-top:6px;font-weight:700;text-align:center;">
+        <div id="cointoss-sub" style="font-size:12.5px;color:#d6c5a9;margin-top:6px;font-weight:700;text-align:center;">
             앞면(👑): 나 선공 · 뒷면(🎭): 상대 선공 (50:50)
         </div>
     </div>
@@ -1179,8 +1324,13 @@
         <!-- 메인 워크스페이스 -->
         <div class="workspace-container">
 
-            <!-- 2. 상·하 대칭 세로 3열 카드 보드 -->
+            <!-- 2. 상·하 대칭 세로 3열 원목 보드 -->
             <main id="board-arena" class="board-arena">
+                <!-- 황동 코너 리벳 -->
+                <span class="brass-rivet rivet-tl"></span>
+                <span class="brass-rivet rivet-tr"></span>
+                <span class="brass-rivet rivet-bl"></span>
+                <span class="brass-rivet rivet-br"></span>
 
                 <!-- 상대 진영 상단 바 -->
                 <div class="faction-bar faction-ai">
@@ -1219,19 +1369,24 @@
                 </div>
             </main>
 
-            <!-- 3. 플레이어 주사위 액션 트레이 -->
+            <!-- 3. 원목 프레임 + 빨간 벨벳 주사위 액션 트레이 -->
             <section class="action-tray">
+                <span class="tray-stud tray-stud-tl"></span>
+                <span class="tray-stud tray-stud-tr"></span>
+                <span class="tray-stud tray-stud-bl"></span>
+                <span class="tray-stud tray-stud-br"></span>
+
                 <div class="tray-left-die">
                     <div id="player-die-slot" style="display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
 
                     <!-- 리롤 전/후 2택 선택 UI -->
                     <div id="reroll-choice-box" class="reroll-pair-wrap hidden">
                         <button type="button" id="btn-pick-before" class="reroll-pick-card">
-                            <span style="font-size:9.5px;font-weight:900;color:#94a3b8;">리롤 전</span>
+                            <span style="font-size:9.5px;font-weight:900;color:#d6c5a9;">리롤 전</span>
                             <div id="reroll-before-die"></div>
                         </button>
-                        <button type="button" id="btn-pick-after" class="reroll-pick-card" style="border-color:#fde047;">
-                            <span style="font-size:9.5px;font-weight:900;color:#fde047;">리롤 후</span>
+                        <button type="button" id="btn-pick-after" class="reroll-pick-card" style="border-color:#f3d078;">
+                            <span style="font-size:9.5px;font-weight:900;color:#f3d078;">리롤 후</span>
                             <div id="reroll-after-die"></div>
                         </button>
                     </div>
@@ -1255,63 +1410,63 @@
     <div id="gameover-modal" class="overlay-backdrop hidden">
         <div class="modal-card" style="text-align:center;">
             <div id="result-trophy" style="font-size:46px;margin-bottom:6px;">🏆</div>
-            <h2 id="result-title" style="font-size:23px;font-weight:900;color:#fde047;margin-bottom:4px;">승리!</h2>
-            <p id="result-subtitle" style="font-size:13px;color:#cbd5e1;margin-bottom:14px;">3개 열 중 2개 열을 점령했습니다!</p>
-            <div id="result-lanes-summary" style="display:flex;flex-direction:column;gap:6px;background:#0f172a;border:1px solid rgba(148,163,184,0.25);border-radius:12px;padding:10px;margin-bottom:16px;"></div>
+            <h2 id="result-title" style="font-size:23px;font-weight:900;color:#f3d078;margin-bottom:4px;">승리!</h2>
+            <p id="result-subtitle" style="font-size:13px;color:#d6c5a9;margin-bottom:14px;">3개 열 중 2개 열을 점령했습니다!</p>
+            <div id="result-lanes-summary" style="display:flex;flex-direction:column;gap:6px;background:#160c07;border:1px solid rgba(200,150,62,0.35);border-radius:12px;padding:10px;margin-bottom:16px;"></div>
             <button type="button" id="btn-modal-rematch" class="btn-roll-main" style="width:100%;padding:11px;">
                 🪙 코인 토스로 한 판 더!
             </button>
         </div>
     </div>
 
-    <!-- 전적 모달 (일반 모드 / 타짜 모드 분리, 알까기 파괴 주사위 항목 제거) -->
+    <!-- 전적 모달 (일반 모드 / 타짜 모드 분리) -->
     <div id="stats-modal" class="overlay-backdrop hidden">
         <div class="modal-card" style="text-align:center;max-width:480px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid rgba(148,163,184,0.25);">
-                <h3 style="font-size:16px;font-weight:900;color:#fde047;">📊 티카투카 모드별 전적</h3>
-                <button type="button" id="btn-close-stats" style="background:none;border:none;color:#cbd5e1;font-size:18px;font-weight:900;cursor:pointer;padding:2px 6px;">✕</button>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid rgba(200,150,62,0.32);">
+                <h3 style="font-size:16px;font-weight:900;color:#f3d078;">📊 티카투카 모드별 전적</h3>
+                <button type="button" id="btn-close-stats" style="background:none;border:none;color:#d6c5a9;font-size:18px;font-weight:900;cursor:pointer;padding:2px 6px;">✕</button>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:10px;margin:14px 0;">
                 <!-- 일반 모드 전적 카드 -->
-                <div style="background:#0f172a;border:1px solid rgba(56,189,248,0.35);border-radius:12px;padding:12px;text-align:left;">
+                <div style="background:#160c07;border:1px solid rgba(200,150,62,0.38);border-radius:12px;padding:12px;text-align:left;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                        <span style="font-size:13px;font-weight:900;color:#38bdf8;">🤖 일반 모드</span>
-                        <span id="stat-normal-rate" style="font-size:12.5px;font-weight:900;color:#fde047;">승률 0.0%</span>
+                        <span style="font-size:13px;font-weight:900;color:#fde68a;">🤖 일반 모드</span>
+                        <span id="stat-normal-rate" style="font-size:12.5px;font-weight:900;color:#f3d078;">승률 0.0%</span>
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;text-align:center;">
-                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
-                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">총 전적</div>
+                        <div style="background:#26160d;border:1px solid rgba(200,150,62,0.2);border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#b59f80;font-weight:800;">총 전적</div>
                             <div id="stat-normal-total" style="font-size:13.5px;font-weight:900;color:#ffffff;margin-top:2px;">0판</div>
                         </div>
-                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
-                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">승 / 패</div>
+                        <div style="background:#26160d;border:1px solid rgba(200,150,62,0.2);border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#b59f80;font-weight:800;">승 / 패</div>
                             <div id="stat-normal-wdl" style="font-size:13.5px;font-weight:900;color:#6ee7b7;margin-top:2px;">0승 0패</div>
                         </div>
-                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
-                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">현재 / 최고 연승</div>
-                            <div id="stat-normal-streaks" style="font-size:12.5px;font-weight:900;color:#7dd3fc;margin-top:2px;">0 / 0연승</div>
+                        <div style="background:#26160d;border:1px solid rgba(200,150,62,0.2);border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#b59f80;font-weight:800;">현재 / 최고 연승</div>
+                            <div id="stat-normal-streaks" style="font-size:12.5px;font-weight:900;color:#f3d078;margin-top:2px;">0 / 0연승</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 타짜 모드 전적 카드 -->
-                <div style="background:#0f172a;border:1px solid rgba(244,63,94,0.42);border-radius:12px;padding:12px;text-align:left;">
+                <div style="background:#160c07;border:1px solid rgba(244,63,94,0.45);border-radius:12px;padding:12px;text-align:left;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                         <span style="font-size:13px;font-weight:900;color:#fda4af;">🃏 타짜 모드</span>
-                        <span id="stat-tazza-rate" style="font-size:12.5px;font-weight:900;color:#fde047;">승률 0.0%</span>
+                        <span id="stat-tazza-rate" style="font-size:12.5px;font-weight:900;color:#f3d078;">승률 0.0%</span>
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;text-align:center;">
-                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
-                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">총 전적</div>
+                        <div style="background:#26160d;border:1px solid rgba(200,150,62,0.2);border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#b59f80;font-weight:800;">총 전적</div>
                             <div id="stat-tazza-total" style="font-size:13.5px;font-weight:900;color:#ffffff;margin-top:2px;">0판</div>
                         </div>
-                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
-                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">승 / 패</div>
+                        <div style="background:#26160d;border:1px solid rgba(200,150,62,0.2);border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#b59f80;font-weight:800;">승 / 패</div>
                             <div id="stat-tazza-wdl" style="font-size:13.5px;font-weight:900;color:#6ee7b7;margin-top:2px;">0승 0패</div>
                         </div>
-                        <div style="background:#181f2e;border-radius:8px;padding:7px 4px;">
-                            <div style="font-size:10px;color:#94a3b8;font-weight:800;">현재 / 최고 연승</div>
+                        <div style="background:#26160d;border:1px solid rgba(200,150,62,0.2);border-radius:8px;padding:7px 4px;">
+                            <div style="font-size:10px;color:#b59f80;font-weight:800;">현재 / 최고 연승</div>
                             <div id="stat-tazza-streaks" style="font-size:12.5px;font-weight:900;color:#fda4af;margin-top:2px;">0 / 0연승</div>
                         </div>
                     </div>
@@ -1328,27 +1483,27 @@
     <!-- 규칙 설명 모달 -->
     <div id="rules-modal" class="overlay-backdrop hidden">
         <div class="modal-card" style="max-width:490px;text-align:left;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid rgba(148,163,184,0.25);">
-                <h3 style="font-size:16px;font-weight:900;color:#fde047;">📖 티카투카 : 운명의 주사위 규칙</h3>
-                <button type="button" id="btn-close-rules" style="background:none;border:none;color:#cbd5e1;font-size:18px;font-weight:900;cursor:pointer;padding:2px 6px;">✕</button>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid rgba(200,150,62,0.32);">
+                <h3 style="font-size:16px;font-weight:900;color:#f3d078;">📖 티카투카 : 운명의 주사위 규칙</h3>
+                <button type="button" id="btn-close-rules" style="background:none;border:none;color:#d6c5a9;font-size:18px;font-weight:900;cursor:pointer;padding:2px 6px;">✕</button>
             </div>
-            <div style="display:flex;flex-direction:column;gap:9px;font-size:12.5px;color:#e2e8f0;line-height:1.55;max-height:60vh;overflow-y:auto;">
-                <div style="background:#0f172a;padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);">
-                    <div style="font-weight:900;color:#fde047;margin-bottom:2px;">1. 50:50 코인 토스 & 18칸 완주 2선승제</div>
+            <div style="display:flex;flex-direction:column;gap:9px;font-size:12.5px;color:#f3e8d2;line-height:1.55;max-height:60vh;overflow-y:auto;">
+                <div style="background:#160c07;padding:10px 12px;border-radius:10px;border:1px solid rgba(200,150,62,0.28);">
+                    <div style="font-weight:900;color:#f3d078;margin-bottom:2px;">1. 50:50 코인 토스 & 18칸 완주 2선승제</div>
                     <p>매 판 시작 시 <b>코인 토스(50:50)</b>로 선공을 정합니다. 한쪽 9칸이 먼저 차면 해당 턴은 자동 패스되며, <b>양쪽 18칸(나 9칸 + 상대 9칸)이 전부 채워져야 종료</b>됩니다. 3개 열 중 2개 이상 점수가 높으면 승리하며, 열 승수와 총점까지 모두 동점인 무승부 시 <b>나 승리 판정</b>으로 처리됩니다.</p>
                 </div>
-                <div style="background:#0f172a;padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);">
-                    <div style="font-weight:900;color:#7dd3fc;margin-bottom:2px;">2. 같은 눈 보너스 (+1개 / +2개 추가 합산)</div>
+                <div style="background:#160c07;padding:10px 12px;border-radius:10px;border:1px solid rgba(200,150,62,0.28);">
+                    <div style="font-weight:900;color:#fde68a;margin-bottom:2px;">2. 같은 눈 보너스 (+1개 / +2개 추가 합산)</div>
                     <p>같은 열에 동일한 눈 주사위가 모이면 보너스 개수가 추가 합산됩니다:<br>
                     • <b>2개 모임 (+1개 보너스)</b>: 동일 눈 1개 추가 → 예: 2, 2면 2+2+<b>2</b> = <b>6점</b> (4, 4면 <b>12점</b>)<br>
                     • <b>3개 모임 (+2개 보너스)</b>: 동일 눈 2개 추가 → 예: 2, 2, 2면 2×5 = <b>10점</b> (4, 4, 4면 <b>20점</b>)</p>
                 </div>
-                <div style="background:#0f172a;padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);">
+                <div style="background:#160c07;padding:10px 12px;border-radius:10px;border:1px solid rgba(200,150,62,0.28);">
                     <div style="font-weight:900;color:#fda4af;margin-bottom:2px;">3. 알까기 (직접 발사 & 연결된 동일 눈 일괄 파괴)</div>
                     <p>• 내 열에 빈 칸이 1칸 이상 있고 맞은편 상대 열에 같은 눈(고정 주사위 제외)이 있으면, 내 열이나 상대 열을 클릭해 주사위를 직접 발사하여 파괴합니다.<br>
                     • 맞은편에 같은 눈이 <b>2~3개 연결</b>되어 있으면 <b>한꺼번에 전부 날아가며</b>, 알까기한 내 주사위도 함께 소멸합니다.</p>
                 </div>
-                <div style="background:#0f172a;padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);">
+                <div style="background:#160c07;padding:10px 12px;border-radius:10px;border:1px solid rgba(200,150,62,0.28);">
                     <div style="font-weight:900;color:#6ee7b7;margin-bottom:2px;">4. 고정 주사위 & 리롤 (타짜의 손놀림)</div>
                     <p>• <b>선공 첫 주사위</b>: 코인 토스 승자의 첫 주사위는 고정 주사위이며, <b>자신의 진영 빈 칸에만 배치 가능</b>하고 정규 턴이므로 <b>리롤(1회) 가능</b>합니다.<br>
                     • <b>알까기 보너스 고정 주사위</b>: 알까기 성공 시 얻는 고정 주사위는 <b>내 빈 칸 또는 상대 빈 칸(방해 투척) 모두 배치 가능</b>하며, 보너스 턴이므로 리롤할 수 없습니다.<br>
@@ -1781,7 +1936,7 @@
                 triggerShake();
                 triggerFlash('rgba(239, 68, 68, 0.36)');
                 spawnShockwave(endX, endY, '#ef4444');
-                spawnFxParticles(endX, endY, ['#ef4444', '#fde047', '#ffffff', '#fb923c'], 38, 10);
+                spawnFxParticles(endX, endY, ['#ef4444', '#f3d078', '#ffffff', '#fb923c'], 38, 10);
 
                 const shatterAnim = proj.animate([
                     { transform: `translate(${dx}px, ${dy}px) scale(1.16) rotate(${spinDeg}deg)`, opacity: 1 },
@@ -1833,7 +1988,7 @@
         }
 
         /* ============================================================================
-           4. 주사위 핍(Pip) 렌더러 (iPadOS Safari WebKit 완벽 호환 구조)
+           4. 순백색 주사위 핍(Pip) 렌더러 (iPadOS Safari WebKit 완벽 호환 구조)
            ============================================================================ */
         const PIP_PATTERNS = {
             1: [4],
@@ -1857,7 +2012,7 @@
 
             if (isQuestionMark || !dieObj || !dieObj.value) {
                 return `
-                    <div class="${sizeClass}" style="border-radius:11px;border:2px dashed rgba(250,204,21,0.55);background:rgba(11,14,20,0.75);display:flex;align-items:center;justify-content:center;color:#fde047;font-weight:900;font-size:21px;flex-shrink:0;">
+                    <div class="${sizeClass}" style="border-radius:11px;border:2px dashed rgba(243,208,120,0.58);background:rgba(20,11,6,0.85);display:flex;align-items:center;justify-content:center;color:#f3d078;font-weight:900;font-size:21px;flex-shrink:0;">
                         ?
                     </div>
                 `;
@@ -1929,8 +2084,6 @@
             return pool[Math.floor(Math.random() * pool.length)];
         }
 
-        // 같은 눈 주사위 2개 이상이 고정 주사위(또는 다른 눈)를 사이에 두고 떨어져 있을 때
-        // 고정 주사위는 파괴하지 않고 뒤쪽 칸으로 밀어내며 같은 눈끼리 앞쪽으로 연결 정렬
         function compactColumnMatchingDice(colDice) {
             if (!Array.isArray(colDice) || colDice.length <= 1) return colDice;
 
@@ -2200,7 +2353,6 @@
             audio.init();
             renderAll();
 
-            // 리롤 시 이전 눈(savedBeforeDie)을 제외한 나머지 5개 눈 중에서만 결정
             const newRolledDie = await animateDieRoll({
                 durationMs: 560,
                 tickIntervalMs: 50,
@@ -2228,12 +2380,10 @@
         async function handleBoardColumnClick(side, colIdx) {
             if (state.isAnimating) return;
 
-            // 1) 정규 턴 배치 / 알까기
             if (state.phase === 'player_place') {
                 const dieVal = state.currentDie;
                 if (!dieVal) return;
 
-                // 선공 첫 턴 고정 주사위는 자신의 진영 빈 칸에만 배치 가능
                 if (state.isOpeningTurn) {
                     if (side !== 'player') return;
                     if (state.playerBoard[colIdx].length >= 3) return;
@@ -2256,14 +2406,12 @@
                     return;
                 }
 
-                // 일반 턴: 알까기 대상 열이면 내 진영/상대 진영 어느 쪽을 눌러도 발동
                 const smashableCols = getSmashableTargets(dieVal, true);
                 if (smashableCols.includes(colIdx)) {
                     await executePlayerAlkkagiSmash(colIdx, dieVal);
                     return;
                 }
 
-                // 일반 배치 (내 진영만)
                 if (side !== 'player') return;
                 if (state.playerBoard[colIdx].length >= 3) return;
 
@@ -2279,7 +2427,7 @@
                         spawnFxParticles(
                             rect.left + rect.width / 2,
                             rect.top + rect.height / 2,
-                            evalAfter.maxCount === 3 ? ['#fb7185', '#fde047', '#ffffff'] : ['#fde047', '#f59e0b'],
+                            evalAfter.maxCount === 3 ? ['#fb7185', '#f3d078', '#ffffff'] : ['#f3d078', '#c8963e'],
                             evalAfter.maxCount === 3 ? 34 : 18,
                             8
                         );
@@ -2291,7 +2439,6 @@
                 return;
             }
 
-            // 2) 알까기 보너스 고정 주사위 배치 (내 진영 또는 상대 진영 빈 칸 모두 가능)
             if (state.phase === 'player_bonus_place') {
                 const dieVal = state.currentDie;
                 if (!dieVal) return;
@@ -2379,7 +2526,6 @@
             audio.playRollStop(isOpening);
             renderAll();
 
-            // 타짜 AI: 게임당 최대 1회만 리롤 허용, 리롤 시 기존 눈(prevVal) 제외
             if (difficulty === 'tazza' && !state.aiRerollUsed) {
                 const canSmashNow = !isOpening && getSmashableTargets(chosenVal, false).length > 0;
                 const hasMatchNow = state.aiBoard.some(col => col.length < 3 && col.some(d => d.value === chosenVal));
@@ -2401,7 +2547,6 @@
                     renderAll();
                     await new Promise(r => setTimeout(r, 380));
 
-                    // 플레이어와 동일하게 리롤 전 vs 리롤 후 최선 수 가치를 비교해 더 유리한 쪽 선택
                     const beforeScore = evaluateAiDieUtility(prevAiVal, isOpening);
                     const afterScore = evaluateAiDieUtility(rerolledVal, isOpening);
                     chosenVal = afterScore >= beforeScore ? rerolledVal : prevAiVal;
@@ -2428,7 +2573,6 @@
                 return;
             }
 
-            // 알까기 가능 열 탐색 (일반 AI는 알까기 가능하면 무조건 발동, 타짜 AI도 우선 발동)
             const smashCols = getSmashableTargets(chosenVal, false);
             if (smashCols.length > 0) {
                 let targetCol = smashCols[0];
@@ -2517,22 +2661,6 @@
                     triggerFlash('rgba(239, 68, 68, 0.28)');
                     state.aiDisplayDie = null;
                     state.aiFixedRoll = false;
-                    renderAll(bestPCol, 'player');
-                } else if (aiAvail.length > 0) {
-                    const bestACol = chooseAiOwnColumn(bonusVal, difficulty, false);
-                    state.aiBoard[bestACol].push({ value: bonusVal, fixed: true, fixedOwner: 'ai' });
-                    const evalAfter = analyzeColumn(state.aiBoard[bestACol]);
-                    audio.playPlace(evalAfter.maxCount, true);
-                    triggerFlash('rgba(239, 68, 68, 0.28)');
-                    state.aiDisplayDie = null;
-                    state.aiFixedRoll = false;
-                    renderAll(bestACol, 'ai');
-                } else if (playerAvail.length > 0) {
-                    const pCol = playerAvail[0];
-                    state.playerBoard[pCol].push({ value: bonusVal, fixed: true, fixedOwner: 'ai' });
-                    audio.playPlace(1, true);
-                    state.aiDisplayDie = null;
-                    state.aiFixedRoll = false;
                     renderAll(pCol, 'player');
                 }
 
@@ -2568,6 +2696,7 @@
             available.forEach(c => {
                 const beforeScore = analyzeColumn(state.aiBoard[c]).totalScore;
                 const simCol = [...state.aiBoard[c], { value: dieVal, fixed: isFixed }];
+                compactColumnMatchingDice(simCol);
                 const afterScore = analyzeColumn(simCol).totalScore;
                 let score = (afterScore - beforeScore) * 10;
 
@@ -2588,7 +2717,6 @@
             return bestCol;
         }
 
-        // 타짜 AI용 주사위 가치 평가 함수 (리롤 전 vs 리롤 후 비교 선택에 사용)
         function evaluateAiDieUtility(dieVal, isOpening) {
             if (!isOpening) {
                 const smashCols = getSmashableTargets(dieVal, false);
@@ -2643,7 +2771,6 @@
                 const stackRect = stack.getBoundingClientRect();
                 if (stackRect.height === 0) return;
 
-                // 동일 눈 값을 가진 슬롯 인덱스 수집
                 const byVal = {};
                 slotNodes.forEach((node, idx) => {
                     const v = node.getAttribute('data-die-val');
@@ -2655,7 +2782,6 @@
 
                 Object.values(byVal).forEach(indices => {
                     if (indices.length < 2) return;
-                    // 연속된 구간(또는 전체 동일 눈 구간)마다 단일 직사각형 테두리 생성
                     let runStart = indices[0];
                     let prev = indices[0];
                     const runs = [];
@@ -2777,7 +2903,6 @@
             document.getElementById('score-player-lines').textContent = playerLineWins;
             document.getElementById('score-ai-lines').textContent = aiLineWins;
 
-            // 1. 상대 3열 렌더링 (기존 3칸 슬롯 구조 그대로 유지)
             const aiGrid = document.getElementById('ai-columns-grid');
             aiGrid.innerHTML = [0, 1, 2].map(colIdx => {
                 const colDice = state.aiBoard[colIdx];
@@ -2836,7 +2961,6 @@
                 `;
             }).join('');
 
-            // 2. 중앙 VS 비교 바 렌더링: 내점수(초록) - 화살표 - 상대점수(빨강)
             const vsGrid = document.getElementById('vs-divider-grid');
             vsGrid.innerHTML = [0, 1, 2].map(colIdx => {
                 const aScore = aiEvalList[colIdx].totalScore;
@@ -2855,7 +2979,6 @@
                 `;
             }).join('');
 
-            // 3. 플레이어 3열 렌더링 (기존 3칸 슬롯 구조 그대로 유지)
             const playerGrid = document.getElementById('player-columns-grid');
             playerGrid.innerHTML = [0, 1, 2].map(colIdx => {
                 const colDice = state.playerBoard[colIdx];
@@ -2916,7 +3039,6 @@
                 `;
             }).join('');
 
-            // 같은 눈 뭉침 직사각형 테두리 오버레이 배치
             positionComboGroupBoxes();
 
             document.querySelectorAll('[data-side][data-col]').forEach(el => {
@@ -2927,7 +3049,6 @@
                 };
             });
 
-            // 4. 하단 플레이어 주사위 트레이 렌더링
             const slotEl = document.getElementById('player-die-slot');
             const rerollChoiceBox = document.getElementById('reroll-choice-box');
             const trayTitle = document.getElementById('tray-title');
@@ -3020,7 +3141,6 @@
                 trayDesc.textContent = '내 빈 칸(방어) 또는 상대 빈 칸(방해 투척)을 클릭하세요!';
                 btnRoll.disabled = true;
                 btnRoll.textContent = '배치할 열 클릭';
-                btnRoll.classList.add('btn-roll-fixed');
                 btnReroll.disabled = true;
 
             } else if (state.phase === 'ai_turn') {
@@ -3058,12 +3178,12 @@
                 if (pScore > aScore) playerWins++;
                 else if (aScore > pScore) aiWins++;
 
-                let arrow = `<span style="color:#94a3b8;font-weight:900;">=</span>`;
+                let arrow = `<span style="color:#b59f80;font-weight:900;">=</span>`;
                 if (pScore > aScore) arrow = `<span style="color:#10b981;font-weight:900;">▼</span>`;
                 else if (aScore > pScore) arrow = `<span style="color:#ef4444;font-weight:900;">▲</span>`;
 
                 return `
-                    <div style="display:flex;align-items:center;justify-content:space-between;background:#181f2e;border:1px solid rgba(148,163,184,0.2);border-radius:8px;padding:7px 14px;font-size:13px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;background:#26160d;border:1px solid rgba(200,150,62,0.25);border-radius:8px;padding:7px 14px;font-size:13px;">
                         <span style="font-weight:900;color:#34d399;">나 ${pScore}점</span>
                         ${arrow}
                         <span style="font-weight:900;color:#fb7185;">상대 ${aScore}점</span>
@@ -3083,7 +3203,6 @@
             } else if (aiTotal > playerTotal) {
                 isVictory = false;
             } else {
-                // 무승부 시 무조건 플레이어(나) 승리 판정
                 isVictory = true;
                 isDrawAdvantageWin = true;
             }
@@ -3098,12 +3217,12 @@
                 if (modeStats.streak > modeStats.maxStreak) modeStats.maxStreak = modeStats.streak;
                 saveStats();
                 audio.playEndGame(true);
-                spawnFxParticles(window.innerWidth / 2, window.innerHeight / 2, ['#fde047', '#10b981', '#38bdf8', '#ffffff'], 65, 11);
+                spawnFxParticles(window.innerWidth / 2, window.innerHeight / 2, ['#f3d078', '#10b981', '#fde68a', '#ffffff'], 65, 11);
                 document.getElementById('result-trophy').textContent = '🏆';
                 document.getElementById('result-title').textContent = isDrawAdvantageWin
                     ? '승리! (동점 우세 판정)'
                     : `승리! (🔥 ${modeTitle} ${modeStats.streak}연승 중)`;
-                document.getElementById('result-title').style.color = '#fde047';
+                document.getElementById('result-title').style.color = '#f3d078';
                 document.getElementById('result-subtitle').textContent = isDrawAdvantageWin
                     ? `열 점령(${playerWins}:${aiWins})과 총점(${playerTotal}점) 동률로 나 승리!`
                     : `열 점령 ${playerWins} : ${aiWins} (총점 ${playerTotal}점 vs ${aiTotal}점)`;
