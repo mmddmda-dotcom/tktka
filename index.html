@@ -524,6 +524,17 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.55);
         }
 
+        .ui-btn-skin {
+            background: linear-gradient(180deg, #0e7490 0%, #155e75 100%);
+            border-color: #67e8f9;
+            color: #ecfeff;
+            box-shadow: 0 2px 8px rgba(6, 182, 212, 0.28), inset 0 1px 0 rgba(207, 250, 254, 0.35);
+        }
+        .ui-btn-skin:hover {
+            border-color: #cffafe;
+            background: linear-gradient(180deg, #0891b2 0%, #0e7490 100%);
+        }
+
         /* =====================================================================
            2. 메인 월넛 원목 & 황동 프레임 3열 보드게임 판
            ===================================================================== */
@@ -581,6 +592,8 @@
         .rivet-br { bottom: 6px; right: 6px; }
 
         .faction-bar {
+            position: relative;
+            z-index: 2;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -614,6 +627,8 @@
         .turn-ind-player { background: #047857; color: #ffffff; border: 1px solid #6ee7b7; }
 
         .columns-grid-3 {
+            position: relative;
+            z-index: 2;
             width: 100%;
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -849,6 +864,8 @@
            3. 중앙 VS 라인 비교 바
            ===================================================================== */
         .vs-divider-grid {
+            position: relative;
+            z-index: 2;
             width: 100%;
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1004,20 +1021,59 @@
         .pip-player { background: #18202c; }
         .pip-ai { background: #be123c; }
 
-        /* 내 고정 주사위: 단일 초록색 4px 테두리 */
-        .die-fixed-player {
+        /* 내 고정 주사위: 단일 초록색 4px 테두리 (바다 주사위 포함 최우선 순위 보장) */
+        .die-fixed-player,
+        .die-face.die-skin-ocean_bubble.die-fixed-player {
             border: 4px solid #10b981 !important;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65) !important;
+            box-shadow:
+                0 0 0 1.5px rgba(5, 46, 22, 0.85),
+                0 0 14px rgba(16, 185, 129, 0.75),
+                0 4px 10px rgba(0, 0, 0, 0.65) !important;
             outline: none !important;
             box-sizing: border-box;
         }
 
-        /* 상대 고정 주사위: 단일 빨간색 4px 테두리 */
-        .die-fixed-ai {
+        /* 상대 고정 주사위: 단일 빨간색 4px 테두리 (바다 주사위 포함 최우선 순위 보장) */
+        .die-fixed-ai,
+        .die-face.die-skin-ocean_bubble.die-fixed-ai {
             border: 4px solid #ef4444 !important;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65) !important;
+            box-shadow:
+                0 0 0 1.5px rgba(69, 10, 10, 0.85),
+                0 0 14px rgba(239, 68, 68, 0.75),
+                0 4px 10px rgba(0, 0, 0, 0.65) !important;
             outline: none !important;
             box-sizing: border-box;
+        }
+
+        /* 바다 주사위 스킨: 투명 공기방울 & 굴절 하이라이트 & 물방울 눈 */
+        .die-face.die-skin-ocean_bubble {
+            background-color: rgba(186, 230, 253, 0.05);
+            background-image:
+                radial-gradient(ellipse 36% 24% at 28% 22%, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.22) 55%, transparent 100%),
+                radial-gradient(circle at 74% 78%, rgba(34, 211, 238, 0.22) 0%, transparent 55%),
+                radial-gradient(circle at 50% 50%, transparent 48%, rgba(56, 189, 248, 0.16) 84%, rgba(125, 211, 252, 0.38) 100%);
+            border: 1.5px solid rgba(186, 230, 253, 0.72);
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
+            box-shadow:
+                0 4px 12px rgba(2, 44, 67, 0.48),
+                inset 0 1.5px 4px rgba(255, 255, 255, 0.82),
+                inset 0 -3px 7px rgba(6, 182, 212, 0.34),
+                inset 0 0 8px rgba(125, 211, 252, 0.24);
+        }
+        .die-face.die-skin-ocean_bubble .pip-player {
+            background: radial-gradient(circle at 34% 30%, #e0f2fe 0%, #38bdf8 26%, #0369a1 64%, #082f49 100%);
+            box-shadow:
+                0 0 0 1.2px rgba(186, 230, 253, 0.75),
+                0 1.5px 4px rgba(1, 16, 32, 0.95),
+                inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
+        }
+        .die-face.die-skin-ocean_bubble .pip-ai {
+            background: radial-gradient(circle at 34% 30%, #ffe4e6 0%, #fb7185 26%, #be123c 64%, #4c0519 100%);
+            box-shadow:
+                0 0 0 1.2px rgba(254, 205, 211, 0.75),
+                0 1.5px 4px rgba(45, 4, 18, 0.95),
+                inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
         }
 
         .die-lock-pin {
@@ -1205,6 +1261,265 @@
         .reroll-pick-card:hover { border-color: var(--brass-bright); transform: translateY(-2px); background: rgba(48, 12, 18, 0.95); }
 
         /* =====================================================================
+           5-B. 심해 바다 테마 스킨 (격자 없는 진짜 바닷속 수심, 햇살 물결, 산호초 & 가오리)
+           ===================================================================== */
+        @keyframes oceanSunRaysSway {
+            0%, 100% { transform: translateX(-2%) skewX(-3deg); opacity: 0.55; }
+            50% { transform: translateX(3%) skewX(2deg); opacity: 0.85; }
+        }
+        @keyframes oceanBubbleRise {
+            0% { transform: translateY(0) scale(0.9); opacity: 0; }
+            25% { opacity: 0.65; }
+            85% { opacity: 0.45; }
+            100% { transform: translateY(-95px) scale(1.15); opacity: 0; }
+        }
+        @keyframes oceanKelpSway {
+            0%, 100% { transform: skewX(-4deg); }
+            50% { transform: skewX(5deg); }
+        }
+        @keyframes mantaGlide {
+            0%, 100% { transform: translateY(0px) rotate(-1.5deg) scaleY(1); }
+            50% { transform: translateY(-5px) rotate(1.5deg) scaleY(0.95); }
+        }
+
+        body.board-skin-deep_ocean {
+            background-color: #021220;
+            background-image:
+                radial-gradient(ellipse 90% 45% at 50% -5%, rgba(56, 189, 248, 0.34) 0%, rgba(14, 116, 144, 0.15) 45%, transparent 78%),
+                radial-gradient(ellipse 95% 42% at 50% 105%, rgba(13, 148, 136, 0.24) 0%, rgba(1, 13, 24, 0.96) 80%),
+                linear-gradient(180deg, #06385a 0%, #032238 45%, #011322 100%);
+        }
+        body.board-skin-deep_ocean .top-header {
+            background-color: #062b42;
+            background-image: linear-gradient(180deg, rgba(125, 211, 252, 0.14) 0%, rgba(3, 23, 38, 0.72) 100%);
+            border-color: rgba(103, 232, 249, 0.55);
+            box-shadow: 0 8px 24px rgba(1, 12, 24, 0.8), inset 0 1px 0 rgba(186, 230, 253, 0.35);
+        }
+        body.board-skin-deep_ocean .board-arena {
+            background-color: #042c44;
+            /* 격자/줄무늬 없이 깊어지는 바닷속 수심과 부드러운 물빛 그라데이션 */
+            background-image:
+                radial-gradient(ellipse 80% 36% at 50% -4%, rgba(186, 230, 253, 0.36) 0%, rgba(56, 189, 248, 0.14) 52%, transparent 85%),
+                radial-gradient(ellipse 65% 40% at 22% 38%, rgba(34, 211, 238, 0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 65% 40% at 78% 62%, rgba(20, 184, 166, 0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 100% 24% at 50% 100%, rgba(251, 191, 36, 0.15) 0%, rgba(13, 148, 136, 0.24) 45%, transparent 88%),
+                linear-gradient(180deg, #085882 0%, #043754 48%, #022036 100%);
+            border-color: #38bdf8;
+            box-shadow:
+                0 20px 50px rgba(1, 10, 20, 0.88),
+                0 0 0 2px #082f49,
+                inset 0 0 0 2px rgba(186, 230, 253, 0.28),
+                inset 0 -10px 24px rgba(1, 14, 26, 0.82);
+        }
+        body.board-skin-deep_ocean .brass-rivet {
+            background: radial-gradient(circle at 32% 30%, #ffffff 0%, #bae6fd 45%, #0284c7 85%, #082f49 100%);
+            border-color: #7dd3fc;
+            box-shadow: 0 0 8px rgba(125, 211, 252, 0.85);
+        }
+        body.board-skin-deep_ocean .faction-ai {
+            background: linear-gradient(90deg, rgba(190, 18, 60, 0.56) 0%, rgba(6, 42, 66, 0.84) 100%);
+            border-color: rgba(251, 113, 133, 0.58);
+        }
+        body.board-skin-deep_ocean .faction-player {
+            background: linear-gradient(90deg, rgba(13, 148, 136, 0.6) 0%, rgba(6, 42, 66, 0.84) 100%);
+            border-color: rgba(94, 234, 212, 0.6);
+        }
+        body.board-skin-deep_ocean .lane-card {
+            background-color: rgba(5, 44, 68, 0.52);
+            /* 격자/줄무늬 제거: 반투명 수중 물방울 캡슐 질감 */
+            background-image:
+                radial-gradient(ellipse 80% 35% at 50% 6%, rgba(186, 230, 253, 0.18) 0%, transparent 72%),
+                linear-gradient(180deg, rgba(14, 116, 144, 0.28) 0%, rgba(2, 26, 44, 0.66) 100%);
+            border-color: rgba(103, 232, 249, 0.45);
+            box-shadow:
+                inset 0 2px 10px rgba(1, 16, 28, 0.68),
+                inset 0 1px 0 rgba(224, 242, 254, 0.3),
+                0 4px 12px rgba(1, 12, 24, 0.45);
+        }
+        body.board-skin-deep_ocean .lane-selectable {
+            border-color: #7dd3fc;
+            background-image:
+                radial-gradient(ellipse 85% 45% at 50% 10%, rgba(186, 230, 253, 0.3) 0%, transparent 75%),
+                linear-gradient(180deg, rgba(2, 132, 199, 0.45) 0%, rgba(4, 47, 73, 0.78) 100%);
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.42), inset 0 1px 0 rgba(224, 242, 254, 0.42);
+        }
+        body.board-skin-deep_ocean .empty-slot {
+            border-color: rgba(125, 211, 252, 0.45);
+            background: radial-gradient(circle at 50% 45%, rgba(2, 22, 38, 0.78) 0%, rgba(6, 52, 80, 0.68) 76%, rgba(56, 189, 248, 0.26) 100%);
+            box-shadow:
+                inset 0 3px 8px rgba(1, 12, 22, 0.85),
+                0 0 8px rgba(56, 189, 248, 0.16);
+            color: rgba(186, 230, 253, 0.58);
+        }
+        body.board-skin-deep_ocean .vs-lane-pill {
+            background: linear-gradient(180deg, #062b44 0%, #031828 100%);
+            border-color: rgba(103, 232, 249, 0.55);
+            box-shadow: inset 0 2px 5px rgba(1, 10, 20, 0.82), 0 0 10px rgba(56, 189, 248, 0.16);
+        }
+        body.board-skin-deep_ocean .action-tray {
+            background-color: #052c44;
+            /* 격자/줄무늬 제거: 깊은 바닷속 물빛 광채 트레이 */
+            background-image:
+                radial-gradient(ellipse 80% 45% at 50% 10%, rgba(125, 211, 252, 0.3) 0%, rgba(14, 116, 144, 0.24) 48%, rgba(2, 18, 32, 0.94) 100%),
+                linear-gradient(180deg, #074466 0%, #032033 100%);
+            border-color: #0c4a6e;
+            box-shadow:
+                0 12px 30px rgba(1, 10, 20, 0.85),
+                0 0 0 1.5px #38bdf8,
+                inset 0 0 0 1.5px rgba(186, 230, 253, 0.36),
+                inset 0 6px 18px rgba(2, 16, 28, 0.85);
+        }
+        body.board-skin-deep_ocean .tray-stud {
+            background: radial-gradient(circle at 32% 30%, #ffffff 0%, #bae6fd 45%, #0284c7 85%, #082f49 100%);
+            border-color: #7dd3fc;
+        }
+        body.board-skin-deep_ocean #player-die-slot {
+            background: radial-gradient(circle at 50% 45%, rgba(56, 189, 248, 0.28) 0%, rgba(3, 25, 42, 0.78) 100%);
+            border-color: rgba(125, 211, 252, 0.65);
+        }
+
+        /* 바닷속 SVG 레이어 (햇살 빛기둥 + 흔들리는 해초·산호 + 떠오르는 기포) */
+        .ocean-reef-decor {
+            display: none;
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            border-radius: inherit;
+            z-index: 1;
+        }
+        body.board-skin-deep_ocean .ocean-reef-decor {
+            display: block;
+        }
+        .ocean-sun-rays {
+            transform-origin: 50% 0%;
+            animation: oceanSunRaysSway 9s ease-in-out infinite;
+        }
+        .ocean-kelp-group {
+            transform-origin: bottom center;
+            animation: oceanKelpSway 6s ease-in-out infinite;
+        }
+        .ocean-bubble-1 { animation: oceanBubbleRise 7s ease-in infinite; }
+        .ocean-bubble-2 { animation: oceanBubbleRise 9s ease-in 2.5s infinite; }
+        .ocean-bubble-3 { animation: oceanBubbleRise 8s ease-in 4.2s infinite; }
+
+        /* 바다 보드 + 패드·컴퓨터 화면 전용: 주사위 트레이 위를 유영하는 가오리 */
+        .ocean-manta-banner {
+            display: none;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin-bottom: 2px;
+            pointer-events: none;
+            position: relative;
+            z-index: 2;
+        }
+        body.layout-pad_pc.board-skin-deep_ocean .ocean-manta-banner {
+            display: flex;
+        }
+        .manta-svg-wrap {
+            animation: mantaGlide 4.2s ease-in-out infinite;
+            filter: drop-shadow(0 8px 12px rgba(1, 14, 28, 0.75)) drop-shadow(0 0 10px rgba(56, 189, 248, 0.35));
+        }
+
+        /* 스킨 모달 전용 UI */
+        .skin-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .skin-tab-btn {
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(200, 150, 62, 0.38);
+            background: rgba(20, 11, 6, 0.85);
+            color: #b59f80;
+            font-size: 12.5px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.14s ease;
+        }
+        .skin-tab-btn.active {
+            background: linear-gradient(180deg, #f3d078 0%, #c8963e 100%);
+            color: #241307;
+            border-color: #fef3c7;
+        }
+        .skin-item-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: #160c07;
+            border: 1.5px solid rgba(200, 150, 62, 0.3);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.14s ease;
+            text-align: left;
+        }
+        .skin-item-card:hover {
+            border-color: rgba(243, 208, 120, 0.7);
+        }
+        .skin-item-card.equipped {
+            border-color: #10b981;
+            background: rgba(6, 78, 59, 0.25);
+        }
+        .skin-item-card.locked {
+            opacity: 0.82;
+        }
+        .skin-preview-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .board-skin-mini-thumb {
+            width: 42px;
+            height: 42px;
+            border-radius: 9px;
+            border: 2px solid #c8963e;
+        }
+        .board-thumb-walnut_velvet {
+            background: linear-gradient(180deg, #3a1f12 0%, #3a1f12 58%, #7f1d1d 58%, #3b070b 100%);
+        }
+        .board-thumb-deep_ocean {
+            background: radial-gradient(circle at 50% 22%, #7dd3fc 0%, #0284c7 48%, #04253e 100%);
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.55), inset 0 1px 3px rgba(255, 255, 255, 0.65);
+        }
+        .skin-status-pill {
+            font-size: 10.5px;
+            font-weight: 900;
+            padding: 4px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .pill-equipped {
+            background: rgba(16, 185, 129, 0.24);
+            border: 1px solid #10b981;
+            color: #6ee7b7;
+        }
+        .pill-unlocked {
+            background: rgba(245, 158, 11, 0.22);
+            border: 1px solid #fbbf24;
+            color: #fde68a;
+        }
+        .pill-locked {
+            background: rgba(100, 116, 139, 0.25);
+            border: 1px solid #64748b;
+            color: #cbd5e1;
+        }
+
+        /* =====================================================================
            6. 황동 코인 토스 & 원목 모달 오버레이
            ===================================================================== */
         .overlay-backdrop {
@@ -1269,7 +1584,7 @@
         .shake-hit { animation: shake-hit 0.35s ease-out; }
     </style>
 </head>
-<body class="layout-pad_pc">
+<body class="layout-pad_pc board-skin-walnut_velvet">
 
     <canvas id="fxCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:40;"></canvas>
     <div id="projectile-layer" style="position:fixed;inset:0;pointer-events:none;z-index:55;overflow:hidden;"></div>
@@ -1314,6 +1629,7 @@
                     <button type="button" class="layout-opt-btn" data-layout-mode="phone">📱 핸드폰</button>
                     <button type="button" class="layout-opt-btn active" data-layout-mode="pad_pc">📟 패드·컴퓨터</button>
                 </div>
+                <button type="button" id="btn-skins" class="ui-btn ui-btn-skin">🎨 스킨</button>
                 <button type="button" id="btn-rules" class="ui-btn">📖 규칙 설명</button>
                 <button type="button" id="btn-stats" class="ui-btn">📊 전적</button>
                 <button type="button" id="btn-sound" class="ui-btn" title="효과음 토글">🔊</button>
@@ -1324,13 +1640,52 @@
         <!-- 메인 워크스페이스 -->
         <div class="workspace-container">
 
-            <!-- 2. 상·하 대칭 세로 3열 원목 보드 -->
+            <!-- 2. 상·하 대칭 세로 3열 원목/심해 보드 -->
             <main id="board-arena" class="board-arena">
-                <!-- 황동 코너 리벳 -->
+                <!-- 황동/진주 코너 리벳 -->
                 <span class="brass-rivet rivet-tl"></span>
                 <span class="brass-rivet rivet-tr"></span>
                 <span class="brass-rivet rivet-bl"></span>
                 <span class="brass-rivet rivet-br"></span>
+
+                <!-- 심해 바다 보드 전용: 격자 없는 바닷속 햇살 빛기둥·산호초·기포 SVG 풍경 -->
+                <div class="ocean-reef-decor" aria-hidden="true">
+                    <svg viewBox="0 0 400 320" preserveAspectRatio="none" style="width:100%;height:100%;">
+                        <defs>
+                            <linearGradient id="oceanSunRay" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0.34"/>
+                                <stop offset="55%" stop-color="#38bdf8" stop-opacity="0.08"/>
+                                <stop offset="100%" stop-color="#0284c7" stop-opacity="0"/>
+                            </linearGradient>
+                            <radialGradient id="oceanGlowOrb" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.32"/>
+                                <stop offset="100%" stop-color="#0284c7" stop-opacity="0"/>
+                            </radialGradient>
+                        </defs>
+                        <!-- 수면 위에서 비스듬히 쏟아지는 햇살 빛기둥 -->
+                        <g class="ocean-sun-rays">
+                            <polygon points="35,0 115,0 168,260 5,260" fill="url(#oceanSunRay)"/>
+                            <polygon points="165,0 245,0 295,250 135,250" fill="url(#oceanSunRay)"/>
+                            <polygon points="285,0 365,0 398,240 250,240" fill="url(#oceanSunRay)"/>
+                        </g>
+                        <!-- 심해 부유 플랑크톤·물빛 보케 -->
+                        <circle cx="95" cy="95" r="26" fill="url(#oceanGlowOrb)"/>
+                        <circle cx="310" cy="145" r="34" fill="url(#oceanGlowOrb)"/>
+                        <circle cx="195" cy="215" r="30" fill="url(#oceanGlowOrb)"/>
+                        <!-- 해저 모래 언덕 & 산호초 실루엣 -->
+                        <path d="M0,320 Q100,302 205,312 Q310,320 400,304 L400,320 Z" fill="#021829" opacity="0.72"/>
+                        <g class="ocean-kelp-group">
+                            <path d="M16,320 Q10,292 22,272 Q14,254 24,236" stroke="#14b8a6" stroke-width="3.2" stroke-linecap="round" fill="none" opacity="0.52"/>
+                            <path d="M32,320 Q40,296 28,278 Q38,262 30,246" stroke="#2dd4bf" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.45"/>
+                            <path d="M372,320 Q364,290 378,270 Q368,250 380,234" stroke="#14b8a6" stroke-width="3.2" stroke-linecap="round" fill="none" opacity="0.5"/>
+                            <path d="M356,320 Q364,298 352,282 Q360,268 354,254" stroke="#fb7185" stroke-width="2.6" stroke-linecap="round" fill="none" opacity="0.42"/>
+                        </g>
+                        <!-- 떠오르는 심해 공기방울 -->
+                        <circle class="ocean-bubble-1" cx="54" cy="240" r="3.2" stroke="#bae6fd" stroke-width="1" fill="rgba(224,242,254,0.2)"/>
+                        <circle class="ocean-bubble-2" cx="342" cy="255" r="2.6" stroke="#bae6fd" stroke-width="1" fill="rgba(224,242,254,0.2)"/>
+                        <circle class="ocean-bubble-3" cx="204" cy="265" r="2.2" stroke="#e0f2fe" stroke-width="1" fill="rgba(224,242,254,0.25)"/>
+                    </svg>
+                </div>
 
                 <!-- 상대 진영 상단 바 -->
                 <div class="faction-bar faction-ai">
@@ -1369,7 +1724,7 @@
                 </div>
             </main>
 
-            <!-- 3. 원목 프레임 + 빨간 벨벳 주사위 액션 트레이 -->
+            <!-- 3. 원목 프레임 + 빨간 벨벳 / 심해 주사위 액션 트레이 -->
             <section class="action-tray">
                 <span class="tray-stud tray-stud-tl"></span>
                 <span class="tray-stud tray-stud-tr"></span>
@@ -1377,6 +1732,56 @@
                 <span class="tray-stud tray-stud-br"></span>
 
                 <div class="tray-left-die">
+                    <!-- 바다 보드 + 패드·컴퓨터 화면 전용: 주사위 슬롯 바로 위를 유영하는 만타 가오리 -->
+                    <div class="ocean-manta-banner" aria-hidden="true">
+                        <div class="manta-svg-wrap">
+                            <svg width="204" height="72" viewBox="0 0 220 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="mantaBodyGrad" x1="110" y1="8" x2="110" y2="62" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0%" stop-color="#0c4a6e"/>
+                                        <stop offset="48%" stop-color="#0284c7"/>
+                                        <stop offset="85%" stop-color="#38bdf8"/>
+                                        <stop offset="100%" stop-color="#e0f2fe"/>
+                                    </linearGradient>
+                                    <linearGradient id="mantaBellyGrad" x1="110" y1="22" x2="110" y2="54" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.85"/>
+                                        <stop offset="100%" stop-color="#ffffff" stop-opacity="0.95"/>
+                                    </linearGradient>
+                                    <linearGradient id="mantaSpotGrad" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.7"/>
+                                        <stop offset="100%" stop-color="#0369a1" stop-opacity="0.2"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M110 47 Q112 60 105 73" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round"/>
+                                <path d="M110 47 Q112 60 105 73" stroke="#e0f2fe" stroke-width="0.9" stroke-linecap="round" opacity="0.8"/>
+                                <path d="M110 14 C94 14, 62 24, 14 16 C32 32, 68 42, 96 47 L110 51 L124 47 C152 42, 188 32, 206 16 C158 24, 126 14, 110 14 Z"
+                                      fill="url(#mantaBodyGrad)" stroke="#bae6fd" stroke-width="1.4" stroke-linejoin="round"/>
+                                <path d="M84 34 Q110 46 136 34 Q122 44 110 47 Q98 44 84 34 Z" fill="url(#mantaBellyGrad)"/>
+                                <!-- 둥글고 귀여운 머리 지느러미 -->
+                                <path d="M102 15 C99 9, 93 10, 95 16" fill="#0284c7" stroke="#bae6fd" stroke-width="1.2" stroke-linecap="round"/>
+                                <path d="M118 15 C121 9, 127 10, 125 16" fill="#0284c7" stroke="#bae6fd" stroke-width="1.2" stroke-linecap="round"/>
+                                <ellipse cx="86" cy="27" rx="7" ry="3.2" transform="rotate(-10 86 27)" fill="url(#mantaSpotGrad)"/>
+                                <ellipse cx="134" cy="27" rx="7" ry="3.2" transform="rotate(10 134 27)" fill="url(#mantaSpotGrad)"/>
+                                <circle cx="72" cy="25" r="2.2" fill="#bae6fd" opacity="0.65"/>
+                                <circle cx="148" cy="25" r="2.2" fill="#bae6fd" opacity="0.65"/>
+                                <!-- 동글동글한 눈 & 하이라이트 -->
+                                <circle cx="96" cy="19.5" r="2.3" fill="#082f49"/>
+                                <circle cx="95.3" cy="18.8" r="0.9" fill="#ffffff"/>
+                                <circle cx="124" cy="19.5" r="2.3" fill="#082f49"/>
+                                <circle cx="123.3" cy="18.8" r="0.9" fill="#ffffff"/>
+                                <!-- 발그레한 볼 & 귀여운 미소 -->
+                                <ellipse cx="91.5" cy="22.5" rx="2.4" ry="1.3" fill="#fda4af" opacity="0.65"/>
+                                <ellipse cx="128.5" cy="22.5" rx="2.4" ry="1.3" fill="#fda4af" opacity="0.65"/>
+                                <path d="M107 22.5 Q110 25 113 22.5" stroke="#e0f2fe" stroke-width="1.2" stroke-linecap="round"/>
+                                <path d="M102 31 Q110 34 118 31" stroke="#0c4a6e" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+                                <path d="M104 35 Q110 37.5 116 35" stroke="#0c4a6e" stroke-width="1" stroke-linecap="round" opacity="0.45"/>
+                                <circle cx="36" cy="36" r="2.4" stroke="#bae6fd" stroke-width="1" fill="rgba(224,242,254,0.25)"/>
+                                <circle cx="182" cy="35" r="2.8" stroke="#bae6fd" stroke-width="1" fill="rgba(224,242,254,0.25)"/>
+                                <circle cx="174" cy="43" r="1.6" fill="#e0f2fe" opacity="0.7"/>
+                            </svg>
+                        </div>
+                    </div>
+
                     <div id="player-die-slot" style="display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
 
                     <!-- 리롤 전/후 2택 선택 UI -->
@@ -1403,6 +1808,30 @@
                 </div>
             </section>
 
+        </div>
+    </div>
+
+    <!-- 스킨 선택 모달 -->
+    <div id="skins-modal" class="overlay-backdrop hidden">
+        <div class="modal-card" style="max-width:460px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid rgba(200,150,62,0.32);">
+                <h3 style="font-size:16px;font-weight:900;color:#f3d078;">🎨 스킨 컬렉션</h3>
+                <button type="button" id="btn-close-skins" style="background:none;border:none;color:#d6c5a9;font-size:18px;font-weight:900;cursor:pointer;padding:2px 6px;">✕</button>
+            </div>
+
+            <div class="skin-tabs">
+                <button type="button" id="tab-skin-dice" class="skin-tab-btn active" data-skin-tab="dice">🫧 주사위 스킨</button>
+                <button type="button" id="tab-skin-board" class="skin-tab-btn" data-skin-tab="board">🌊 보드 스킨</button>
+            </div>
+
+            <div id="skin-toast-msg" style="font-size:11.5px;font-weight:800;min-height:18px;margin-bottom:8px;text-align:center;"></div>
+            <div id="skin-list-container"></div>
+
+            <div style="margin-top:10px;display:flex;gap:6px;align-items:center;">
+                <input type="text" id="skin-secret-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="시크릿 코드 입력 (선택)" style="flex:1;background:#140b06;border:1px solid rgba(200,150,62,0.32);border-radius:9px;padding:7px 10px;color:#f3e8d2;font-size:11.5px;outline:none;">
+            </div>
+
+            <button type="button" id="btn-confirm-skins" class="btn-roll-main" style="width:100%;margin-top:8px;padding:10px;">확인</button>
         </div>
     </div>
 
@@ -1617,6 +2046,42 @@
                 this.init();
                 if (!this.ctx) return;
                 const now = this.ctx.currentTime;
+                const isOceanCombo = typeof state !== 'undefined' && state.skins &&
+                    state.skins.equippedDice === 'ocean_bubble' &&
+                    state.skins.equippedBoard === 'deep_ocean';
+
+                if (isOceanCombo) {
+                    // 바다 보드 + 공기방울 주사위 동시 착용 시: 수중 거품 보글보글 사운드
+                    const baseFreq = 300 + (step % 5) * 85 + Math.random() * 140;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(baseFreq, now);
+                    osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.9, now + 0.068);
+                    gain.gain.setValueAtTime(0.01, now);
+                    gain.gain.linearRampToValueAtTime(0.18, now + 0.012);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.072);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.075);
+
+                    // 잔기포 서브 팝(Pop)
+                    const subOsc = this.ctx.createOscillator();
+                    const subGain = this.ctx.createGain();
+                    const subStart = now + 0.022;
+                    subOsc.type = 'sine';
+                    subOsc.frequency.setValueAtTime(baseFreq * 1.35, subStart);
+                    subOsc.frequency.exponentialRampToValueAtTime(baseFreq * 2.35, subStart + 0.05);
+                    subGain.gain.setValueAtTime(0.09, subStart);
+                    subGain.gain.exponentialRampToValueAtTime(0.001, subStart + 0.055);
+                    subOsc.connect(subGain);
+                    subGain.connect(this.ctx.destination);
+                    subOsc.start(subStart);
+                    subOsc.stop(subStart + 0.06);
+                    return;
+                }
+
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'triangle';
@@ -1636,6 +2101,29 @@
                 this.init();
                 if (!this.ctx) return;
                 const now = this.ctx.currentTime;
+                const isOceanCombo = typeof state !== 'undefined' && state.skins &&
+                    state.skins.equippedDice === 'ocean_bubble' &&
+                    state.skins.equippedBoard === 'deep_ocean';
+
+                if (isOceanCombo) {
+                    const bubbleNotes = isFixed ? [560, 840, 1180, 1520] : [480, 760, 1080];
+                    bubbleNotes.forEach((f, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        const t = now + idx * 0.038;
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(f * 0.78, t);
+                        osc.frequency.exponentialRampToValueAtTime(f * 1.35, t + 0.14);
+                        gain.gain.setValueAtTime(0.16, t);
+                        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(t);
+                        osc.stop(t + 0.17);
+                    });
+                    return;
+                }
+
                 const notes = isFixed ? [587.33, 880, 1174.66] : [392.0, 523.25];
                 notes.forEach((f, idx) => {
                     const osc = this.ctx.createOscillator();
@@ -1988,7 +2476,7 @@
         }
 
         /* ============================================================================
-           4. 순백색 주사위 핍(Pip) 렌더러 (iPadOS Safari WebKit 완벽 호환 구조)
+           4. 입체 주사위 핍(Pip) 렌더러 (순백 / 공기방울 스킨 + 고정 주사위 테두리 보장)
            ============================================================================ */
         const PIP_PATTERNS = {
             1: [4],
@@ -2007,7 +2495,8 @@
                 isPop = false,
                 isQuestionMark = false,
                 showLockPin = false,
-                dataAttr = ''
+                dataAttr = '',
+                overrideSkinId = null
             } = options;
 
             if (isQuestionMark || !dieObj || !dieObj.value) {
@@ -2021,8 +2510,12 @@
             const val = Math.max(1, Math.min(6, Number(dieObj.value) || 1));
             const isFixed = Boolean(dieObj.fixed);
             const fixedSide = dieObj.fixedOwner || owner;
+            const activeSkin = overrideSkinId || (state && state.skins ? state.skins.equippedDice : 'classic_white');
 
             let styleClass = 'die-face';
+            if (activeSkin === 'ocean_bubble') {
+                styleClass += ' die-skin-ocean_bubble';
+            }
             if (isFixed) {
                 styleClass += fixedSide === 'ai' ? ' die-fixed-ai' : ' die-fixed-player';
             }
@@ -2049,9 +2542,56 @@
         }
 
         /* ============================================================================
-           5. 핵심 게임 상태 및 규칙 유틸리티 함수
+           5. 핵심 게임 상태 및 규칙 유틸리티 함수 (바다 테마 스킨 & 타짜 10연승 해금)
            ============================================================================ */
         const STATS_KEY = 'tika_tuka_mode_stats_v6';
+        const SKINS_KEY = 'tika_tuka_ocean_skins_v1';
+
+        const DICE_SKIN_CATALOG = [
+            {
+                id: 'classic_white',
+                name: '순백 입체 주사위',
+                desc: '시인성이 뛰어난 클래식 순백색 입체 주사위',
+                conditionLabel: '기본 지급 (해금 완료)',
+                checkUnlock: () => ({ unlocked: true, progressText: '해금 완료' })
+            },
+            {
+                id: 'ocean_bubble',
+                name: '공기방울 주사위',
+                desc: '투명한 바닷속 기포 안에 영롱한 물방울 눈이 담긴 주사위',
+                conditionLabel: '타짜 모드 10연승 달성',
+                checkUnlock: (stats) => {
+                    const bestTazzaStreak = Math.max(stats.tazza.maxStreak, stats.tazza.streak);
+                    return {
+                        unlocked: bestTazzaStreak >= 10,
+                        progressText: bestTazzaStreak >= 10 ? '해금 완료' : `타짜 최고 ${Math.min(bestTazzaStreak, 10)}/10연승`
+                    };
+                }
+            }
+        ];
+
+        const BOARD_SKIN_CATALOG = [
+            {
+                id: 'walnut_velvet',
+                name: '월넛 원목 & 빨간 벨벳',
+                desc: '황동 리벳이 박힌 월넛 원목 보드와 로열 크림슨 벨벳 트레이',
+                conditionLabel: '기본 지급 (해금 완료)',
+                checkUnlock: () => ({ unlocked: true, progressText: '해금 완료' })
+            },
+            {
+                id: 'deep_ocean',
+                name: '심해 바다 보드',
+                desc: '수면 위 햇살 물결과 산호초·기포가 일렁이는 심해 보드 (패드·컴퓨터 트레이 위 가오리 유영)',
+                conditionLabel: '타짜 모드 10연승 달성',
+                checkUnlock: (stats) => {
+                    const bestTazzaStreak = Math.max(stats.tazza.maxStreak, stats.tazza.streak);
+                    return {
+                        unlocked: bestTazzaStreak >= 10,
+                        progressText: bestTazzaStreak >= 10 ? '해금 완료' : `타짜 최고 ${Math.min(bestTazzaStreak, 10)}/10연승`
+                    };
+                }
+            }
+        ];
 
         function createEmptyModeStat() {
             return { wins: 0, losses: 0, streak: 0, maxStreak: 0 };
@@ -2076,8 +2616,174 @@
             stats: {
                 normal: createEmptyModeStat(),
                 tazza: createEmptyModeStat()
+            },
+            skins: {
+                activeTab: 'dice',
+                equippedDice: 'classic_white',
+                equippedBoard: 'walnut_velvet',
+                unlockedDice: ['classic_white'],
+                unlockedBoard: ['walnut_velvet']
             }
         };
+
+        function applyBoardSkin(boardSkinId) {
+            const validId = boardSkinId === 'deep_ocean' ? 'deep_ocean' : 'walnut_velvet';
+            document.body.classList.remove('board-skin-walnut_velvet', 'board-skin-deep_ocean');
+            document.body.classList.add(`board-skin-${validId}`);
+        }
+
+        function evaluateAndSyncSkinUnlocks() {
+            let changed = false;
+            DICE_SKIN_CATALOG.forEach(skin => {
+                if (!state.skins.unlockedDice.includes(skin.id)) {
+                    if (skin.checkUnlock(state.stats).unlocked) {
+                        state.skins.unlockedDice.push(skin.id);
+                        changed = true;
+                    }
+                }
+            });
+            BOARD_SKIN_CATALOG.forEach(skin => {
+                if (!state.skins.unlockedBoard.includes(skin.id)) {
+                    if (skin.checkUnlock(state.stats).unlocked) {
+                        state.skins.unlockedBoard.push(skin.id);
+                        changed = true;
+                    }
+                }
+            });
+            if (changed) saveSkins();
+        }
+
+        function saveSkins() {
+            try {
+                localStorage.setItem(SKINS_KEY, JSON.stringify({
+                    equippedDice: state.skins.equippedDice,
+                    equippedBoard: state.skins.equippedBoard,
+                    unlockedDice: state.skins.unlockedDice,
+                    unlockedBoard: state.skins.unlockedBoard
+                }));
+            } catch (e) {}
+        }
+
+        function loadSkins() {
+            try {
+                const raw = localStorage.getItem(SKINS_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        if (Array.isArray(parsed.unlockedDice)) {
+                            state.skins.unlockedDice = Array.from(new Set(['classic_white', ...parsed.unlockedDice]));
+                        }
+                        if (Array.isArray(parsed.unlockedBoard)) {
+                            state.skins.unlockedBoard = Array.from(new Set(['walnut_velvet', ...parsed.unlockedBoard]));
+                        }
+                        if (parsed.equippedDice && state.skins.unlockedDice.includes(parsed.equippedDice)) {
+                            state.skins.equippedDice = parsed.equippedDice;
+                        }
+                        if (parsed.equippedBoard && state.skins.unlockedBoard.includes(parsed.equippedBoard)) {
+                            state.skins.equippedBoard = parsed.equippedBoard;
+                        }
+                    }
+                }
+            } catch (e) {}
+            evaluateAndSyncSkinUnlocks();
+            applyBoardSkin(state.skins.equippedBoard);
+        }
+
+        function renderSkinsModal() {
+            const tab = state.skins.activeTab;
+            document.getElementById('tab-skin-dice').classList.toggle('active', tab === 'dice');
+            document.getElementById('tab-skin-board').classList.toggle('active', tab === 'board');
+
+            const container = document.getElementById('skin-list-container');
+            const catalog = tab === 'dice' ? DICE_SKIN_CATALOG : BOARD_SKIN_CATALOG;
+            const unlockedList = tab === 'dice' ? state.skins.unlockedDice : state.skins.unlockedBoard;
+            const equippedId = tab === 'dice' ? state.skins.equippedDice : state.skins.equippedBoard;
+
+            container.innerHTML = catalog.map(skin => {
+                const evalInfo = skin.checkUnlock(state.stats);
+                const isUnlocked = unlockedList.includes(skin.id) || evalInfo.unlocked;
+                const isEquipped = equippedId === skin.id;
+
+                let cardClass = 'skin-item-card';
+                if (isEquipped) cardClass += ' equipped';
+                else if (!isUnlocked) cardClass += ' locked';
+
+                let statusPill = '';
+                if (isEquipped) {
+                    statusPill = `<span class="skin-status-pill pill-equipped">✔ 착용 중</span>`;
+                } else if (isUnlocked) {
+                    statusPill = `<span class="skin-status-pill pill-unlocked">해금 완료</span>`;
+                } else {
+                    statusPill = `<span class="skin-status-pill pill-locked">🔒 잠금</span>`;
+                }
+
+                const previewHtml = tab === 'dice'
+                    ? renderDieHTML(
+                        { value: 5, fixed: false },
+                        { sizeClass: 'die-sz-reroll', owner: 'player', overrideSkinId: skin.id }
+                    )
+                    : `<div class="board-skin-mini-thumb board-thumb-${skin.id}"></div>`;
+
+                const conditionLine = isUnlocked
+                    ? `<span style="color:#6ee7b7;">✔ ${skin.conditionLabel}</span>`
+                    : `<span style="color:#fbbf24;">조건: ${skin.conditionLabel} (${evalInfo.progressText})</span>`;
+
+                return `
+                    <div class="${cardClass}" data-skin-type="${tab}" data-skin-id="${skin.id}">
+                        <div style="display:flex;align-items:center;gap:11px;min-width:0;flex:1;">
+                            <div class="skin-preview-box">${previewHtml}</div>
+                            <div style="min-width:0;">
+                                <div style="font-size:13.5px;font-weight:900;color:#fbf4e4;margin-bottom:2px;">${skin.name}</div>
+                                <div style="font-size:11px;color:#d8c7ab;line-height:1.35;margin-bottom:4px;">${skin.desc}</div>
+                                <div style="font-size:10.5px;font-weight:800;">${conditionLine}</div>
+                            </div>
+                        </div>
+                        ${statusPill}
+                    </div>
+                `;
+            }).join('');
+
+            container.querySelectorAll('.skin-item-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const skinType = card.getAttribute('data-skin-type');
+                    const skinId = card.getAttribute('data-skin-id');
+                    handleSelectSkinCard(skinType, skinId, card);
+                });
+            });
+        }
+
+        function handleSelectSkinCard(skinType, skinId, cardEl) {
+            const toastEl = document.getElementById('skin-toast-msg');
+            const catalog = skinType === 'dice' ? DICE_SKIN_CATALOG : BOARD_SKIN_CATALOG;
+            const unlockedList = skinType === 'dice' ? state.skins.unlockedDice : state.skins.unlockedBoard;
+            const skin = catalog.find(s => s.id === skinId);
+            if (!skin) return;
+
+            const isUnlocked = unlockedList.includes(skinId) || skin.checkUnlock(state.stats).unlocked;
+            if (!isUnlocked) {
+                if (cardEl) {
+                    cardEl.classList.remove('shake-hit');
+                    void cardEl.offsetWidth;
+                    cardEl.classList.add('shake-hit');
+                }
+                toastEl.style.color = '#fda4af';
+                toastEl.textContent = `🔒 해금 조건 미달성: ${skin.conditionLabel}`;
+                return;
+            }
+
+            if (skinType === 'dice') {
+                state.skins.equippedDice = skinId;
+            } else {
+                state.skins.equippedBoard = skinId;
+                applyBoardSkin(skinId);
+            }
+            saveSkins();
+            audio.playPlace(2, false);
+            toastEl.style.color = '#6ee7b7';
+            toastEl.textContent = `✨ [${skin.name}] 스킨이 적용되었습니다!`;
+            renderSkinsModal();
+            renderAll();
+        }
 
         function rollDieValue(excludeVal = null) {
             const pool = [1, 2, 3, 4, 5, 6].filter(v => v !== excludeVal);
@@ -2284,12 +2990,14 @@
                     });
                 }
             } catch (e) {}
+            evaluateAndSyncSkinUnlocks();
         }
 
         function saveStats() {
             try {
                 localStorage.setItem(STATS_KEY, JSON.stringify(state.stats));
             } catch (e) {}
+            evaluateAndSyncSkinUnlocks();
         }
 
         function resetStats() {
@@ -3330,15 +4038,98 @@
                 if (e.target === statsModal) statsModal.classList.add('hidden');
             });
 
+            const skinsModal = document.getElementById('skins-modal');
+            const skinSecretInput = document.getElementById('skin-secret-input');
+            let skinSecretBuffer = '';
+            const SKIN_SECRET_CODE = 'rlaxodydtmzls';
+            const SKIN_SECRET_KO = '김태용스킨';
+
+            function unlockAllSkinsByEasterEgg() {
+                DICE_SKIN_CATALOG.forEach(skin => {
+                    if (!state.skins.unlockedDice.includes(skin.id)) {
+                        state.skins.unlockedDice.push(skin.id);
+                    }
+                });
+                BOARD_SKIN_CATALOG.forEach(skin => {
+                    if (!state.skins.unlockedBoard.includes(skin.id)) {
+                        state.skins.unlockedBoard.push(skin.id);
+                    }
+                });
+                saveSkins();
+                audio.playEndGame(true);
+                triggerFlash('rgba(56, 189, 248, 0.35)');
+                spawnFxParticles(window.innerWidth / 2, window.innerHeight / 2, ['#7dd3fc', '#38bdf8', '#fde047', '#ffffff'], 45, 9);
+
+                if (skinSecretInput) skinSecretInput.value = '';
+                const toastEl = document.getElementById('skin-toast-msg');
+                if (toastEl) {
+                    toastEl.style.color = '#7dd3fc';
+                    toastEl.textContent = '✨ [시크릿 코드 발동] 바다 테마 스킨이 모두 해금되었습니다!';
+                }
+                renderSkinsModal();
+            }
+
+            if (skinSecretInput) {
+                skinSecretInput.addEventListener('input', (e) => {
+                    const val = (e.target.value || '').trim().toLowerCase();
+                    if (val.includes(SKIN_SECRET_CODE) || val.includes(SKIN_SECRET_KO)) {
+                        skinSecretBuffer = '';
+                        unlockAllSkinsByEasterEgg();
+                    }
+                });
+            }
+
+            document.getElementById('btn-skins').addEventListener('click', () => {
+                evaluateAndSyncSkinUnlocks();
+                skinSecretBuffer = '';
+                if (skinSecretInput) skinSecretInput.value = '';
+                document.getElementById('skin-toast-msg').textContent = '';
+                renderSkinsModal();
+                skinsModal.classList.remove('hidden');
+            });
+            document.getElementById('btn-close-skins').addEventListener('click', () => skinsModal.classList.add('hidden'));
+            document.getElementById('btn-confirm-skins').addEventListener('click', () => skinsModal.classList.add('hidden'));
+            skinsModal.addEventListener('click', (e) => {
+                if (e.target === skinsModal) skinsModal.classList.add('hidden');
+            });
+            document.querySelectorAll('.skin-tab-btn').forEach(tabBtn => {
+                tabBtn.addEventListener('click', () => {
+                    state.skins.activeTab = tabBtn.dataset.skinTab === 'board' ? 'board' : 'dice';
+                    document.getElementById('skin-toast-msg').textContent = '';
+                    renderSkinsModal();
+                });
+            });
+
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     rulesModal.classList.add('hidden');
                     statsModal.classList.add('hidden');
+                    skinsModal.classList.add('hidden');
+                    skinSecretBuffer = '';
+                    return;
+                }
+                if (!skinsModal.classList.contains('hidden')) {
+                    if (document.activeElement === skinSecretInput) return;
+                    if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+                        let ch = '';
+                        if (e.code && e.code.startsWith('Key') && e.code.length === 4) {
+                            ch = e.code.slice(3).toLowerCase();
+                        } else if (e.key && e.key.length === 1) {
+                            ch = e.key.toLowerCase();
+                        }
+                        if (ch) {
+                            skinSecretBuffer = (skinSecretBuffer + ch).slice(-SKIN_SECRET_CODE.length);
+                            if (skinSecretBuffer === SKIN_SECRET_CODE) {
+                                skinSecretBuffer = '';
+                                unlockAllSkinsByEasterEgg();
+                            }
+                        }
+                    }
                     return;
                 }
                 if (e.code === 'Space') {
                     if (state.isAnimating) return;
-                    if (!rulesModal.classList.contains('hidden') || !statsModal.classList.contains('hidden')) return;
+                    if (!rulesModal.classList.contains('hidden') || !statsModal.classList.contains('hidden') || !skinsModal.classList.contains('hidden')) return;
                     if (state.phase === 'player_wait_roll') {
                         e.preventDefault();
                         handlePlayerRoll(false);
@@ -3353,6 +4144,7 @@
         function bootstrap() {
             applyLayoutMode(detectDefaultLayoutMode());
             loadStats();
+            loadSkins();
             bindEvents();
             startNewGame();
         }
