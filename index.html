@@ -1929,6 +1929,40 @@
             return pool[Math.floor(Math.random() * pool.length)];
         }
 
+        // 같은 눈 주사위 2개 이상이 고정 주사위(또는 다른 눈)를 사이에 두고 떨어져 있을 때
+        // 고정 주사위는 파괴하지 않고 뒤쪽 칸으로 밀어내며 같은 눈끼리 앞쪽으로 연결 정렬
+        function compactColumnMatchingDice(colDice) {
+            if (!Array.isArray(colDice) || colDice.length <= 1) return colDice;
+
+            const counts = {};
+            const firstIndex = {};
+            colDice.forEach((d, idx) => {
+                counts[d.value] = (counts[d.value] || 0) + 1;
+                if (firstIndex[d.value] === undefined) {
+                    firstIndex[d.value] = idx;
+                }
+            });
+
+            const hasPairOrTriple = Object.values(counts).some(cnt => cnt >= 2);
+            if (!hasPairOrTriple) return colDice;
+
+            const indexed = colDice.map((die, idx) => ({ die, idx }));
+            indexed.sort((a, b) => {
+                const aIsGroup = counts[a.die.value] >= 2 ? 0 : 1;
+                const bIsGroup = counts[b.die.value] >= 2 ? 0 : 1;
+                if (aIsGroup !== bIsGroup) return aIsGroup - bIsGroup;
+
+                if (aIsGroup === 0 && bIsGroup === 0 && a.die.value !== b.die.value) {
+                    return firstIndex[a.die.value] - firstIndex[b.die.value];
+                }
+                return a.idx - b.idx;
+            });
+
+            const reordered = indexed.map(item => item.die);
+            colDice.splice(0, colDice.length, ...reordered);
+            return colDice;
+        }
+
         function analyzeColumn(colDice) {
             const counts = {};
             let baseSum = 0;
@@ -2205,6 +2239,7 @@
                     if (state.playerBoard[colIdx].length >= 3) return;
 
                     state.playerBoard[colIdx].push({ value: dieVal, fixed: true, fixedOwner: 'player' });
+                    compactColumnMatchingDice(state.playerBoard[colIdx]);
                     state.isOpeningTurn = false;
                     const evalAfter = analyzeColumn(state.playerBoard[colIdx]);
                     audio.playPlace(evalAfter.maxCount, true);
@@ -2233,6 +2268,7 @@
                 if (state.playerBoard[colIdx].length >= 3) return;
 
                 state.playerBoard[colIdx].push({ value: dieVal, fixed: false });
+                compactColumnMatchingDice(state.playerBoard[colIdx]);
                 const evalAfter = analyzeColumn(state.playerBoard[colIdx]);
                 audio.playPlace(evalAfter.maxCount, false);
 
@@ -2264,6 +2300,7 @@
                 if (targetBoard[colIdx].length >= 3) return;
 
                 targetBoard[colIdx].push({ value: dieVal, fixed: true, fixedOwner: 'player' });
+                compactColumnMatchingDice(targetBoard[colIdx]);
                 const evalAfter = analyzeColumn(targetBoard[colIdx]);
                 audio.playPlace(evalAfter.maxCount, true);
                 triggerFlash('rgba(16, 185, 129, 0.28)');
@@ -2303,6 +2340,7 @@
             });
 
             state.aiBoard[colIdx] = state.aiBoard[colIdx].filter(d => !(d.value === dieVal && !d.fixed));
+            compactColumnMatchingDice(state.aiBoard[colIdx]);
 
             state.isAnimating = false;
             state.currentDie = null;
@@ -2369,6 +2407,7 @@
             if (isOpening) {
                 const colIdx = chooseAiOwnColumn(chosenVal, difficulty, false);
                 state.aiBoard[colIdx].push({ value: chosenVal, fixed: true, fixedOwner: 'ai' });
+                compactColumnMatchingDice(state.aiBoard[colIdx]);
                 state.isOpeningTurn = false;
                 const evalAfter = analyzeColumn(state.aiBoard[colIdx]);
                 audio.playPlace(evalAfter.maxCount, true);
@@ -2412,6 +2451,7 @@
                 });
 
                 state.playerBoard[targetCol] = state.playerBoard[targetCol].filter(d => !(d.value === chosenVal && !d.fixed));
+                compactColumnMatchingDice(state.playerBoard[targetCol]);
                 state.aiDisplayDie = null;
                 renderAll();
 
@@ -2445,6 +2485,26 @@
                         }
                     });
                     state.playerBoard[bestPCol].push({ value: bonusVal, fixed: true, fixedOwner: 'ai' });
+                    compactColumnMatchingDice(state.playerBoard[bestPCol]);
+                    audio.playPlace(1, true);
+                    triggerFlash('rgba(239, 68, 68, 0.28)');
+                    state.aiDisplayDie = null;
+                    state.aiFixedRoll = false;
+                    renderAll(bestPCol, 'player');
+                } else if (aiAvail.length > 0) {
+                    const bestACol = chooseAiOwnColumn(bonusVal, difficulty, false);
+                    state.aiBoard[bestACol].push({ value: bonusVal, fixed: true, fixedOwner: 'ai' });
+                    compactColumnMatchingDice(state.aiBoard[bestACol]);
+                    const evalAfter = analyzeColumn(state.aiBoard[bestACol]);
+                    audio.playPlace(evalAfter.maxCount, true);
+                    triggerFlash('rgba(239, 68, 68, 0.28)');
+                    state.aiDisplayDie = null;
+                    state.aiFixedRoll = false;
+                    renderAll(bestACol, 'ai');
+                } else if (playerAvail.length > 0) {
+                    const pCol = playerAvail[0];
+                    state.playerBoard[pCol].push({ value: bonusVal, fixed: true, fixedOwner: 'ai' });
+                    compactColumnMatchingDice(state.playerBoard[pCol]);
                     audio.playPlace(1, true);
                     triggerFlash('rgba(239, 68, 68, 0.28)');
                     state.aiDisplayDie = null;
@@ -2475,6 +2535,7 @@
 
             const chosenCol = chooseAiOwnColumn(chosenVal, difficulty, false);
             state.aiBoard[chosenCol].push({ value: chosenVal, fixed: false });
+            compactColumnMatchingDice(state.aiBoard[chosenCol]);
             const evalAfter = analyzeColumn(state.aiBoard[chosenCol]);
             audio.playPlace(evalAfter.maxCount, false);
             state.aiDisplayDie = null;
