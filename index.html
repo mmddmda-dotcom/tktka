@@ -4187,7 +4187,7 @@
             const unlocked = bestStreak >= 15 || wins >= 50;
             return {
                 unlocked,
-                progressText: unlocked ? '해금 완료' : `최고 ${bestStreak}/15연승 · 누적 ${wins}/50승`
+                progressText: unlocked ? '해금 완료' : `타짜 최고 ${bestStreak}/15연승 · 타짜 ${wins}/50승`
             };
         }
 
@@ -4234,7 +4234,7 @@
                     const progress = Math.max(stats.normal.maxStreak || 0, stats.normal.streak || 0);
                     return {
                         unlocked: progress >= 10,
-                        progressText: progress >= 10 ? '해금 완료' : `일반 ${Math.min(progress, 10)}/10연승`
+                        progressText: progress >= 10 ? '해금 완료' : `일반 최고 ${Math.min(progress, 10)}/10연승`
                     };
                 }
             },
@@ -4260,7 +4260,7 @@
                     const progress = Math.max(stats.tazza.maxStreak || 0, stats.tazza.streak || 0);
                     return {
                         unlocked: progress >= 10,
-                        progressText: progress >= 10 ? '해금 완료' : `타짜 ${Math.min(progress, 10)}/10연승`
+                        progressText: progress >= 10 ? '해금 완료' : `타짜 최고 ${Math.min(progress, 10)}/10연승`
                     };
                 }
             },
@@ -4268,7 +4268,7 @@
                 id: 'clockwork_gem',
                 name: '황금 태엽 주사위',
                 desc: '황동 바탕에 톱니와 태엽 무늬를 새긴 주사위',
-                conditionLabel: '타짜 15연승 또는 누적 50승',
+                conditionLabel: '타짜 15연승 또는 타짜 50승',
                 checkUnlock: checkClockworkUnlock
             }
         ];
@@ -4355,7 +4355,7 @@
                 id: 'clockwork_palace',
                 name: '황금 시계태엽 궁전 보드',
                 desc: '짙은 녹색 보드의 모서리에서 황동 톱니바퀴가 돌아가는 태엽 테마',
-                conditionLabel: '타짜 15연승 또는 누적 50승',
+                conditionLabel: '타짜 15연승 또는 타짜 50승',
                 checkUnlock: checkClockworkUnlock
             }
         ];
@@ -4543,7 +4543,8 @@
 
                 const conditionLine = isUnlocked
                     ? `<span style="color:#6ee7b7;">✔ ${skin.conditionLabel}</span>`
-                    : `<span style="color:#fbbf24;">조건: ${skin.conditionLabel}</span>`;
+                    : `<span style="color:#fbbf24;display:block;">조건: ${skin.conditionLabel}</span>
+                       <span style="color:#d8c7ab;display:block;margin-top:3px;">진행도: ${evalInfo.progressText}</span>`;
 
                 return `
                     <div class="${cardClass}" data-skin-type="${tab}" data-skin-id="${skin.id}">
