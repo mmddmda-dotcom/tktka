@@ -2257,7 +2257,7 @@
             position: absolute;
             height: auto;
             opacity: .9;
-            animation: gearSpinSlowCW 48s linear infinite;
+            animation: gearSpinSlowCW 160s linear infinite;
         }
         .corner-nw {
             width: var(--small-wheel);
@@ -2273,7 +2273,7 @@
             bottom: 18px;
             margin-right: calc(var(--large-wheel) * -.5);
             translate: 0 50%;
-            animation-duration: 55s;
+            animation-duration: 184s;
             animation-direction: reverse;
         }
         .clockwork-decor::before, .clockwork-decor::after {
@@ -2643,6 +2643,42 @@
             --die-finish: linear-gradient(145deg, #fff2bf61, transparent 35%, transparent 70%, #72511f49);
         }
         .die-face.die-skin-clockwork_gem::before { opacity: .42; }
+    
+        [hidden] { display: none !important; }
+        .front-screen { min-height:100dvh; display:grid; place-items:center; padding:18px; }
+        .front-card { width:min(100%,400px); display:grid; gap:14px; text-align:center; padding:26px;
+            color:#f7e6bd; background:#26190f; border:1px solid #a67d47; border-radius:16px; }
+        .front-card h1,.front-card h2,.front-card p { margin:0; }
+        .front-card .ui-btn { min-height:44px; }
+        .front-card form { display:grid; gap:10px; }
+        #room-code { font-size:1.9rem; letter-spacing:.13em; user-select:all; }
+        #online-nickname { width:100%; padding:10px; text-align:center; font:inherit; }
+        .room-player { display:flex; justify-content:space-between; gap:12px; text-align:left; overflow-wrap:anywhere; }
+        #join-code { width:100%; padding:10px; text-align:center; font:inherit; text-transform:uppercase; }
+        dialog.front-card { margin:auto; max-width:calc(100vw - 36px); }
+        dialog.front-card:not([open]) { display:none; }
+        dialog.front-card::backdrop { background:#0009; }
+        .online-game :is(.ai-mode-switcher,#streak-badge,#btn-new-game,#btn-stats,#ai-mini-die-box) {display:none !important;}
+    
+        #home-screen { position:fixed; inset:0; overflow:auto; z-index:20;
+            background:radial-gradient(ellipse at 50% 33%,#193d43,#0a1b25 65%,#060e17);
+            color-scheme:dark; }
+        #home-screen .front-card { width:min(100%,460px); gap:18px; padding:clamp(24px,7vw,48px);
+            background:#0c1d28; border:1px solid #9c7a4a; border-radius:24px;
+            box-shadow:0 24px 70px #0008,inset 0 0 0 6px #0c1d28,inset 0 0 0 7px #8b724045; }
+        #home-screen h1 { color:#ffe2aa; font-size:clamp(2.5rem,10vw,4rem); line-height:1.05; }
+        #home-screen h1 span { display:block; margin-top:12px; font-size:.35em; letter-spacing:.2em; }
+        #home-screen .title-die { justify-self:center; display:grid; grid-template:repeat(3,1fr)/repeat(3,1fr);
+            place-items:center; width:68px; height:68px; padding:7px; margin:10px; transform:rotate(-13deg);
+            border:2px solid #ffdd93; border-radius:15px; background:#cba164; box-shadow:6px 8px 0 #574024; }
+        .title-die i { width:9px; height:9px; border-radius:50%; background:#1b2630; }
+        .title-die i:nth-child(2){ grid-area:1/3; } .title-die i:nth-child(3){ grid-area:2/2; }
+        .title-die i:nth-child(4){ grid-area:3/1; } .title-die i:nth-child(5){ grid-area:3/3; }
+        #home-screen button { font:inherit; font-weight:800; min-height:49px; color:#fae2ad;
+            background:#142d3a; border:1px solid #997846; border-radius:12px; }
+        #home-screen button:first-of-type { margin-top:12px; color:#17232c; background:#e9c37e; }
+        .online-game #btn-skins { display:none !important; }
+        #gameover-modal .ai-mode-switcher { display:flex; justify-content:center; margin-bottom:12px; }
     </style>
 </head>
 <body class="layout-pad_pc board-skin-walnut_velvet">
@@ -2684,7 +2720,61 @@
     </div>
 
     <!-- 메인 앱 셸 -->
-    <div id="app" class="app-shell">
+    
+    <main id="home-screen" class="front-screen"><section class="front-card">
+        <div class="title-die" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <h1>티카투카<span>운명의 주사위</span></h1>
+        <button id="open-single" class="ui-btn ui-btn-gold">싱글플레이</button>
+        <button id="open-online" class="ui-btn">멀티플레이</button>
+    </section></main>
+    <main id="online-screen" class="front-screen" hidden><section class="front-card">
+        <h2>멀티플레이</h2>
+        <label for="online-nickname">닉네임</label>
+        <input id="online-nickname" type="text" maxlength="16" autocomplete="nickname" placeholder="닉네임 입력">
+        <button id="create-room" class="ui-btn ui-btn-gold">방 만들기</button>
+        <form id="join-room">
+            <input id="join-code" aria-label="방 코드" placeholder="네 자리 방 코드" inputmode="numeric" maxlength="4" autocomplete="off" hidden>
+            <button class="ui-btn">참가하기</button>
+        </form>
+        <p id="online-message" role="status"></p>
+        <button id="online-back" class="ui-btn">뒤로</button>
+    </section></main>
+    <main id="room-screen" class="front-screen" hidden><section class="front-card">
+        <h2>대기실</h2>
+        <p>방 코드</p><strong id="room-code"></strong>
+        <p class="room-player"><span>방장</span><strong id="room-host-name"></strong></p>
+        <p class="room-player"><span>참가자</span><strong id="room-guest-name"></strong></p>
+        <p id="room-status" role="status"></p>
+        <button id="room-skins" class="ui-btn">스킨</button>
+        <button id="room-ready" class="ui-btn ui-btn-gold" hidden>레디</button>
+        <button id="room-start" class="ui-btn ui-btn-gold" disabled>게임 시작</button>
+        <button id="room-leave" class="ui-btn">나가기</button>
+    </section></main>
+    <dialog id="resume-dialog" class="front-card" aria-labelledby="resume-title">
+        <h2 id="resume-title">진행 중인 게임이 있어요</h2>
+        <p id="resume-copy">이어서 할까요, 처음부터 할까요?</p>
+        <button id="resume-yes" class="ui-btn ui-btn-gold">이어서 하기</button>
+        <button id="resume-no" class="ui-btn">처음부터 하기</button>
+    </dialog>
+    <dialog id="game-settings" class="front-card">
+        <h2>설정</h2>
+                <div class="layout-switcher" role="group" aria-label="화면 비율 선택">
+                    <button type="button" class="layout-opt-btn" data-layout-mode="phone">📱 핸드폰</button>
+                    <button type="button" class="layout-opt-btn active" data-layout-mode="pad_pc">📟 패드·컴퓨터</button>
+                </div>
+
+        <button type="button" id="btn-bgm" class="ui-btn">배경음악 켜기</button>
+        <button type="button" id="btn-sound" class="ui-btn">효과음 끄기</button>
+        <button id="return-home" class="ui-btn">메인화면으로 돌아가기</button>
+        <form method="dialog"><button class="ui-btn">닫기</button></form>
+    </dialog>
+    <dialog id="online-result" class="front-card">
+        <h2 id="online-result-text"></h2>
+        <button id="online-rematch" class="ui-btn ui-btn-gold">한 판 더</button>
+        <p id="online-rematch-status" role="status"></p>
+        <button id="online-result-home" class="ui-btn">메인화면으로 돌아가기</button>
+    </dialog>
+    <div id="app" class="app-shell" hidden>
 
         <!-- 1. 상단 헤더 바 -->
         <header class="top-header">
@@ -2695,15 +2785,10 @@
             </div>
 
             <div class="header-actions">
-                <div class="layout-switcher" role="group" aria-label="화면 비율 선택">
-                    <button type="button" class="layout-opt-btn" data-layout-mode="phone">📱 핸드폰</button>
-                    <button type="button" class="layout-opt-btn active" data-layout-mode="pad_pc">📟 패드·컴퓨터</button>
-                </div>
+                <button id="open-settings" type="button" class="ui-btn">⚙ 설정</button>
                 <button type="button" id="btn-skins" class="ui-btn ui-btn-skin">🎨 스킨</button>
                 <button type="button" id="btn-rules" class="ui-btn">📖 규칙 설명</button>
                 <button type="button" id="btn-stats" class="ui-btn">📊 전적</button>
-                <button type="button" id="btn-bgm" class="ui-btn" title="오르골 배경음악 토글">🎵</button>
-                <button type="button" id="btn-sound" class="ui-btn" title="효과음 토글">🔊</button>
                 <button type="button" id="btn-new-game" class="ui-btn ui-btn-gold">↻ 새 게임</button>
             </div>
         </header>
@@ -2812,20 +2897,36 @@
                 </div>
 
                 <div class="clockwork-decor" aria-hidden="true">
-                        <svg class="corner-wheel corner-nw" viewBox="0 0 96 96" focusable="false"><defs><g id="corner-movement"><polygon points="85.00,48.00 84.93,50.19 90.82,51.90 90.09,56.79 83.90,56.95 82.77,60.65 81.96,62.69 86.91,66.31 84.55,70.66 78.67,68.69 76.34,71.78 74.88,73.42 78.30,78.51 74.59,81.79 69.75,77.93 66.50,80.04 64.57,81.08 66.04,87.03 61.43,88.85 58.20,83.57 54.42,84.44 52.25,84.75 51.60,90.85 46.65,90.98 45.42,84.91 41.58,84.44 39.43,83.99 36.73,89.50 32.03,87.92 32.95,81.80 29.50,80.04 27.63,78.89 23.21,83.14 19.34,80.06 22.30,74.62 19.66,71.78 18.30,70.06 12.69,72.54 10.10,68.32 14.74,64.22 13.23,60.65 12.54,58.57 6.43,58.98 5.44,54.13 11.20,51.87 11.00,48.00 11.07,45.81 5.18,44.10 5.91,39.21 12.10,39.05 13.23,35.35 14.04,33.31 9.09,29.69 11.45,25.34 17.33,27.31 19.66,24.22 21.12,22.58 17.70,17.49 21.41,14.21 26.25,18.07 29.50,15.96 31.43,14.92 29.96,8.97 34.57,7.15 37.80,12.43 41.58,11.56 43.75,11.25 44.40,5.15 49.35,5.02 50.58,11.09 54.42,11.56 56.57,12.01 59.27,6.50 63.97,8.08 63.05,14.20 66.50,15.96 68.37,17.11 72.79,12.86 76.66,15.94 73.70,21.38 76.34,24.22 77.70,25.94 83.31,23.46 85.90,27.68 81.26,31.78 82.77,35.35 83.46,37.43 89.57,37.02 90.56,41.87 84.80,44.13" fill="#9b814c" stroke="#dfc58c" stroke-width="1.2"/><circle cx="48" cy="48" r="34.5" fill="none" stroke="#564629" stroke-width="1"/>
-                        <circle cx="48" cy="48" r="31" fill="#193128" stroke="#d0ac67" stroke-width="3"/><path d="M46 15h4l2 25h-8z" fill="#b69a61" transform="rotate(0 48 48)"/><path d="M46 15h4l2 25h-8z" fill="#b69a61" transform="rotate(60 48 48)"/><path d="M46 15h4l2 25h-8z" fill="#b69a61" transform="rotate(120 48 48)"/><path d="M46 15h4l2 25h-8z" fill="#b69a61" transform="rotate(180 48 48)"/><path d="M46 15h4l2 25h-8z" fill="#b69a61" transform="rotate(240 48 48)"/><path d="M46 15h4l2 25h-8z" fill="#b69a61" transform="rotate(300 48 48)"/><circle cx="48" cy="48" r="11" fill="#b99c61" stroke="#ead496"/><circle cx="48" cy="48" r="5" fill="#23372c"/></g></defs><use href="#corner-movement"/></svg>
+                        <svg class="corner-wheel corner-nw" viewBox="0 0 96 96" focusable="false"><defs>
+                            <linearGradient id="tika-gear-brass" x2="1" y2="1">
+                                <stop stop-color="#d5b57c"/><stop offset=".33" stop-color="#977747"/>
+                                <stop offset=".62" stop-color="#624a31"/><stop offset="1" stop-color="#ae8c56"/>
+                            </linearGradient>
+                            <radialGradient id="tika-gear-recess">
+                                <stop stop-color="#263d33"/><stop offset="1" stop-color="#142923"/>
+                            </radialGradient>
+                            <g id="corner-movement">
+                                <polygon points="85.00,48.00 84.93,50.19 90.82,51.90 90.09,56.79 83.90,56.95 82.77,60.65 81.96,62.69 86.91,66.31 84.55,70.66 78.67,68.69 76.34,71.78 74.88,73.42 78.30,78.51 74.59,81.79 69.75,77.93 66.50,80.04 64.57,81.08 66.04,87.03 61.43,88.85 58.20,83.57 54.42,84.44 52.25,84.75 51.60,90.85 46.65,90.98 45.42,84.91 41.58,84.44 39.43,83.99 36.73,89.50 32.03,87.92 32.95,81.80 29.50,80.04 27.63,78.89 23.21,83.14 19.34,80.06 22.30,74.62 19.66,71.78 18.30,70.06 12.69,72.54 10.10,68.32 14.74,64.22 13.23,60.65 12.54,58.57 6.43,58.98 5.44,54.13 11.20,51.87 11.00,48.00 11.07,45.81 5.18,44.10 5.91,39.21 12.10,39.05 13.23,35.35 14.04,33.31 9.09,29.69 11.45,25.34 17.33,27.31 19.66,24.22 21.12,22.58 17.70,17.49 21.41,14.21 26.25,18.07 29.50,15.96 31.43,14.92 29.96,8.97 34.57,7.15 37.80,12.43 41.58,11.56 43.75,11.25 44.40,5.15 49.35,5.02 50.58,11.09 54.42,11.56 56.57,12.01 59.27,6.50 63.97,8.08 63.05,14.20 66.50,15.96 68.37,17.11 72.79,12.86 76.66,15.94 73.70,21.38 76.34,24.22 77.70,25.94 83.31,23.46 85.90,27.68 81.26,31.78 82.77,35.35 83.46,37.43 89.57,37.02 90.56,41.87 84.80,44.13" fill="url(#tika-gear-brass)" stroke="#493426" stroke-width="1.15"/>
+                                <circle cx="48" cy="48" r="37.1" fill="none" stroke="#e0c38f" stroke-opacity=".58" stroke-width=".65"/>
+                                <circle cx="48" cy="48" r="34.9" fill="none" stroke="#533f2b" stroke-width=".75"/>
+                                <circle cx="48" cy="48" r="31" fill="url(#tika-gear-recess)" stroke="#362e24" stroke-width="1.2"/>
+                                <circle cx="48" cy="48" r="29.5" fill="none" stroke="#b99a65" stroke-opacity=".6" stroke-width=".6"/>
+                                <path d="M43 17H53L51 39H45Z" fill="url(#tika-gear-brass)" stroke="#483328" stroke-width=".65" transform="rotate(0 48 48)"/><path d="M43 17H53L51 39H45Z" fill="url(#tika-gear-brass)" stroke="#483328" stroke-width=".65" transform="rotate(60 48 48)"/><path d="M43 17H53L51 39H45Z" fill="url(#tika-gear-brass)" stroke="#483328" stroke-width=".65" transform="rotate(120 48 48)"/><path d="M43 17H53L51 39H45Z" fill="url(#tika-gear-brass)" stroke="#483328" stroke-width=".65" transform="rotate(180 48 48)"/><path d="M43 17H53L51 39H45Z" fill="url(#tika-gear-brass)" stroke="#483328" stroke-width=".65" transform="rotate(240 48 48)"/><path d="M43 17H53L51 39H45Z" fill="url(#tika-gear-brass)" stroke="#483328" stroke-width=".65" transform="rotate(300 48 48)"/>
+                                <circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(0 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(30 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(60 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(90 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(120 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(150 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(180 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(210 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(240 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(270 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(300 48 48)"/><circle cx="48" cy="14" r="1.1" fill="#4d3826" stroke="#c1a16a" stroke-width=".45" transform="rotate(330 48 48)"/>
+                                <circle cx="48" cy="48" r="12" fill="url(#tika-gear-brass)" stroke="#423424" stroke-width="1.1"/>
+                                <circle cx="48" cy="48" r="8.5" fill="none" stroke="#d8b97f" stroke-opacity=".75" stroke-width=".65"/>
+                                <circle cx="48" cy="48" r="5.5" fill="#263c33" stroke="#56412c" stroke-width="1"/>
+                                <path d="M45.5 48h5" stroke="#c1a475" stroke-width=".7"/>
+                            </g>
+                        </defs><use href="#corner-movement"/></svg>
                         <svg class="corner-wheel corner-se" viewBox="0 0 96 96" focusable="false"><use href="#corner-movement"/></svg>
                 </div>
 
                 <!-- 상대 진영 상단 바 -->
                 <div class="faction-bar faction-ai">
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                        <span>🎭 상대</span>
-                        <div class="ai-mode-switcher" role="group" aria-label="AI 난이도 전환" title="게임 중 변경 시 다음 게임부터 적용됩니다">
-                            <button type="button" id="btn-ai-normal" class="ai-mode-btn active-normal" data-ai-mode="normal">🤖 일반</button>
-                            <button type="button" id="btn-ai-tazza" class="ai-mode-btn" data-ai-mode="tazza">🃏 타짜</button>
-                        </div>
-                        <span id="ai-queued-badge" class="ai-queued-badge hidden">다음 판: 타짜</span>
+                        <span id="opponent-name">🎭 상대</span>
+
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span id="ai-turn-status" style="font-size:10.5px;color:#fecdd3;">대기 중</span>
@@ -2846,7 +2947,7 @@
 
                 <!-- 플레이어 진영 하단 바 -->
                 <div class="faction-bar faction-player">
-                    <span>👑 나</span>
+                    <span id="self-name">👑 나</span>
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span style="font-size:11px;opacity:0.95;">점령 <b id="score-player-lines">0</b>:<b id="score-ai-lines">0</b> · 총점 <b id="score-player-total">0</b></span>
                         <span id="player-turn-badge" class="turn-indicator turn-ind-player">내 턴</span>
@@ -3017,9 +3118,15 @@
             <h2 id="result-title" style="font-size:23px;font-weight:900;color:#f3d078;margin-bottom:4px;">승리!</h2>
             <p id="result-subtitle" style="font-size:13px;color:#d6c5a9;margin-bottom:14px;">3개 열 중 2개 열을 점령했습니다!</p>
             <div id="result-lanes-summary" style="display:flex;flex-direction:column;gap:6px;background:#160c07;border:1px solid rgba(200,150,62,0.35);border-radius:12px;padding:10px;margin-bottom:16px;"></div>
+            <p>다음 판 난이도</p>
+            <div class="ai-mode-switcher" role="group" aria-label="AI 난이도 전환">
+                            <button type="button" id="btn-ai-normal" class="ai-mode-btn active-normal" data-ai-mode="normal">🤖 일반</button>
+                            <button type="button" id="btn-ai-tazza" class="ai-mode-btn" data-ai-mode="tazza">🃏 타짜</button>
+                        </div>
             <button type="button" id="btn-modal-rematch" class="btn-roll-main" style="width:100%;padding:11px;">
                 🪙 코인 토스로 한 판 더!
             </button>
+            <button id="result-home" class="ui-btn" style="margin-top:10px">메인메뉴로 나가기</button>
         </div>
     </div>
 
@@ -3182,7 +3289,7 @@
                 if (typeof state === 'undefined' || !state.skins) return 'default';
                 const d = state.skins.equippedDice;
                 const b = state.skins.equippedBoard;
-                if (d === 'clockwork_gem' || b === 'clockwork_palace') return 'clockwork';
+                if (d === 'clockwork_gem' && b === 'clockwork_palace') return 'clockwork';
                 if (d === 'ocean_bubble' && b === 'deep_ocean') return 'ocean';
                 if (d === 'najeon_lacquer' && b === 'korean_hanok') return 'najeon';
                 if (d === 'pure_gold' && b === 'pure_gold') return 'gold';
@@ -3316,6 +3423,22 @@
                 });
             }
 
+            playClockworkClick(at, pitch, volume) {
+                // Short brass overtones imitate a pawl catching a gear tooth.
+                for (const [ratio, level, decay] of [[1, 1, 0.028], [1.73, 0.36, 0.014], [2.42, 0.18, 0.008]]) {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(pitch * ratio, at);
+                    gain.gain.setValueAtTime(volume * level, at);
+                    gain.gain.exponentialRampToValueAtTime(0.001, at + decay);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(at);
+                    osc.stop(at + decay + 0.004);
+                }
+            }
+
             playRollTick(step = 0) {
                 if (!this.enabled) return;
                 this.init();
@@ -3416,19 +3539,9 @@
                 }
 
                 if (combo === 'clockwork') {
-                    // 시계 이스케이프먼트 '째깍-째깍' 정밀 태엽 소리
-                    const isTick = step % 2 === 0;
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(isTick ? 1950 : 1580, now);
-                    osc.frequency.exponentialRampToValueAtTime(isTick ? 620 : 480, now + 0.028);
-                    gain.gain.setValueAtTime(0.16, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.032);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.035);
+                    const tooth = step % 2 === 0 ? 2400 : 1750;
+                    this.playClockworkClick(now, tooth, 0.15);
+                    this.playClockworkClick(now + 0.019, tooth * 0.65, 0.075);
                     return;
                 }
 
@@ -3589,11 +3702,9 @@
                 const combo = this.getActiveSetCombo();
 
                 if (combo === 'clockwork') {
-                    // 영롱한 오르골 벨 착지 화음
-                    const bellNotes = isFixed ? [1046.5, 1318.51, 1567.98, 2093.0] : [1046.5, 1567.98];
-                    bellNotes.forEach((f) => {
-                        this.playMusicBoxPluck(f, 0.75, 0.095);
-                    });
+                    this.playClockworkClick(now, 1330, 0.22);
+                    this.playClockworkClick(now + 0.032, 870, 0.15);
+                    this.playMusicBoxPluck(isFixed ? 1567.98 : 1046.5, 0.48, 0.085);
                     return;
                 }
 
@@ -3804,7 +3915,8 @@
             victimSnapshots,
             targetLaneRect,
             targetLaneEl,
-            isPlayerAttacking
+            isPlayerAttacking,
+            projectileSkin = null
         }) {
             const layer = document.getElementById('projectile-layer');
             if (!layer || !sourceSlotEl) return;
@@ -3829,7 +3941,7 @@
                 const projSize = 54;
                 const dieMarkup = renderDieHTML(
                     { value: dieValue, fixed: false },
-                    { sizeClass: 'die-sz-full', owner: isPlayerAttacking ? 'player' : 'ai', showLockPin: false }
+                    { sizeClass: 'die-sz-full', owner: isPlayerAttacking ? 'player' : 'ai', showLockPin: false, overrideSkinId: projectileSkin }
                 );
 
                 proj = document.createElement('div');
@@ -4031,7 +4143,7 @@
             const val = Math.max(1, Math.min(6, Number(dieObj.value) || 1));
             const isFixed = Boolean(dieObj.fixed);
             const fixedSide = dieObj.fixedOwner || owner;
-            const activeSkin = overrideSkinId || (state && state.skins ? state.skins.equippedDice : 'classic_white');
+            const activeSkin = overrideSkinId || DICE_SKIN_CATALOG.find(skin => skin.id === dieObj.onlineSkin)?.id || (state && state.skins ? state.skins.equippedDice : 'classic_white');
 
             let styleClass = 'die-face';
             if (activeSkin && activeSkin !== 'classic_white') {
@@ -4460,6 +4572,7 @@
         }
 
         function handleSelectSkinCard(skinType, skinId, cardEl) {
+            if (match && match.status !== 'waiting') return;
             const toastEl = document.getElementById('skin-toast-msg');
             const catalog = skinType === 'dice' ? DICE_SKIN_CATALOG : BOARD_SKIN_CATALOG;
             const unlockedList = skinType === 'dice' ? state.skins.unlockedDice : state.skins.unlockedBoard;
@@ -4595,7 +4708,7 @@
             return finalVal;
         }
 
-        async function runPreRoundCoinToss() {
+        async function playCoinToss(isPlayerFirst) {
             const session = state.gameSessionId;
             const overlay = document.getElementById('cointoss-overlay');
             const coinEl = document.getElementById('coin-3d-el');
@@ -4608,8 +4721,6 @@
             titleEl.textContent = '🪙 운명의 동전을 던집니다...';
             subEl.textContent = '앞면(👑): 나 선공 · 뒷면(🎭): 상대 선공 (50:50)';
 
-            const isPlayerFirst = Math.random() < 0.5;
-            saveRound(isPlayerFirst ? 'player_wait_roll' : 'coin_ai_first', { isOpeningTurn: true });
             audio.playCoinFlip();
 
             const targetDeg = isPlayerFirst ? 1800 : 1980;
@@ -4623,7 +4734,7 @@
                 fill: 'forwards'
             });
 
-            if (session !== state.gameSessionId) return;
+            if (session !== state.gameSessionId) return false;
             audio.playCoinLand(isPlayerFirst);
 
             if (isPlayerFirst) {
@@ -4635,10 +4746,17 @@
             }
 
             await new Promise(r => setTimeout(r, 950));
-            if (session !== state.gameSessionId) return;
+            if (session !== state.gameSessionId) return false;
             overlay.classList.add('hidden');
 
             state.isAnimating = false;
+            return true;
+        }
+
+        async function runPreRoundCoinToss() {
+            const isPlayerFirst = Math.random() < 0.5;
+            saveRound(isPlayerFirst ? 'player_wait_roll' : 'coin_ai_first', { isOpeningTurn: true });
+            if (!await playCoinToss(isPlayerFirst)) return;
             state.isOpeningTurn = true;
 
             if (isPlayerFirst) {
@@ -4744,6 +4862,7 @@
            7. 플레이어 액션 핸들러
            ============================================================================ */
         async function handlePlayerRoll(isBonus = false) {
+            if (match) return onlineMove('roll');
             const expectedPhase = isBonus ? 'player_bonus_wait_roll' : 'player_wait_roll';
             if (state.phase !== expectedPhase || state.isAnimating) return;
 
@@ -4769,6 +4888,7 @@
         }
 
         async function handlePlayerReroll() {
+            if (match) return onlineMove('reroll');
             if (state.phase !== 'player_place' || state.rerollsLeft <= 0 || state.isAnimating) return;
 
             const savedBeforeDie = state.currentDie;
@@ -4799,6 +4919,7 @@
         }
 
         function handlePickRerollOption(chooseAfter) {
+            if (match) return onlineMove(chooseAfter ? 'after' : 'before');
             if (state.phase !== 'player_reroll_choose' || state.isAnimating) return;
             state.currentDie = chooseAfter ? state.rerollAfterDie : state.rerollBeforeDie;
             state.rerollBeforeDie = null;
@@ -4810,6 +4931,10 @@
         }
 
         async function handleBoardColumnClick(side, colIdx) {
+            if (match) {
+                if (['player_place','player_bonus_place'].includes(state.phase)) return onlineMove('place', { side, lane: colIdx });
+                return;
+            }
             if (state.isAnimating) return;
 
             if (state.phase === 'player_place') {
@@ -5283,7 +5408,8 @@
             slotEl.classList.remove('hidden');
 
             slotEl.innerHTML = renderDieHTML(
-                { value: state.currentDie, fixed: isFixedStyle, fixedOwner: 'player' },
+                { value: state.currentDie, fixed: isFixedStyle, fixedOwner: match && match.game.turn !== match.seat ? 'ai' : 'player',
+                    onlineSkin: match?.skins[match.game.turn] },
                 {
                     sizeClass: 'die-sz-tray',
                     owner: 'player',
@@ -5295,6 +5421,8 @@
         }
 
         function renderAll(popColIdx = -1, popSide = '') {
+            byId('opponent-name').textContent = match ? onlineName(1 - match.seat) : '🎭 상대';
+            byId('self-name').textContent = match ? onlineName(match.seat) + ' (나)' : '👑 나';
             const currentMode = state.activeAiMode;
             const currentStreak = state.stats[currentMode].streak;
             const modeLabel = currentMode === 'tazza' ? '타짜' : '일반';
@@ -5304,22 +5432,15 @@
 
             const btnNormal = document.getElementById('btn-ai-normal');
             const btnTazza = document.getElementById('btn-ai-tazza');
-            const queuedBadge = document.getElementById('ai-queued-badge');
-            if (btnNormal && btnTazza) {
-                btnNormal.classList.toggle('active-normal', state.queuedAiMode === 'normal');
-                btnTazza.classList.toggle('active-tazza', state.queuedAiMode === 'tazza');
-            }
-            if (queuedBadge) {
-                if (state.queuedAiMode !== state.activeAiMode) {
-                    queuedBadge.textContent = `다음 판: ${state.queuedAiMode === 'tazza' ? '타짜' : '일반'}`;
-                    queuedBadge.classList.remove('hidden');
-                } else {
-                    queuedBadge.classList.add('hidden');
-                }
-            }
+            btnNormal.classList.toggle('active-normal', state.queuedAiMode === 'normal');
+            btnTazza.classList.toggle('active-tazza', state.queuedAiMode === 'tazza');
+            btnNormal.setAttribute('aria-pressed', state.queuedAiMode === 'normal');
+            btnTazza.setAttribute('aria-pressed', state.queuedAiMode === 'tazza');
 
-            const isPlayerTurn = state.phase.startsWith('player_');
-            const isAiTurn = state.phase === 'ai_turn';
+            const onlineRolling = state.phase === 'online_rolling';
+            const isPlayerTurn = state.phase.startsWith('player_') || (onlineRolling && match.game.turn === match.seat);
+            const isAiTurn = state.phase === 'ai_turn' || state.phase === 'online_other'
+                || (onlineRolling && !isPlayerTurn);
             document.body.classList.toggle('turn-is-ai', isAiTurn);
             document.getElementById('player-turn-badge').classList.toggle('hidden', !isPlayerTurn);
             document.getElementById('ai-turn-badge').classList.toggle('hidden', !isAiTurn);
@@ -5327,7 +5448,7 @@
             const aiStatusEl = document.getElementById('ai-turn-status');
             const aiMiniDieBox = document.getElementById('ai-mini-die-box');
             if (isAiTurn) {
-                aiStatusEl.textContent = state.aiFixedRoll ? '고정 주사위 굴리는 중' : '주사위 굴리는 중';
+                aiStatusEl.textContent = onlineRolling || state.aiRollingAnim ? '' : match ? onlineName(1 - match.seat) + ' 차례' : '상대 차례';
                 if (state.aiDisplayDie) {
                     aiMiniDieBox.innerHTML = renderDieHTML(
                         { value: state.aiDisplayDie, fixed: state.aiFixedRoll, fixedOwner: 'ai' },
@@ -5381,7 +5502,7 @@
                 else if (canInjectFixed) cardClass += ' lane-fixed-enemy';
 
                 let badgeHtml = '';
-                if (isSmashCol) badgeHtml = `<div class="smash-floating-badge">💥 알까기 발사!</div>`;
+                if (isSmashCol) badgeHtml = `<div class="smash-floating-badge">💥 알까기</div>`;
                 else if (canInjectFixed) badgeHtml = `<div class="inject-floating-badge">투척 가능</div>`;
 
                 const bonusHtml = evalRes.maxCount === 3
@@ -5460,7 +5581,7 @@
                 else if (isFull) cardClass += ' lane-full-dim';
 
                 let badgeHtml = '';
-                if (isSmashCol) badgeHtml = `<div class="smash-floating-badge">💥 알까기 발사!</div>`;
+                if (isSmashCol) badgeHtml = `<div class="smash-floating-badge">💥 알까기</div>`;
 
                 const bonusHtml = evalRes.maxCount === 3
                     ? `<span class="bonus-tag bonus-tag-3">+2개 보너스</span>`
@@ -5542,19 +5663,15 @@
                 if (isFirstLock) btnRoll.classList.add('btn-roll-fixed');
                 btnReroll.disabled = true;
 
-            } else if (state.phase === 'player_rolling' || state.phase === 'player_bonus_rolling') {
-                const isFixedRoll = state.phase === 'player_bonus_rolling' || state.isOpeningTurn;
-                renderTrayOnly(true, isFixedRoll);
-                trayTitle.textContent = '주사위가 구르는 중...';
-                trayDesc.textContent = '잠시만 기다려주세요.';
+            } else if (['player_rolling', 'player_bonus_rolling', 'player_rerolling', 'online_rolling'].includes(state.phase)
+                || (state.phase === 'ai_turn' && state.aiRollingAnim)) {
+                const isFixedRoll = state.phase === 'player_bonus_rolling' || state.isOpeningTurn
+                    || (state.phase === 'online_rolling' && match.game.step === 'bonus_place');
+                renderTrayOnly(state.phase !== 'ai_turn', isFixedRoll);
+                trayTitle.textContent = '주사위가 굴러가는 중';
+                trayDesc.textContent = '';
                 btnRoll.disabled = true;
-                btnReroll.disabled = true;
-
-            } else if (state.phase === 'player_rerolling') {
-                renderTrayOnly(true, state.isOpeningTurn);
-                trayTitle.textContent = '🃏 타짜의 손놀림 발동!';
-                trayDesc.textContent = '다른 눈이 나오도록 주사위를 다시 굴리는 중...';
-                btnRoll.disabled = true;
+                btnRoll.textContent = '굴리는 중';
                 btnReroll.disabled = true;
 
             } else if (state.phase === 'player_place') {
@@ -5565,7 +5682,7 @@
                     trayTitle.textContent = `🔒 선공 고정 [${state.currentDie}] — 내 진영에 배치`;
                     trayDesc.textContent = '내 빈 칸에 놓거나 다시 굴리세요.';
                 } else if (smashTargets.length > 0) {
-                    trayTitle.textContent = `💥 [${state.currentDie}] 알까기 발사 가능!`;
+                    trayTitle.textContent = `💥 [${state.currentDie}] 알까기`;
                     trayDesc.textContent = '강조된 열을 눌러 상대의 같은 눈 주사위를 없애세요.';
                 } else {
                     trayTitle.textContent = `주사위 [${state.currentDie}] 배치`;
@@ -5580,11 +5697,11 @@
                 slotEl.classList.add('hidden');
                 rerollChoiceBox.classList.remove('hidden');
                 document.getElementById('reroll-before-die').innerHTML = renderDieHTML(
-                    { value: state.rerollBeforeDie, fixed: state.isOpeningTurn, fixedOwner: 'player' },
+                    { value: state.rerollBeforeDie, onlineSkin: match?.skins[match.seat], fixed: state.isOpeningTurn, fixedOwner: 'player' },
                     { sizeClass: 'die-sz-reroll', owner: 'player', showLockPin: false }
                 );
                 document.getElementById('reroll-after-die').innerHTML = renderDieHTML(
-                    { value: state.rerollAfterDie, fixed: state.isOpeningTurn, fixedOwner: 'player' },
+                    { value: state.rerollAfterDie, onlineSkin: match?.skins[match.seat], fixed: state.isOpeningTurn, fixedOwner: 'player' },
                     { sizeClass: 'die-sz-reroll', owner: 'player', showLockPin: false }
                 );
                 trayTitle.textContent = '🃏 리롤 결과 선택';
@@ -5609,6 +5726,23 @@
                 btnRoll.textContent = '배치할 열 클릭';
                 btnReroll.disabled = true;
 
+            } else if (state.phase === 'online_other') {
+                const game = match.game;
+                renderTrayOnly(false, game.opening || game.step.startsWith('bonus'));
+                const name = onlineName(1 - match.seat);
+                const subject = withSubjectParticle(name);
+                const actions = {
+                    wait_roll: '주사위를 굴릴 차례예요.',
+                    place: '놓을 칸을 고르고 있어요.',
+                    reroll_choose: '주사위 눈을 고르고 있어요.',
+                    bonus_wait_roll: '보너스 주사위를 굴릴 차례예요.',
+                    bonus_place: '보너스 주사위를 놓을 칸을 고르고 있어요.'
+                };
+                trayTitle.textContent = state.currentDie ? `${name}의 주사위 [${state.currentDie}]` : `${name} 차례`;
+                trayDesc.textContent = `${subject} ${actions[game.step] || '차례를 진행하고 있어요.'}`;
+                btnRoll.disabled = true;
+                btnRoll.textContent = '상대 차례';
+                btnReroll.disabled = true;
             } else if (state.phase === 'ai_turn') {
                 renderTrayOnly(false, false);
                 trayTitle.textContent = '상대 턴 진행 중...';
@@ -5744,12 +5878,12 @@
             });
         }
 
-        function resumeRound() {
+        function readSavedRound() {
             let saved;
             try {
                 saved = JSON.parse(localStorage.getItem(ROUND_KEY));
             } catch (e) {
-                return false;
+                return null;
             }
             const phases = ['player_wait_roll', 'player_place', 'player_reroll_choose',
                 'player_bonus_wait_roll', 'player_bonus_place', 'coin_ai_first', 'ai_turn', 'ai_finish'];
@@ -5758,8 +5892,13 @@
                     column.every(die => Number.isInteger(die?.value) && die.value >= 1 && die.value <= 6));
             const validMode = mode => mode === 'normal' || mode === 'tazza';
             if (!saved || !phases.includes(saved.phase) || !validBoard(saved.playerBoard) ||
-                !validBoard(saved.aiBoard) || !validMode(saved.activeAiMode) || !validMode(saved.queuedAiMode)) return false;
+                !validBoard(saved.aiBoard) || !validMode(saved.activeAiMode) || !validMode(saved.queuedAiMode)) return null;
 
+            return saved;
+        }
+
+        function resumeRound(saved = readSavedRound()) {
+            if (!saved) return false;
             const { aiSeed, ...round } = saved;
             roundCheckpoint = saved;
             Object.assign(state, round);
@@ -5819,13 +5958,6 @@
                     const mode = btn.dataset.aiMode === 'tazza' ? 'tazza' : 'normal';
                     state.queuedAiMode = mode;
 
-                    const isBoardEmpty = state.playerBoard.every(c => c.length === 0) && state.aiBoard.every(c => c.length === 0);
-                    if ((isBoardEmpty && state.phase !== 'ai_turn') || state.phase === 'gameover') {
-                        state.activeAiMode = mode;
-                    }
-                    if (roundCheckpoint) {
-                        writeRound({ ...roundCheckpoint, queuedAiMode: mode, activeAiMode: state.activeAiMode });
-                    }
                     renderAll();
                 });
             });
@@ -5866,7 +5998,7 @@
                 audio.init();
                 audio.syncBgmState();
                 const btnBgm = document.getElementById('btn-bgm');
-                btnBgm.textContent = audio.bgmEnabled ? '🎵' : '🔇';
+                btnBgm.textContent = audio.bgmEnabled ? '배경음악 끄기' : '배경음악 켜기';
                 btnBgm.style.opacity = audio.bgmEnabled ? '1' : '0.55';
             });
 
@@ -5877,7 +6009,7 @@
                 } else {
                     audio.stopMusicBoxBgm();
                 }
-                document.getElementById('btn-sound').textContent = audio.enabled ? '🔊' : '🔇';
+                document.getElementById('btn-sound').textContent = audio.enabled ? '효과음 끄기' : '효과음 켜기';
             });
 
             const rulesModal = document.getElementById('rules-modal');
@@ -5987,7 +6119,7 @@
             });
 
             window.addEventListener('keydown', (e) => {
-                if (restartDialog.open) return;
+                if (restartDialog.open || !inGame || byId('game-settings').open || byId('online-result').open) return;
                 if (e.key === 'Escape') {
                     rulesModal.classList.add('hidden');
                     statsModal.classList.add('hidden');
@@ -6029,6 +6161,371 @@
             });
         }
 
+        // Configure both values after installing tika-multiplayer.sql.
+        const onlineConfig = {
+            url: 'https://yxjnrkuccoyspcyxfhen.supabase.co',
+            key: 'sb_publishable_ekQxLCcJsSA5Q7O2YPWspw_tTDbXD-N'
+        };
+        const nicknameKey = 'tika_online_nickname';
+        function onlineName(seat) {
+            return match?.names?.[seat] || (seat === 0 ? '방장' : '참가자');
+        }
+
+        function withSubjectParticle(name) {
+            const ending = name.normalize('NFKC').match(/[가-힣a-z0-9](?=[^가-힣a-z0-9]*$)/i)?.[0] || '';
+            const syllable = ending.charCodeAt(0);
+            const hasBatchim = syllable >= 0xAC00 && syllable <= 0xD7A3
+                ? (syllable - 0xAC00) % 28 !== 0
+                : /^[013678lmn]$/i.test(ending);
+            return name + (hasBatchim ? '이' : '가');
+        }
+
+        const ticketKey = 'tika_online_session';
+        let match = null;
+        let onlineBusy = false;
+        let leavePending = false;
+        let offerOnlineResume = false;
+        let onlineTicket = null;
+        let inGame = false;
+
+        const byId = id => document.getElementById(id);
+        function showScreen(screen) {
+            for (const id of ['home-screen','online-screen','room-screen','app']) {
+                byId(id).hidden = id !== screen;
+            }
+        }
+
+        function onlineMessage(message) {
+            byId('online-message').textContent = message;
+        }
+
+        async function roomRequest(action, payload = {}, code = match?.code || '') {
+            if (!onlineConfig.url || !onlineConfig.key) throw new Error('SETUP');
+            const response = await fetch(onlineConfig.url.replace(/\/$/, '') + '/rest/v1/rpc/tika_room', {
+                method: 'POST',
+                headers: { apikey: onlineConfig.key, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, room_code: code, ticket: onlineTicket, payload }),
+                signal: AbortSignal.timeout(8000)
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'NETWORK');
+            return data;
+        }
+
+        function exitOnline(message = '') {
+            match = null;
+            sessionStorage.removeItem(ticketKey);
+            const stored = JSON.parse(localStorage.getItem(ticketKey) || 'null');
+            if (stored?.ticket === onlineTicket) localStorage.removeItem(ticketKey);
+            offerOnlineResume = false;
+            byId('resume-dialog').close();
+            state.gameSessionId++;
+            state.isAnimating = false;
+            state.currentDie = null;
+            state.playerBoard = [[], [], []];
+            state.aiBoard = [[], [], []];
+            document.body.classList.remove('online-game');
+            byId('online-result').close();
+            audio.stopMusicBoxBgm();
+            inGame = false;
+            showScreen(message ? 'online-screen' : 'home-screen');
+            onlineMessage(message);
+        }
+
+        function findOnlineSmash(previousGame, game) {
+            // Only 알까기 removes dice. A board comparison also catches it
+            // when a poll arrives after the attacker has rolled the bonus die.
+            if (!previousGame || game.version <= previousGame.version) return null;
+            for (const [defender, board] of previousGame.boards.entries()) {
+                for (const [lane, oldDice] of board.entries()) {
+                    const newDice = game.boards[defender][lane];
+                    const countLooseDice = (dice, value) => dice.filter(die => !die.fixed && die.value === value).length;
+                    const removed = oldDice.find(die => !die.fixed &&
+                        countLooseDice(oldDice, die.value) > countLooseDice(newDice, die.value));
+                    if (removed) return { defender, lane, value: removed.value };
+                }
+            }
+            return null;
+        }
+
+        async function animateOnlineSmash(smash, seat, skins) {
+            const isPlayerAttacking = smash.defender !== seat;
+            const targetSide = isPlayerAttacking ? 'ai' : 'player';
+            const targetLaneEl = document.querySelector(`[data-${targetSide}-lane="${smash.lane}"]`);
+            if (!targetLaneEl) return;
+            const sourceSlotEl = byId('player-die-slot');
+            const victimDice = Array.from(targetLaneEl.querySelectorAll(
+                `[data-die-val="${smash.value}"][data-die-fixed="0"]`
+            ));
+            const skin = DICE_SKIN_CATALOG.find(entry => entry.id === skins[1 - smash.defender]);
+            audio.init();
+            await playAlkkagiFlightAnimation({
+                dieValue: smash.value,
+                sourceSlotEl,
+                victimSnapshots: captureVictimSnapshots(victimDice, targetLaneEl.getBoundingClientRect()),
+                targetLaneRect: targetLaneEl.getBoundingClientRect(),
+                targetLaneEl,
+                isPlayerAttacking,
+                projectileSkin: skin?.id || 'classic_white'
+            });
+        }
+
+        async function syncMatch(next) {
+            const previous = match;
+            if (next.status === 'closed') {
+                exitOnline('상대가 나갔거나 연결이 끊겨 방이 종료됐어요.');
+                return;
+            }
+            match = next;
+            const savedSession = JSON.stringify({ code: next.code, ticket: onlineTicket });
+            sessionStorage.setItem(ticketKey, savedSession);
+            localStorage.setItem(ticketKey, savedSession);
+            if (next.status === 'waiting') {
+                offerOnlineResume = false;
+                showScreen('room-screen');
+                byId('room-code').textContent = next.code;
+                byId('room-host-name').textContent = onlineName(0);
+                byId('room-guest-name').textContent = next.joined ? onlineName(1) : '입장 대기 중';
+                byId('room-start').hidden = next.seat !== 0;
+                byId('room-start').disabled = !next.ready;
+                byId('room-ready').hidden = next.seat === 0;
+                byId('room-ready').textContent = next.ready ? '레디 취소' : '레디';
+                const opponent = withSubjectParticle(onlineName(1 - next.seat));
+                byId('room-status').textContent = !next.joined ? '친구를 기다리는 중'
+                    : next.ready ? (next.seat === 0 ? `${opponent} 준비됐어요.` : `${opponent} 시작하기를 기다리는 중이에요.`)
+                    : (next.seat === 0 ? `${opponent} 레디를 누르기를 기다리는 중이에요.` : '준비되면 레디를 눌러 주세요.');
+                return;
+            }
+            if (offerOnlineResume && next.status === 'playing') {
+                askToResume(() => {
+                    offerOnlineResume = false;
+                    const latest = match;
+                    match = null;
+                    syncMatch(latest);
+                }, () => onlineAction('leave'));
+                return;
+            }
+            offerOnlineResume = false;
+            if (next.status === 'finished') {
+                const voted = Boolean(next.rematch?.[next.seat]);
+                const otherVoted = Boolean(next.rematch?.[1 - next.seat]);
+                byId('online-rematch').disabled = voted;
+                byId('online-rematch-status').textContent = voted ? `${onlineName(1 - next.seat)}의 응답을 기다리는 중이에요.`
+                    : otherVoted ? `${withSubjectParticle(onlineName(1 - next.seat))} 한 판 더 하자고 했어요.` : '';
+            }
+            if (previous?.game?.version === next.game.version && previous.status === next.status) return;
+            if (next.status === 'playing') byId('online-result').close();
+            byId('skins-modal').classList.add('hidden');
+
+            const { game, seat, skins } = next;
+            const decodeBoard = index => game.boards[index].map(column => {
+                const dice = column.map(die => ({
+                    ...die, fixedOwner: die.roller === seat ? 'player' : 'ai', onlineSkin: skins[die.roller]
+                }));
+                return compactColumnMatchingDice(dice);
+            });
+            if (!inGame) {
+                audio.init();
+                state.gameSessionId++;
+                state.isAnimating = false;
+            }
+            inGame = true;
+            document.body.classList.add('online-game');
+            showScreen('app');
+            const sameRound = !previous?.game || (previous.game.round ?? 1) === (game.round ?? 1);
+            const smash = sameRound ? findOnlineSmash(previous?.game, game) : null;
+            if (smash) {
+                state.isAnimating = true;
+                try {
+                    await animateOnlineSmash(smash, seat, skins);
+                } catch (error) {
+                    console.warn('알까기 연출을 재생하지 못했습니다.', error);
+                } finally {
+                    state.isAnimating = false;
+                }
+            }
+            state.playerBoard = decodeBoard(seat);
+            state.aiBoard = decodeBoard(1 - seat);
+            state.currentDie = game.die;
+            state.isOpeningTurn = game.opening;
+            state.rerollsLeft = game.rerolls[seat];
+            state.rerollBeforeDie = game.before;
+            state.rerollAfterDie = game.die;
+            const myTurn = game.turn === seat;
+            const phase = next.status === 'finished' ? 'gameover' : myTurn ? 'player_' + game.step : 'online_other';
+            if ((previous?.status === 'waiting' || !sameRound) && next.status === 'playing') {
+                state.phase = 'coin_toss';
+                renderAll();
+                if (!await playCoinToss((game.first ?? game.turn) === seat)) return;
+            }
+            if (sameRound && previous?.game && (game.last === 'roll' || game.last === 'reroll')) {
+                state.phase = 'online_rolling';
+                state.currentDie = null;
+                state.isAnimating = true;
+                renderAll();
+                audio.init();
+                try {
+                    await animateDieRoll({ durationMs: 780, tickIntervalMs: 60,
+                        finalVal: game.die, isFixedStyle: game.opening || game.step === 'bonus_place' });
+                } finally {
+                    state.currentDie = game.die;
+                    state.isAnimating = false;
+                }
+            }
+            state.phase = phase;
+            renderAll();
+            if (phase === 'gameover') {
+                const scores = [state.playerBoard,state.aiBoard].map(board => board.map(c => analyzeColumn(c).totalScore));
+                const lanes = scores[0].reduce((sum, score, i) => sum + Math.sign(score - scores[1][i]), 0);
+                const total = scores[0].reduce((sum, score, i) => sum + score - scores[1][i], 0);
+                const result = lanes || total;
+                byId('online-result-text').textContent = result > 0 ? '승리!' : result < 0 ? '패배' : '무승부';
+                byId('online-result').showModal();
+            }
+        }
+
+        async function onlineAction(action, payload, code) {
+            if (onlineBusy) {
+                if (action === 'leave') leavePending = true;
+                return;
+            }
+            onlineBusy = true;
+            try {
+                if (['poll','ready','start'].includes(action)) payload = { ...payload, skin: state.skins.equippedDice };
+                const next = await roomRequest(action, payload, code);
+                if (action === 'leave') exitOnline();
+                else if (!Array.isArray(next.names) || !Array.isArray(next.rematch)) {
+                    if (action === 'create') await roomRequest('leave', {}, next.code);
+                    onlineMessage('Supabase에 최신 멀티플레이 설정을 적용해 주세요.');
+                } else await syncMatch(next);
+            } catch (error) {
+                const messages = {
+                    SETUP: 'Supabase 연결이 필요해요.',
+                    NO_ROOM: '방을 찾을 수 없어요. 코드를 확인해 주세요.',
+                    ROOM_FULL: '이미 두 사람이 참가했어요.',
+                    STALE: '상대와 게임 상태를 맞추는 중이에요.',
+                    INVALID: '지금은 그 칸에 놓을 수 없어요.',
+                    ALL_ROOMS_BUSY: '사용할 수 있는 방 코드가 없어요. 잠시 뒤 다시 시도해 주세요.'
+                };
+                const message = messages[error.message] || '연결할 수 없어요. 잠시 뒤 다시 시도해 주세요.';
+                if (action === 'leave' || (action === 'poll' && error.message === 'NO_ROOM')) exitOnline(message);
+                else if (action === 'rematch') byId('online-rematch-status').textContent = message;
+                else if (inGame) byId('tray-desc').textContent = message;
+                else {
+                    onlineMessage(message);
+                    byId('room-status').textContent = message;
+                }
+            } finally {
+                onlineBusy = false;
+                if (leavePending) {
+                    leavePending = false;
+                    if (match) onlineAction('leave');
+                }
+            }
+        }
+
+        function onlineMove(move, extra = {}) {
+            if (match?.status !== 'playing' || match.game.turn !== match.seat) return;
+            return onlineAction('move', { move, version: match.game.version, ...extra });
+        }
+
+        function askToResume(resume, restart, copy = '이어서 할까요, 처음부터 할까요?') {
+            const dialog = byId('resume-dialog');
+            if (dialog.open) return;
+            byId('resume-copy').textContent = copy;
+            byId('resume-yes').onclick = () => { dialog.close(); resume(); };
+            byId('resume-no').onclick = () => { dialog.close(); restart(); };
+            dialog.showModal();
+        }
+
+        function returnToHome() {
+            if (match) return onlineAction('leave');
+            state.gameSessionId++;
+            state.isAnimating = false;
+            byId('gameover-modal').classList.add('hidden');
+            byId('cointoss-overlay').classList.add('hidden');
+            audio.stopMusicBoxBgm();
+            inGame = false;
+            showScreen('home-screen');
+        }
+
+        function bindNavigation() {
+            byId('resume-dialog').addEventListener('cancel', event => event.preventDefault());
+            byId('open-single').onclick = () => {
+                const saved = readSavedRound();
+                const enter = resume => {
+                    showScreen('app');
+                    inGame = true;
+                    audio.init();
+                    if (resume && resumeRound(saved)) return;
+                    if (saved) {
+                        breakWinStreak(saved.activeAiMode);
+                        state.queuedAiMode = saved.queuedAiMode;
+                    }
+                    startNewGame();
+                };
+                if (saved) askToResume(() => enter(true), () => enter(false),
+                    state.stats[saved.activeAiMode].streak > 0
+                        ? '처음부터 하면 진행 중인 판과 현재 연승 기록이 초기화돼요.'
+                        : '이어서 할까요, 처음부터 할까요?');
+                else enter(false);
+            };
+            byId('open-online').onclick = () => showScreen('online-screen');
+            byId('online-back').onclick = () => showScreen('home-screen');
+            byId('open-settings').onclick = () => byId('game-settings').showModal();
+            byId('return-home').onclick = () => { byId('game-settings').close(); returnToHome(); };
+            byId('result-home').onclick = returnToHome;
+            byId('room-skins').onclick = () => byId('btn-skins').click();
+            byId('room-ready').onclick = () => { if (match) onlineAction('ready', { ready: !match.ready }); };
+            byId('online-result-home').onclick = () => onlineAction('leave');
+            byId('room-leave').onclick = () => onlineAction('leave');
+            byId('room-start').onclick = () => onlineAction('start');
+            const nicknameInput = byId('online-nickname');
+            nicknameInput.value = localStorage.getItem(nicknameKey) || '';
+            const saveNickname = () => {
+                const nickname = nicknameInput.value.trim();
+                localStorage.setItem(nicknameKey, nickname);
+                return nickname;
+            };
+            nicknameInput.addEventListener('change', saveNickname);
+            byId('online-result').addEventListener('cancel', event => event.preventDefault());
+            byId('online-rematch').onclick = () => {
+                if (match?.status === 'finished') onlineAction('rematch', { round: match.game.round ?? 1 });
+            };
+            byId('create-room').onclick = () => {
+                if (onlineBusy) return;
+                if (!onlineConfig.url || !onlineConfig.key) return onlineMessage('Supabase 연결이 필요해요.');
+                onlineTicket = crypto.randomUUID();
+                onlineAction('create', { skin: state.skins.equippedDice, nickname: saveNickname() });
+            };
+            byId('join-room').onsubmit = event => {
+                event.preventDefault();
+                const input = byId('join-code');
+                if (input.hidden) {
+                    input.hidden = false;
+                    input.focus();
+                    return;
+                }
+                if (onlineBusy) return;
+                const code = input.value.trim();
+                if (!/^\d{4}$/.test(code)) return onlineMessage('네 자리 숫자 방 코드를 입력해 주세요.');
+                onlineTicket = crypto.randomUUID();
+                onlineAction('join', { skin: state.skins.equippedDice, nickname: saveNickname() }, code);
+            };
+            const saved = sessionStorage.getItem(ticketKey) || localStorage.getItem(ticketKey);
+            if (saved && onlineConfig.url && onlineConfig.key) {
+                try {
+                    const { ticket, code } = JSON.parse(saved);
+                    onlineTicket = ticket;
+                    offerOnlineResume = true;
+                    onlineAction('poll', {}, code);
+                } catch {
+                    sessionStorage.removeItem(ticketKey);
+                }
+            }
+            setInterval(() => { if (match) onlineAction('poll'); }, 900);
+        }
+
         function bootstrap() {
             // Earlier releases use separate keys, so an old open tab cannot restore their progress.
             try {
@@ -6039,7 +6536,7 @@
             loadStats();
             loadSkins();
             bindEvents();
-            if (!resumeRound()) startNewGame();
+            bindNavigation();
         }
 
         if (document.readyState === 'loading') {
